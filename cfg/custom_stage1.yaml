@@ -1,0 +1,24 @@
+# ========== 数据增强 ==========
+mosaic: 0.5
+mixup: 0.1
+copy_paste: 0.3
+
+hsv_h: 0.015
+hsv_s: 0.5
+hsv_v: 0.4
+
+degrees: 5.0
+translate: 0.05
+scale: 0.3
+shear: 0.0
+perspective: 0.0
+
+# ========== 损失权重 ==========
+box: 7.5
+cls: 0.5
+dfl: 1.5
+
+# ========== 训练策略 ==========
+epochs: 150
+patience: 50
+imgsz: 640

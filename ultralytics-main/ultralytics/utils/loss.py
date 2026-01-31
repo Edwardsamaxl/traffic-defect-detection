@@ -17,16 +17,16 @@ from ultralytics.utils.torch_utils import autocast
 from .metrics import bbox_iou, probiou
 from .tal import bbox2dist, rbox2dist
 
-def focal_bce_with_logits(pred, target, alpha=0.25, gamma=2.0):
-    """
-    pred: (B, N, C) logits
-    target: same shape, in {0,1}
-    """
-    bce = F.binary_cross_entropy_with_logits(pred, target, reduction="none")
-    prob = torch.sigmoid(pred)
-    pt = target * prob + (1 - target) * (1 - prob)
-    focal_weight = (alpha * target + (1 - alpha) * (1 - target)) * (1 - pt).pow(gamma)
-    return focal_weight * bce
+# def focal_bce_with_logits(pred, target, alpha=0.25, gamma=2.0):
+#     """
+#     pred: (B, N, C) logits
+#     target: same shape, in {0,1}
+#     """
+#     bce = F.binary_cross_entropy_with_logits(pred, target, reduction="none")
+#     prob = torch.sigmoid(pred)
+#     pt = target * prob + (1 - target) * (1 - prob)
+#     focal_weight = (alpha * target + (1 - alpha) * (1 - target)) * (1 - pt).pow(gamma)
+#     return focal_weight * bce
 
 
 
@@ -434,12 +434,12 @@ class v8DetectionLoss:
         target_scores_sum = max(target_scores.sum(), 1)
 
         # Cls loss
-        # loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum
-        loss[1] = (
-                focal_bce_with_logits(pred_scores, target_scores.to(dtype))
-                .sum()
-                / target_scores_sum
-        )
+        loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum
+        # loss[1] = (
+        #         focal_bce_with_logits(pred_scores, target_scores.to(dtype))
+        #         .sum()
+        #         / target_scores_sum
+        # )
         # BCE
 
         # Bbox loss

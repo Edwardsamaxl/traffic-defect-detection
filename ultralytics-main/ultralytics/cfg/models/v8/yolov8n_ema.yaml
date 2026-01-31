@@ -1,5 +1,5 @@
 # Ultralytics YOLOv8n with EMA attention
-# Light-weight YOLOv8n: depth=0.33, width=0.25
+# Light-weights YOLOv8n: depth=0.33, width=0.25
 
 nc: 80  # number of classes
 

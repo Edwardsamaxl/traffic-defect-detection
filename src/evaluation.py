@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/stage1_data_aug/weights/best.pt"
+    model_path = ROOT / "experiments/baseline/weights/best.pt"
     # model_path = ROOT / "experiments/baseline/weights/best.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 

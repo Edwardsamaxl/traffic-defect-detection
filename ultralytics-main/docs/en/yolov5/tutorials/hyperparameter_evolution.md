@@ -39,7 +39,7 @@ YOLOv5 has about 30 hyperparameters used for various training settings. These ar
 lr0: 0.01 # initial learning rate (SGD=1E-2, Adam=1E-3)
 lrf: 0.01 # final OneCycleLR learning rate (lr0 * lrf)
 momentum: 0.937 # SGD momentum/Adam beta1
-weight_decay: 0.0005 # optimizer weight decay 5e-4
+weight_decay: 0.0005 # optimizer weights decay 5e-4
 warmup_epochs: 3.0 # warmup epochs (fractions ok)
 warmup_momentum: 0.8 # warmup initial momentum
 warmup_bias_lr: 0.1 # warmup initial bias lr
@@ -125,7 +125,7 @@ The main genetic operators are **crossover** and **mutation**. In this work muta
 lr0: 0.01 # initial learning rate (SGD=1E-2, Adam=1E-3)
 lrf: 0.2 # final OneCycleLR learning rate (lr0 * lrf)
 momentum: 0.937 # SGD momentum/Adam beta1
-weight_decay: 0.0005 # optimizer weight decay 5e-4
+weight_decay: 0.0005 # optimizer weights decay 5e-4
 warmup_epochs: 3.0 # warmup epochs (fractions ok)
 warmup_momentum: 0.8 # warmup initial momentum
 warmup_bias_lr: 0.1 # warmup initial bias lr

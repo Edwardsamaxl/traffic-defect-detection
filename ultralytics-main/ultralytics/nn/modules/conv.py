@@ -24,7 +24,6 @@ __all__ = (
     "LightConv",
     "RepConv",
     "SpatialAttention",
-    "EMA",
 )
 
 

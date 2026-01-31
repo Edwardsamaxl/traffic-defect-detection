@@ -93,7 +93,7 @@ class Tuner:
             "lr0": (1e-5, 1e-2),  # initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
             "lrf": (0.01, 1.0),  # final OneCycleLR learning rate (lr0 * lrf)
             "momentum": (0.7, 0.98, 0.3),  # SGD momentum/Adam beta1
-            "weight_decay": (0.0, 0.001),  # optimizer weight decay 5e-4
+            "weight_decay": (0.0, 0.001),  # optimizer weights decay 5e-4
             "warmup_epochs": (0.0, 5.0),  # warmup epochs (fractions ok)
             "warmup_momentum": (0.0, 0.95),  # warmup initial momentum
             "box": (1.0, 20.0),  # box loss gain

@@ -259,7 +259,7 @@ class Model(torch.nn.Module):
     def _load(self, weights: str, task=None) -> None:
         """Load a model from a checkpoint file or initialize it from a weights file.
 
-        This method handles loading models from either .pt checkpoint files or other weight file formats. It sets up the
+        This method handles loading models from either .pt checkpoint files or other weights file formats. It sets up the
         model, task, and related attributes based on the loaded weights.
 
         Args:
@@ -433,7 +433,7 @@ class Model(torch.nn.Module):
         single layer. This fusion can significantly improve inference speed by reducing the number of operations and
         memory accesses required during forward passes.
 
-        The fusion process typically involves folding the BatchNorm2d parameters (mean, variance, weight, and
+        The fusion process typically involves folding the BatchNorm2d parameters (mean, variance, weights, and
         bias) into the preceding Conv2d layer's weights and biases. This results in a single Conv2d layer that
         performs both convolution and normalization in one step.
 

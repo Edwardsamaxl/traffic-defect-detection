@@ -932,7 +932,7 @@ class BaseTrainer:
                 number of iterations.
             lr (float, optional): The learning rate for the optimizer.
             momentum (float, optional): The momentum factor for the optimizer.
-            decay (float, optional): The weight decay for the optimizer.
+            decay (float, optional): The weights decay for the optimizer.
             iterations (float, optional): The number of iterations, which determines the optimizer if name is 'auto'.
 
         Returns:
@@ -959,10 +959,10 @@ class BaseTrainer:
                     g[3][fullname] = param  # muon params
                 elif "bias" in fullname:  # bias (no decay)
                     g[2][fullname] = param
-                elif isinstance(module, bn) or "logit_scale" in fullname:  # weight (no decay)
+                elif isinstance(module, bn) or "logit_scale" in fullname:  # weights (no decay)
                     # ContrastiveHead and BNContrastiveHead included here with 'logit_scale'
                     g[1][fullname] = param
-                else:  # weight (with decay)
+                else:  # weights (with decay)
                     g[0][fullname] = param
         if not use_muon:
             g = [x.values() for x in g[:3]]  # convert to list of params
@@ -983,7 +983,7 @@ class BaseTrainer:
 
         num_params = [len(g[0]), len(g[1]), len(g[2])]  # number of param groups
         g[2] = {"params": g[2], **optim_args, "param_group": "bias"}
-        g[0] = {"params": g[0], **optim_args, "weight_decay": decay, "param_group": "weight"}
+        g[0] = {"params": g[0], **optim_args, "weight_decay": decay, "param_group": "weights"}
         g[1] = {"params": g[1], **optim_args, "weight_decay": 0.0, "param_group": "bn"}
         muon, sgd = (0.2, 1.0)
         if use_muon:
@@ -1004,6 +1004,6 @@ class BaseTrainer:
 
         LOGGER.info(
             f"{colorstr('optimizer:')} {type(optimizer).__name__}(lr={lr}, momentum={momentum}) with parameter groups "
-            f"{num_params[1]} weight(decay=0.0), {num_params[0]} weight(decay={decay}), {num_params[2]} bias(decay=0.0)"
+            f"{num_params[1]} weights(decay=0.0), {num_params[0]} weights(decay={decay}), {num_params[2]} bias(decay=0.0)"
         )
         return optimizer

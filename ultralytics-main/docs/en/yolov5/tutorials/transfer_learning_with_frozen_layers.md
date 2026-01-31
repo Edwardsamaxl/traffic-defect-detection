@@ -45,14 +45,14 @@ for name, param in model.named_parameters():
 
 """
 Example Output:
-model.0.conv.conv.weight
-model.0.conv.bn.weight
+model.0.conv.conv.weights
+model.0.conv.bn.weights
 model.0.conv.bn.bias
-model.1.conv.weight
-model.1.bn.weight
+model.1.conv.weights
+model.1.bn.weights
 model.1.bn.bias
-model.2.cv1.conv.weight
-model.2.cv1.bn.weight
+model.2.cv1.conv.weights
+model.2.cv1.bn.weights
 ...
 """
 ```

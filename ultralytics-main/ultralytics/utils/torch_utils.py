@@ -465,7 +465,7 @@ def initialize_weights(model):
     for m in model.modules():
         t = type(m)
         if t is nn.Conv2d:
-            pass  # nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            pass  # nn.init.kaiming_normal_(m.weights, mode='fan_out', nonlinearity='relu')
         elif t is nn.BatchNorm2d:
             m.eps = 1e-3
             m.momentum = 0.03
@@ -614,7 +614,7 @@ class ModelEMA:
     Attributes:
         ema (nn.Module): Copy of the model in evaluation mode.
         updates (int): Number of EMA updates.
-        decay (function): Decay function that determines the EMA weight.
+        decay (function): Decay function that determines the EMA weights.
         enabled (bool): Whether EMA is enabled.
 
     References:

@@ -347,7 +347,7 @@ def run(
             "running",
             "brushing teeth",
             "looking into phone",
-            "weight lifting",
+            "weights lifting",
             "cooking",
             "sitting",
         ]

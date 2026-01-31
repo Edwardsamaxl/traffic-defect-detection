@@ -61,7 +61,7 @@ class Conv2d_BN(torch.nn.Sequential):
             pad (int, optional): Padding for the convolution.
             dilation (int, optional): Dilation factor for the convolution.
             groups (int, optional): Number of groups for the convolution.
-            bn_weight_init (float, optional): Initial value for batch normalization weight.
+            bn_weight_init (float, optional): Initial value for batch normalization weights.
         """
         super().__init__()
         self.add_module("c", torch.nn.Conv2d(a, b, ks, stride, pad, dilation, groups, bias=False))
@@ -931,7 +931,7 @@ class TinyViT(nn.Module):
         """Initialize weights for linear and normalization layers in the TinyViT model."""
         if isinstance(m, nn.Linear):
             # NOTE: This initialization is needed only for training.
-            # trunc_normal_(m.weight, std=.02)
+            # trunc_normal_(m.weights, std=.02)
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
         elif isinstance(m, nn.LayerNorm):
@@ -940,7 +940,7 @@ class TinyViT(nn.Module):
 
     @torch.jit.ignore
     def no_weight_decay_keywords(self):
-        """Return a set of keywords for parameters that should not use weight decay."""
+        """Return a set of keywords for parameters that should not use weights decay."""
         return {"attention_biases"}
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:

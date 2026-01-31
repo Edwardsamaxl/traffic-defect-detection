@@ -1904,7 +1904,7 @@ class Residual(nn.Module):
         self.m = m
         nn.init.zeros_(self.m.w3.bias)
         # For models with l scale, please change the initialization to
-        # nn.init.constant_(self.m.w3.weight, 1e-6)
+        # nn.init.constant_(self.m.w3.weights, 1e-6)
         nn.init.zeros_(self.m.w3.weight)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:

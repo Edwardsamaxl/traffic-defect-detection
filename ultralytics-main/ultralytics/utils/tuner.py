@@ -59,7 +59,7 @@ def run_ray_tune(
         "lr0": tune.uniform(1e-5, 1e-1),
         "lrf": tune.uniform(0.01, 1.0),  # final OneCycleLR learning rate (lr0 * lrf)
         "momentum": tune.uniform(0.6, 0.98),  # SGD momentum/Adam beta1
-        "weight_decay": tune.uniform(0.0, 0.001),  # optimizer weight decay
+        "weight_decay": tune.uniform(0.0, 0.001),  # optimizer weights decay
         "warmup_epochs": tune.uniform(0.0, 5.0),  # warmup epochs (fractions ok)
         "warmup_momentum": tune.uniform(0.0, 0.95),  # warmup initial momentum
         "box": tune.uniform(0.02, 0.2),  # box loss gain

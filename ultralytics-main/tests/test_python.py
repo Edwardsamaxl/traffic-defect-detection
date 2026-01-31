@@ -218,7 +218,7 @@ def test_track_stream(model, tmp_path):
         model.track(video_url, imgsz=160, tracker=custom_yaml)
 
 
-@pytest.mark.parametrize("task,weight,data", TASK_MODEL_DATA)
+@pytest.mark.parametrize("task,weights,data", TASK_MODEL_DATA)
 def test_val(task: str, weight: str, data: str) -> None:
     """Test the validation mode of the YOLO model."""
     model = YOLO(weight)

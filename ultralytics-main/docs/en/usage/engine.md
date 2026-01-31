@@ -50,7 +50,7 @@ from ultralytics.models.yolo.detect import DetectionTrainer
 
 class CustomTrainer(DetectionTrainer):
     def get_model(self, cfg, weights):
-        """Loads a custom detection model given configuration and weight files."""
+        """Loads a custom detection model given configuration and weights files."""
         ...
 
 
@@ -79,7 +79,7 @@ class CustomTrainer(DetectionTrainer):
 
 # Callback to upload model weights
 def log_model(trainer):
-    """Logs the path of the last model weight used by the trainer."""
+    """Logs the path of the last model weights used by the trainer."""
     last_weight_path = trainer.last
     print(last_weight_path)
 
@@ -132,7 +132,7 @@ from ultralytics.models.yolo.detect import DetectionTrainer
 
 class CustomTrainer(DetectionTrainer):
     def get_model(self, cfg, weights):
-        """Loads a custom detection model given configuration and weight files."""
+        """Loads a custom detection model given configuration and weights files."""
         ...
 
 
@@ -165,7 +165,7 @@ from ultralytics.models.yolo.detect import DetectionTrainer
 
 # Callback to upload model weights
 def log_model(trainer):
-    """Logs the path of the last model weight used by the trainer."""
+    """Logs the path of the last model weights used by the trainer."""
     last_weight_path = trainer.last
     print(last_weight_path)
 

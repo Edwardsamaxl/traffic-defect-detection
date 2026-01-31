@@ -17,6 +17,18 @@ from ultralytics.utils.torch_utils import autocast
 from .metrics import bbox_iou, probiou
 from .tal import bbox2dist, rbox2dist
 
+def focal_bce_with_logits(pred, target, alpha=0.25, gamma=2.0):
+    """
+    pred: (B, N, C) logits
+    target: same shape, in {0,1}
+    """
+    bce = F.binary_cross_entropy_with_logits(pred, target, reduction="none")
+    prob = torch.sigmoid(pred)
+    pt = target * prob + (1 - target) * (1 - prob)
+    focal_weight = (alpha * target + (1 - alpha) * (1 - target)) * (1 - pt).pow(gamma)
+    return focal_weight * bce
+
+
 
 class VarifocalLoss(nn.Module):
     """Varifocal loss by Zhang et al.
@@ -98,8 +110,8 @@ class DFLoss(nn.Module):
         target = target.clamp_(0, self.reg_max - 1 - 0.01)
         tl = target.long()  # target left
         tr = tl + 1  # target right
-        wl = tr - target  # weight left
-        wr = 1 - wl  # weight right
+        wl = tr - target  # weights left
+        wr = 1 - wl  # weights right
         return (
             F.cross_entropy(pred_dist, tl.view(-1), reduction="none").view(tl.shape) * wl
             + F.cross_entropy(pred_dist, tr.view(-1), reduction="none").view(tl.shape) * wr
@@ -167,7 +179,7 @@ class RLELoss(nn.Module):
     """
 
     def __init__(self, use_target_weight: bool = True, size_average: bool = True, residual: bool = True):
-        """Initialize RLELoss with target weight and residual options.
+        """Initialize RLELoss with target weights and residual options.
 
         Args:
             use_target_weight (bool): Whether to use target weights for loss calculation.
@@ -291,7 +303,7 @@ class BCEDiceLoss(nn.Module):
     """Criterion class for computing combined BCE and Dice losses."""
 
     def __init__(self, weight_bce: float = 0.5, weight_dice: float = 0.5):
-        """Initialize BCEDiceLoss with BCE and Dice weight factors.
+        """Initialize BCEDiceLoss with BCE and Dice weights factors.
 
         Args:
             weight_bce (float): Weight factor for BCE loss component.
@@ -422,7 +434,13 @@ class v8DetectionLoss:
         target_scores_sum = max(target_scores.sum(), 1)
 
         # Cls loss
-        loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
+        # loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum
+        loss[1] = (
+                focal_bce_with_logits(pred_scores, target_scores.to(dtype))
+                .sum()
+                / target_scores_sum
+        )
+        # BCE
 
         # Bbox loss
         if fg_mask.sum():
@@ -1167,7 +1185,7 @@ class E2ELoss:
         self.o2o = max(self.total - self.o2m, 0)
 
     def decay(self, x) -> float:
-        """Calculate the decayed weight for one-to-many loss based on the current update step."""
+        """Calculate the decayed weights for one-to-many loss based on the current update step."""
         return max(1 - x / max(self.one2one.hyp.epochs - 1, 1), 0) * (self.o2m_copy - self.final_o2m) + self.final_o2m
 
 

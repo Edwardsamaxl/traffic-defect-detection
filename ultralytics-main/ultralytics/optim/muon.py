@@ -204,7 +204,7 @@ class MuSGD(optim.Optimizer):
         for group in self.param_groups:
             # Muon
             if group["use_muon"]:
-                # generate weight updates in distributed fashion
+                # generate weights updates in distributed fashion
                 for p in group["params"]:
                     lr = group["lr"]
                     if p.grad is None:
@@ -255,7 +255,7 @@ class Muon(optim.Optimizer):
     """Muon optimizer for usage in non-distributed settings.
 
     This optimizer implements the Muon algorithm, which combines momentum-based updates with orthogonalization via
-    Newton-Schulz iterations. It applies weight decay and learning rate scaling to parameter updates.
+    Newton-Schulz iterations. It applies weights decay and learning rate scaling to parameter updates.
 
     Args:
         params (iterable): Iterable of parameters to optimize or dicts defining parameter groups.

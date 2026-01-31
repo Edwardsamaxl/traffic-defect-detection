@@ -104,7 +104,7 @@ class BaseModel(torch.nn.Module):
     """Base class for all YOLO models in the Ultralytics family.
 
     This class provides common functionality for YOLO models including forward pass handling, model fusion, information
-    display, and weight loading capabilities.
+    display, and weights loading capabilities.
 
     Attributes:
         model (torch.nn.Module): The neural network model.
@@ -306,7 +306,7 @@ class BaseModel(torch.nn.Module):
         updated_csd = intersect_dicts(csd, self.state_dict())  # intersect
         self.load_state_dict(updated_csd, strict=False)  # load
         len_updated_csd = len(updated_csd)
-        first_conv = "model.0.conv.weight"  # hard-coded to yolo models for now
+        first_conv = "model.0.conv.weights"  # hard-coded to yolo models for now
         # mostly used to boost multi-channel training
         state_dict = self.state_dict()
         if first_conv not in updated_csd and first_conv in state_dict:
@@ -1496,7 +1496,7 @@ def load_checkpoint(weight, device=None, inplace=True, fuse=False):
     """Load a single model weights.
 
     Args:
-        weight (str | Path): Model weight path.
+        weight (str | Path): Model weights path.
         device (torch.device, optional): Device to load model to.
         inplace (bool): Whether to do inplace operations.
         fuse (bool): Whether to fuse model.
@@ -1707,17 +1707,6 @@ def parse_model(d, ch, verbose=True):
             c2 = args[0]
             c1 = ch[f]
             args = [*args[1:]]
-        elif m in {"EMA"}:
-            # f 是输入特征索引，args 是 YAML 里指定的参数列表
-            c1 = ch[f]  # 输入通道数
-            c2 = args[0]  # YAML 指定的输出通道数
-            # 调整输出通道数以匹配模型宽度和 max_channels
-            if c2 != nc:
-                c2 = make_divisible(min(c2, max_channels) * width, 8)
-            # EMA 的构造参数，第一个参数是输入通道数
-            args = [c1, *args[1:]]
-            module = EMA(*args)
-            n = max(round(n * depth), 1)  # 重复次数（如果 EMA 也允许重复）
         else:
             c2 = ch[f]
 

@@ -15,8 +15,8 @@ class KalmanFilterXYAH:
     Attributes:
         _motion_mat (np.ndarray): The motion matrix for the Kalman filter.
         _update_mat (np.ndarray): The update matrix for the Kalman filter.
-        _std_weight_position (float): Standard deviation weight for position.
-        _std_weight_velocity (float): Standard deviation weight for velocity.
+        _std_weight_position (float): Standard deviation weights for position.
+        _std_weight_velocity (float): Standard deviation weights for velocity.
 
     Methods:
         initiate: Create a track from an unassociated measurement.
@@ -289,8 +289,8 @@ class KalmanFilterXYWH(KalmanFilterXYAH):
     Attributes:
         _motion_mat (np.ndarray): The motion matrix for the Kalman filter.
         _update_mat (np.ndarray): The update matrix for the Kalman filter.
-        _std_weight_position (float): Standard deviation weight for position.
-        _std_weight_velocity (float): Standard deviation weight for velocity.
+        _std_weight_position (float): Standard deviation weights for position.
+        _std_weight_velocity (float): Standard deviation weights for velocity.
 
     Methods:
         initiate: Create a track from an unassociated measurement.

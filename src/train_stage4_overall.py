@@ -13,9 +13,9 @@ def main():
         mosaic=1.0,  # 保持数据多样性
         flipud=0.5,  # 开启垂直翻转
         close_mosaic=10,  # 结束前关闭 Mosaic
-        patience=50,  # 给它多点耐心
+        patience=50,
 
-        project="E:/PycharmProjects/traffic-defect-detection/experiments",
+        project="../experiments",
         name="stage4_overall",
     )
 

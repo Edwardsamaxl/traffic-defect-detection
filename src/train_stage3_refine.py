@@ -14,6 +14,7 @@ def main():
 
         lr0=1e-4,
         lrf=1e-3,
+        mosaic=0.0,
 
         #freeze=10,
 

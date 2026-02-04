@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/stage3_refine_s4/weights/best.pt"
+    model_path = ROOT / "experiments/baseline_s/weights/best.pt"
     #model_path = ROOT / "experiments/baseline_s/weights/best.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 
@@ -15,8 +15,7 @@ if __name__ == "__main__":
     metrics = model.val(
         data=str(data_yaml),
         imgsz=640,
-        conf=0.25,
-        workers=0
+        conf=0.15,
     )
 
     print("\n===== Overall Metrics =====")

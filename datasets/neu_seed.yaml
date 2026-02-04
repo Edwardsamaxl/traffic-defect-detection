@@ -1,0 +1,13 @@
+path: ../data/NEU-DET-semi/seed
+
+train: images/train
+val: images/val
+test: ../test/images   # 测试集相对 seed，保持独立
+
+names:
+  0: crazing
+  1: inclusion
+  2: patches
+  3: pitted_surface
+  4: rolled-in_scale
+  5: scratches

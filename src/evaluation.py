@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/baseline_seed/weights/best.pt"
+    model_path = ROOT / "experiments/stage7_refine_compare/weights/best.pt"
     #model_path = ROOT / "experiments/baseline_s/weights/best.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 
@@ -15,7 +15,8 @@ if __name__ == "__main__":
     metrics = model.val(
         data=str(data_yaml),
         imgsz=640,
-        conf=0.15,
+        conf=0.25, # 0.001能够看完整的性能边界，用于测试map
+        iou=0.6, # 防止一个物体被框多次，框多次就排除，默认值
     )
 
     print("\n===== Overall Metrics =====")

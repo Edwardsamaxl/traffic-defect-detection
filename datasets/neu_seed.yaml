@@ -1,4 +1,4 @@
-path: ../data/NEU-DET-semi/seed
+path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET-semi/seed
 
 train: images/train
 val: images/val

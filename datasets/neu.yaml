@@ -1,4 +1,4 @@
-path: ../data/NEU-DET
+path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET
 
 train: images/train
 val: images/val

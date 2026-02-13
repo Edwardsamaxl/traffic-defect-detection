@@ -1,7 +1,7 @@
-path: ../data/NEU-DET-semi/merge
-
+path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET-semi/merge
 train: images/train
 val: images/val
+test: ../test/images
 
 names:
   0: crazing

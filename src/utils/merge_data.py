@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 seed_root = ROOT / "data/NEU-DET-semi/seed"
 pseudo_root = ROOT / "data/NEU-DET-semi/unlabeled"
-merge_root = ROOT / "data/NEU-DET-semi/merge"
+merge_root = ROOT / "data/NEU-DET-semi/new-merge"
 
 train_ratio = 0.8
 val_ratio = 0.2
@@ -43,7 +43,7 @@ collect_pairs(
 # pseudo（伪标注）
 collect_pairs(
     pseudo_root / "images",
-    pseudo_root / "pseudo_labels"
+    pseudo_root / "new-pseudo_labels"
 )
 
 print(f"Total samples collected: {len(image_label_pairs)}")

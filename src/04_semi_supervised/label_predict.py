@@ -4,11 +4,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 
 # ================= 配置区 =================
-MODEL_PATH = ROOT / "experiments/baseline_seed/weights/best.pt"
+MODEL_PATH = ROOT / "experiments/baseline_seed/weights/new-best.pt"
 
-UNLABELED_IMG_DIR = ROOT / "data/NEU-DET-semi/unlabeled/images/train"
+UNLABELED_IMG_DIR = ROOT / "data/NEU-DET/unlabeled/images/train"
 
-PSEUDO_LABEL_DIR = ROOT / "data/NEU-DET-semi/unlabeled/pseudo_labels/train"
+PSEUDO_LABEL_DIR = ROOT / "data/NEU-DET/unlabeled/pseudo_labels/train"
 
 CONF_THRES = 0.7
 IMG_SIZE = 640

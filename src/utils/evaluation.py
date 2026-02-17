@@ -6,8 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/stage4_overall/weights/best-640.pt"
-    #model_path = ROOT / "experiments/baseline_s/weights/best.pt"
+    model_path = ROOT / "experiments/baseline_seed/weights/new-best.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 
     model = YOLO(model_path)
@@ -18,6 +17,7 @@ if __name__ == "__main__":
         imgsz=640,
         conf=0.001, # 0.001能够看完整的性能边界，用于测试map
         iou=0.6, # 防止一个物体被框多次，框多次就排除，默认值
+        augment=True, # 开启TTA
     )
 
     print("\n===== Overall Metrics =====")

@@ -1,0 +1,3 @@
+Total images: 1260
+Seed (labeled): 252
+Unlabeled (simulated): 1008

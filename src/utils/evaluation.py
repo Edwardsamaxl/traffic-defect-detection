@@ -6,7 +6,7 @@ ROOT = Path(__file__).resolve().parents[2]
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/baseline_seed/weights/new-best.pt"
+    model_path = ROOT / "experiments/stage6_semi/weights/new-best.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 
     model = YOLO(model_path)

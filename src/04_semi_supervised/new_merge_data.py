@@ -35,7 +35,7 @@ collect_and_copy(
 # 复制 pseudo
 collect_and_copy(
     pseudo_root / "images",
-    pseudo_root / "new-pseudo_labels"
+    pseudo_root / "pseudo_labels"
 )
 
 print("===== 合并完成 =====")

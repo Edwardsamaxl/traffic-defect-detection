@@ -14,10 +14,10 @@ TRAIN_DIR = ROOT / "data/NEU-DET"  # 原始图片和标签都在这里
 IMG_DIR = TRAIN_DIR / "images/train"
 LABEL_DIR = TRAIN_DIR / "labels/train"
 
-# 增强数据输出目录
+# 增强数据输出目录（YOLOv8 期望的格式）
 AUG_DIR = ROOT / "data/NEU-DET/train_copy_paste"
-AUG_IMG_DIR = AUG_DIR / "images"
-AUG_LABEL_DIR = AUG_DIR / "labels"
+AUG_IMG_DIR = AUG_DIR / "images/train"   # 注意这里加了 train
+AUG_LABEL_DIR = AUG_DIR / "labels/train" # 注意这里加了 train
 
 NUM_AUG_PER_IMAGE = 2       # 每张原图生成几张增强图
 MAX_PATCH_PER_IMAGE = 1     # 每张增强图最多粘贴几个 patch
@@ -76,12 +76,14 @@ def paste_instance(target_img, patch):
 # 生成增强数据集
 # -------------------------------
 def generate_aug_dataset(img_dir, label_dir, aug_img_dir, aug_label_dir):
+    # 删除旧目录
     if aug_img_dir.exists():
         shutil.rmtree(aug_img_dir)
     if aug_label_dir.exists():
         shutil.rmtree(aug_label_dir)
-    aug_img_dir.mkdir(parents=True)
-    aug_label_dir.mkdir(parents=True)
+    # 创建目录
+    aug_img_dir.mkdir(parents=True, exist_ok=True)
+    aug_label_dir.mkdir(parents=True, exist_ok=True)
 
     img_files = list(img_dir.glob("*.jpg"))
 
@@ -92,7 +94,7 @@ def generate_aug_dataset(img_dir, label_dir, aug_img_dir, aug_label_dir):
         labels = load_labels(txt_file)
         image = cv2.imread(str(img_file))
 
-        # 先保存原图到增强目录
+        # 保存原图
         shutil.copy(img_file, aug_img_dir / img_file.name)
         shutil.copy(txt_file, aug_label_dir / f"{img_file.stem}.txt")
 

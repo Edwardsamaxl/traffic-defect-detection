@@ -8,8 +8,8 @@ def main():
 
     MODEL_PATH = ROOT / "experiments/baseline_seed/weights/new-best.pt"
     DATA_YAML = ROOT / "datasets/neu.yaml"
-    UNLABELED_IMG_DIR = ROOT / "data/NEU-DET/unlabeled/images/train"
-    PSEUDO_LABEL_DIR = ROOT / "data/NEU-DET/unlabeled/pseudo_labels_adaptive/train"
+    UNLABELED_IMG_DIR = ROOT / "data/NEU-DET/unlabeled-conservative/images/train"
+    PSEUDO_LABEL_DIR = ROOT / "data/NEU-DET/unlabeled-conservative/pseudo_labels_adaptive/train"
 
     IMG_SIZE = 640
     BASE_CONF = 0.65

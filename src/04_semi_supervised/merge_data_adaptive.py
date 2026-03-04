@@ -4,8 +4,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 
-seed_root = ROOT / "data/NEU-DET/seed"
-pseudo_root = ROOT / "data/NEU-DET/unlabeled"
+seed_root = ROOT / "data/NEU-DET/seed-conservative"
+pseudo_root = ROOT / "data/NEU-DET/unlabeled-conservative"
 merge_root = ROOT / "data/NEU-DET/merge-adaptive"
 
 seed = 42

@@ -26,8 +26,8 @@ def collect(img_dir, lbl_dir, repeat=1):
         for _ in range(repeat):
             pairs.append((img, lbl))
 
-# seed：复制 2 次（强化真实数据）
-collect(seed_root / "images/train", seed_root / "labels/train", repeat=2)
+# seed：复制 2 次（强化真实数据） / 1 次
+collect(seed_root / "images/train", seed_root / "labels/train", repeat=1)
 
 # 注意：不再使用 seed/val 参与训练
 

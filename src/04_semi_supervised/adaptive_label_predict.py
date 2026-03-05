@@ -1,6 +1,7 @@
 from ultralytics import YOLO
 from pathlib import Path
 import numpy as np
+from collections import defaultdict
 
 def main():
 
@@ -13,7 +14,7 @@ def main():
 
     IMG_SIZE = 640
     BASE_CONF = 0.65
-    LAMBDA = 0.25
+    LAMBDA = 0.15
 
     PSEUDO_LABEL_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -51,6 +52,10 @@ def main():
         augment=False
     )
 
+    # ===== 统计容器 =====
+    class_counter = defaultdict(int)
+    total_boxes = 0
+
     for result in results:
         img_path = Path(result.path)
         label_path = PSEUDO_LABEL_DIR / f"{img_path.stem}.txt"
@@ -69,12 +74,20 @@ def main():
             if confidence >= thres:
                 x, y, w, h = box.xywhn[0].tolist()
                 valid_boxes.append((cls_id, x, y, w, h))
+                # 统计
+                class_counter[cls_id] += 1
+                total_boxes += 1
 
         if valid_boxes:
             with open(label_path, "w") as f:
                 for cls_id, x, y, w, h in valid_boxes:
                     f.write(f"{cls_id} {x:.6f} {y:.6f} {w:.6f} {h:.6f}\n")
 
+    print("\n===== 伪标签统计 =====")
+    for cls_id in sorted(CLASS_CONF_THRES.keys()):
+        print(f"Class {cls_id}: {class_counter[cls_id]}")
+
+    print("总伪标签数:", total_boxes)
     print("完成")
 
 

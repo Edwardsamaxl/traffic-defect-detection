@@ -1,0 +1,22 @@
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+
+# Runtime outputs
+runs/
+src/runs/
+experiments/
+
+# Local datasets and model artifacts
+data/
+datasets/
+*.pt

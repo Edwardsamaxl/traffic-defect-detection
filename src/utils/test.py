@@ -1,7 +1,10 @@
 from ultralytics import YOLO
-from pathlib import Path
+try:
+    from utils.common import PROJECT_ROOT
+except ModuleNotFoundError:
+    from common import PROJECT_ROOT
 
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = PROJECT_ROOT
 
 if __name__ == "__main__":
 

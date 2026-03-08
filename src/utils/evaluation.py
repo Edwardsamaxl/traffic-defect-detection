@@ -1,22 +1,24 @@
 from ultralytics import YOLO
-from pathlib import Path
+try:
+    from utils.common import PROJECT_ROOT
+except ModuleNotFoundError:
+    from common import PROJECT_ROOT
 
-# 项目根目录
-ROOT = Path(__file__).resolve().parents[2]
+ROOT = PROJECT_ROOT
 
 if __name__ == "__main__":
 
-    model_path = ROOT / "experiments/baseline_seed/weights/new-best.pt"
+    model_path = ROOT / "experiments/stage6_semi/weights/best-adaptive.pt"
     data_yaml = ROOT / "datasets/neu.yaml"
 
     model = YOLO(model_path)
 
     metrics = model.val(
         data=str(data_yaml),
-        #split="test", # 开启测试集
         imgsz=640,
         conf=0.001, # 0.001能够看完整的性能边界，用于测试map
         iou=0.6, # 防止一个物体被框多次，框多次就排除，默认值
+        split="test",
         augment=True, # 开启TTA
     )
 

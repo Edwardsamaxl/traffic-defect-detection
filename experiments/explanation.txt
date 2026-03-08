@@ -1,0 +1,15 @@
+baseline yolov8n
+baseline_s yolov8s
+baseline_seed yolov8s seed
+stage1_data_aug yolov8n用马赛克技术、亮度提升以及仿射变换，后续发现无效且默认值就有做类似的操作
+stage1_focal yolov8s开启focal loss
+stage2_finetune2 小学习率微调，没用
+stage3_refine yolov8n的refine，类似于对最终模型进行抛光，比stage2更精细的学习率，发现有效
+stage4_overall 全面的提升，包括开启focal loss，提高分类权重，垂直翻转增强数据
+stage3_refine_s4 是效果最好的模型 !
+stage5_p2 增加p2层，没用
+stage6_semi 尝试用merge数据集进行半监督学习，并尝试了不同分辨率，发现640不仅训练速度快，还不容易让模型学习到噪音
+stage6_semi_conservative 用更高置信度来merge data，同时copy了一份seed数据，发现过拟合
+stage7_refine 1024的分辨率训练
+stage7_refine_compare 用best-640进行微调，是在本地训练出来的，是效果最好的半监督模型 !(在测试集中表现也最好)
+stage7_refine_conservative 保守策略进行的refine，效果不佳

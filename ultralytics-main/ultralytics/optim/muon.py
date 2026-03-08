@@ -84,8 +84,8 @@ def muon_update(grad: torch.Tensor, momentum: torch.Tensor, beta: float = 0.95, 
         - Momentum buffer is updated in-place: momentum = beta * momentum + (1-beta) * grad.
         - With Nesterov: update = beta * momentum + (1-beta) * grad.
         - Without Nesterov: update = momentum.
-        - 4D tensors (conv filters) are reshaped to 2D as (channels, height*width*depth) for orthogonalization.
-        - Final update is scaled by sqrt(max(dim[-2], dim[-1])) to account for parameter dimensions.
+        - 4D tensors (conv filters) are reshaped to 2D as (out_channels, in_channels*height*width) for orthogonalization.
+        - Final update is scaled by sqrt(max(1, dim[-2] / dim[-1])) to account for parameter dimensions.
     """
     momentum.lerp_(grad, 1 - beta)
     update = grad.lerp(momentum, beta) if nesterov else momentum
@@ -104,7 +104,7 @@ class MuSGD(optim.Optimizer):
     approach or pure SGD.
 
     Args:
-        param_groups (list): List of parameter groups with their optimization settings.
+        params (Iterable): Parameters to optimize or dicts defining parameter groups.
         muon (float, optional): Weight factor for Muon updates in hybrid mode. Default: 0.5.
         sgd (float, optional): Weight factor for SGD updates in hybrid mode. Default: 0.5.
 
@@ -192,7 +192,7 @@ class MuSGD(optim.Optimizer):
             (torch.Tensor | None): The loss value if closure is provided, otherwise None.
 
         Notes:
-            - Parameters with None gradients are assigned zero gradients for synchronization.
+            - Parameters with None gradients are skipped.
             - Muon updates use Newton-Schulz orthogonalization and work best on 2D+ tensors.
             - Weight decay is applied only to the SGD component in hybrid mode.
         """
@@ -204,7 +204,7 @@ class MuSGD(optim.Optimizer):
         for group in self.param_groups:
             # Muon
             if group["use_muon"]:
-                # generate weights updates in distributed fashion
+                # generate weight updates in distributed fashion
                 for p in group["params"]:
                     lr = group["lr"]
                     if p.grad is None:
@@ -255,7 +255,7 @@ class Muon(optim.Optimizer):
     """Muon optimizer for usage in non-distributed settings.
 
     This optimizer implements the Muon algorithm, which combines momentum-based updates with orthogonalization via
-    Newton-Schulz iterations. It applies weights decay and learning rate scaling to parameter updates.
+    Newton-Schulz iterations. It applies weight decay and learning rate scaling to parameter updates.
 
     Args:
         params (iterable): Iterable of parameters to optimize or dicts defining parameter groups.

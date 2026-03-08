@@ -257,7 +257,7 @@ class ConvTranspose(nn.Module):
         return self.act(self.bn(self.conv_transpose(x)))
 
     def forward_fuse(self, x):
-        """Apply activation and convolution transpose operation to input.
+        """Apply convolution transpose and activation to input.
 
         Args:
             x (torch.Tensor): Input tensor.
@@ -296,7 +296,7 @@ class Focus(nn.Module):
     def forward(self, x):
         """Apply Focus operation and convolution to input tensor.
 
-        Input shape is (B, C, W, H) and output shape is (B, 4C, W/2, H/2).
+        Input shape is (B, C, H, W) and output shape is (B, c2, H/2, W/2).
 
         Args:
             x (torch.Tensor): Input tensor.
@@ -667,21 +667,3 @@ class Index(nn.Module):
             (torch.Tensor): Selected tensor.
         """
         return x[self.index]
-
-class EMA(nn.Module):
-    def __init__(self, channels, reduction=16):
-        super().__init__()
-        self.channels = channels
-        self.reduction = reduction
-        self.conv1 = nn.Conv2d(channels, channels // reduction, 1)
-        self.conv2 = nn.Conv2d(channels // reduction, channels, 1)
-        self.softmax = nn.Softmax(dim=-1)
-
-    def forward(self, x):
-        b, c, h, w = x.shape   # 🔹 动态获取输入形状
-        x1 = self.conv1(x)
-        x2 = self.conv2(x1)
-        # 原先可能写死 16x16，改成动态 h, w
-        attn = self.softmax(x2.view(b, c, -1))  # 展平成 b, c, H*W
-        attn = attn.view(b, c, h, w)           # 再 reshape 回原来的形状
-        return x * attn

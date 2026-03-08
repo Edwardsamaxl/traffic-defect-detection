@@ -1,0 +1,4 @@
+best-640是前朝遗物，并没使用focal loss
+best是正常训练
+best-cosine是用了余弦退火
+各个refine都是负作用

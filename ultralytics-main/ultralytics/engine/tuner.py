@@ -44,8 +44,8 @@ class Tuner:
         space (dict[str, tuple]): Hyperparameter search space containing bounds and scaling factors for mutation.
         tune_dir (Path): Directory where evolution logs and results will be saved.
         tune_csv (Path): Path to the CSV file where evolution logs are saved.
-        args (dict): Configuration arguments for the tuning process.
-        callbacks (list): Callback functions to be executed during tuning.
+        args (SimpleNamespace): Configuration arguments for the tuning process.
+        callbacks (dict): Callback functions to be executed during tuning.
         prefix (str): Prefix string for logging messages.
         mongodb (MongoClient): Optional MongoDB client for distributed tuning.
         collection (Collection): MongoDB collection for storing tuning results.
@@ -86,14 +86,14 @@ class Tuner:
 
         Args:
             args (dict): Configuration for hyperparameter evolution.
-            _callbacks (list | None, optional): Callback functions to be executed during tuning.
+            _callbacks (dict | None, optional): Callback functions to be executed during tuning.
         """
         self.space = args.pop("space", None) or {  # key: (min, max, gain(optional))
             # 'optimizer': tune.choice(['SGD', 'Adam', 'AdamW', 'NAdam', 'RAdam', 'RMSProp']),
             "lr0": (1e-5, 1e-2),  # initial learning rate (i.e. SGD=1E-2, Adam=1E-3)
             "lrf": (0.01, 1.0),  # final OneCycleLR learning rate (lr0 * lrf)
             "momentum": (0.7, 0.98, 0.3),  # SGD momentum/Adam beta1
-            "weight_decay": (0.0, 0.001),  # optimizer weights decay 5e-4
+            "weight_decay": (0.0, 0.001),  # optimizer weight decay 5e-4
             "warmup_epochs": (0.0, 5.0),  # warmup epochs (fractions ok)
             "warmup_momentum": (0.0, 0.95),  # warmup initial momentum
             "box": (1.0, 20.0),  # box loss gain
@@ -253,7 +253,7 @@ class Tuner:
             with open(self.tune_csv, "w", encoding="utf-8") as f:
                 f.write(headers)
                 for result in all_results:
-                    fitness = result["fitness"]
+                    fitness = result["fitness"] or 0.0
                     hyp_values = [result["hyperparameters"].get(k, self.args.get(k)) for k in self.space.keys()]
                     log_row = [round(fitness, 5), *hyp_values]
                     f.write(",".join(map(str, log_row)) + "\n")
@@ -406,7 +406,7 @@ class Tuner:
                 LOGGER.error(f"training failure for hyperparameter tuning iteration {i + 1}\n{e}")
 
             # Save results - MongoDB takes precedence
-            fitness = metrics.get("fitness", 0.0)
+            fitness = metrics.get("fitness") or 0.0
             if self.mongodb:
                 self._save_to_mongodb(fitness, mutated_hyp, metrics, i + 1)
                 self._sync_mongodb_to_csv()

@@ -61,7 +61,7 @@ class Conv2d_BN(torch.nn.Sequential):
             pad (int, optional): Padding for the convolution.
             dilation (int, optional): Dilation factor for the convolution.
             groups (int, optional): Number of groups for the convolution.
-            bn_weight_init (float, optional): Initial value for batch normalization weights.
+            bn_weight_init (float, optional): Initial value for batch normalization weight.
         """
         super().__init__()
         self.add_module("c", torch.nn.Conv2d(a, b, ks, stride, pad, dilation, groups, bias=False))
@@ -262,7 +262,7 @@ class ConvLayer(nn.Module):
         depth (int): Number of MBConv layers in the block.
         use_checkpoint (bool): Whether to use gradient checkpointing to save memory.
         blocks (nn.ModuleList): List of MBConv layers.
-        downsample (Optional[nn.Module]): Function for downsampling the output.
+        downsample (nn.Module | None): Function for downsampling the output.
 
     Examples:
         >>> input_tensor = torch.randn(1, 64, 56, 56)
@@ -295,9 +295,9 @@ class ConvLayer(nn.Module):
             depth (int): The number of MBConv layers in the block.
             activation (nn.Module): Activation function applied after each convolution.
             drop_path (float | list[float], optional): Drop path rate. Single float or a list of floats for each MBConv.
-            downsample (Optional[nn.Module], optional): Function for downsampling the output. None to skip downsampling.
+            downsample (nn.Module | None, optional): Function for downsampling the output. None to skip downsampling.
             use_checkpoint (bool, optional): Whether to use gradient checkpointing to save memory.
-            out_dim (Optional[int], optional): Output dimensions. None means it will be the same as `dim`.
+            out_dim (int | None, optional): Output dimensions. None means it will be the same as `dim`.
             conv_expand_ratio (float, optional): Expansion ratio for the MBConv layers.
         """
         super().__init__()
@@ -369,8 +369,8 @@ class MLP(nn.Module):
 
         Args:
             in_features (int): Number of input features.
-            hidden_features (Optional[int], optional): Number of hidden features.
-            out_features (Optional[int], optional): Number of output features.
+            hidden_features (int | None, optional): Number of hidden features.
+            out_features (int | None, optional): Number of output features.
             activation (nn.Module): Activation function applied after the first fully-connected layer.
             drop (float, optional): Dropout probability.
         """
@@ -931,7 +931,7 @@ class TinyViT(nn.Module):
         """Initialize weights for linear and normalization layers in the TinyViT model."""
         if isinstance(m, nn.Linear):
             # NOTE: This initialization is needed only for training.
-            # trunc_normal_(m.weights, std=.02)
+            # trunc_normal_(m.weight, std=.02)
             if m.bias is not None:
                 nn.init.constant_(m.bias, 0)
         elif isinstance(m, nn.LayerNorm):
@@ -940,7 +940,7 @@ class TinyViT(nn.Module):
 
     @torch.jit.ignore
     def no_weight_decay_keywords(self):
-        """Return a set of keywords for parameters that should not use weights decay."""
+        """Return a set of keywords for parameters that should not use weight decay."""
         return {"attention_biases"}
 
     def forward_features(self, x: torch.Tensor) -> torch.Tensor:

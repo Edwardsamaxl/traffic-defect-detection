@@ -1,0 +1,6 @@
+Total images: 1800
+Seed (labeled): 360
+  - Train: 288
+  - Val  : 72
+Unlabeled (simulated): 1080
+Test: 360

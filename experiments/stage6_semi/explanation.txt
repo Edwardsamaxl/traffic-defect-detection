@@ -1,0 +1,4 @@
+new-best 置信度70且开启增强
+new-best-conservative 更多seed更高置信度
+best-640 之前的
+new-best-noaug 没增强的conservative

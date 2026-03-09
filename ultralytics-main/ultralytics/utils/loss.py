@@ -360,6 +360,25 @@ class v8DetectionLoss:
         self.bbox_loss = BboxLoss(m.reg_max).to(device)
         self.proj = torch.arange(m.reg_max, dtype=torch.float, device=device)
 
+    def _build_image_weights(self, batch: dict[str, Any], batch_size: int, dtype: torch.dtype) -> torch.Tensor:
+        """Build per-image weights: pseudo images get lower weight, seed images keep weight 1.0."""
+        pseudo_weight = float(getattr(self.hyp, "pseudo_weight", 1.0))
+        pseudo_key = str(getattr(self.hyp, "pseudo_key", "pseudo_labels"))
+        if pseudo_weight >= 1.0:
+            return torch.ones(batch_size, device=self.device, dtype=dtype)
+
+        im_files = batch.get("im_file", None)
+        if not im_files:
+            return torch.ones(batch_size, device=self.device, dtype=dtype)
+
+        weights = []
+        for p in list(im_files)[:batch_size]:
+            path_str = str(p)
+            weights.append(pseudo_weight if pseudo_key in path_str else 1.0)
+        if len(weights) < batch_size:
+            weights.extend([1.0] * (batch_size - len(weights)))
+        return torch.tensor(weights, device=self.device, dtype=dtype)
+
     def preprocess(self, targets: torch.Tensor, batch_size: int, scale_tensor: torch.Tensor) -> torch.Tensor:
         """Preprocess targets by converting to tensor format and scaling coordinates."""
         nl, ne = targets.shape
@@ -419,10 +438,14 @@ class v8DetectionLoss:
             mask_gt,
         )
 
-        target_scores_sum = max(target_scores.sum(), 1)
+        image_weights = self._build_image_weights(batch, batch_size, dtype)
+        anchor_weights = image_weights[:, None, None]
+        weighted_target_scores = target_scores * anchor_weights
+        target_scores_sum = max(weighted_target_scores.sum(), 1)
 
         # Cls loss
-        loss[1] = self.bce(pred_scores, target_scores.to(dtype)).sum() / target_scores_sum  # BCE
+        cls_loss = self.bce(pred_scores, target_scores.to(dtype))
+        loss[1] = (cls_loss * anchor_weights).sum() / target_scores_sum  # BCE
 
         # Bbox loss
         if fg_mask.sum():
@@ -431,7 +454,7 @@ class v8DetectionLoss:
                 pred_bboxes,
                 anchor_points,
                 target_bboxes / stride_tensor,
-                target_scores,
+                weighted_target_scores,
                 target_scores_sum,
                 fg_mask,
                 imgsz,

@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traffic Defect Detection Demo</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #222; }
+      .container { max-width: 980px; margin: 24px auto; background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+      h1 { margin-top: 0; font-size: 24px; }
+      .row { display: flex; gap: 16px; flex-wrap: wrap; }
+      .card { flex: 1; min-width: 280px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+      label { display: block; margin-bottom: 6px; font-weight: 600; }
+      input[type="number"], input[type="file"], select { width: 100%; margin-bottom: 10px; padding: 8px; box-sizing: border-box; }
+      button { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
+      button:disabled { background: #94a3b8; cursor: not-allowed; }
+      .status { margin-top: 8px; min-height: 22px; }
+      .ok { color: #166534; }
+      .err { color: #b91c1c; }
+      img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+      th, td { border-bottom: 1px solid #e5e7eb; text-align: left; padding: 6px; font-size: 14px; }
+      th { background: #f8fafc; }
+      .meta { font-size: 13px; color: #64748b; }
+      .inline { display: flex; gap: 8px; align-items: center; }
+      .inline > * { flex: 1; }
+      .tag { display: inline-block; margin-right: 8px; font-size: 12px; color: #334155; background: #e2e8f0; padding: 2px 6px; border-radius: 999px; }
+      .hidden { display: none; }
+      .mono { font-family: Consolas, Monaco, monospace; font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>交通缺陷检测 Demo</h1>
+      <p class="meta">支持单图展示与批量检测；模型可从项目内 <code>.pt</code> 文件中选择。</p>
+
+      <div class="row">
+        <div class="card">
+          <label for="modeSelect">检测模式</label>
+          <select id="modeSelect">
+            <option value="single">单图展示</option>
+            <option value="batch">批量检测</option>
+          </select>
+
+          <label for="modelSelect">选择模型（.pt）</label>
+          <div class="inline">
+            <select id="modelSelect"></select>
+            <button id="refreshModelsBtn" type="button">刷新模型</button>
+          </div>
+          <div class="inline">
+            <input id="modelFileInput" type="file" accept=".pt" />
+            <button id="uploadModelBtn" type="button">上传模型</button>
+          </div>
+
+          <div id="singleUploadBlock">
+            <label for="imageInput">单图上传</label>
+            <input id="imageInput" type="file" accept="image/*" />
+          </div>
+
+          <div id="batchUploadBlock" class="hidden">
+            <label for="batchImageInput">批量上传（选择文件夹）</label>
+            <input id="batchImageInput" type="file" accept="image/*" webkitdirectory directory multiple />
+            <div class="meta">将遍历文件夹内所有图片，自动保存打标结果到项目目录。</div>
+          </div>
+
+          <label for="presetSelect">阈值预设</label>
+          <select id="presetSelect">
+            <option value="balanced">平衡（默认）</option>
+            <option value="high_recall">高召回</option>
+            <option value="high_precision">高精度</option>
+            <option value="custom">自定义</option>
+          </select>
+
+          <label for="confInput">置信度阈值 conf</label>
+          <input id="confInput" type="number" min="0.01" max="0.99" step="0.01" value="0.25" />
+
+          <label for="iouInput">NMS IoU 阈值 iou</label>
+          <input id="iouInput" type="number" min="0.10" max="0.95" step="0.01" value="0.60" />
+
+          <button id="runBtn">开始运行</button>
+          <div id="status" class="status"></div>
+        </div>
+
+        <div class="card">
+          <h3>结果面板</h3>
+          <div id="activeMeta" class="meta">尚未运行</div>
+          <img id="resultImage" alt="单图模式会显示可视化结果图" />
+          <div id="batchSummary" class="meta hidden"></div>
+        </div>
+      </div>
+
+      <div id="detailsCard" class="card" style="margin-top: 16px;">
+        <h3>结果明细</h3>
+        <div id="summary" class="meta">尚未检测</div>
+        <table>
+          <thead>
+            <tr>
+              <th>序号/文件</th>
+              <th>类别或状态</th>
+              <th>置信度/数量</th>
+              <th>边框或信息</th>
+            </tr>
+          </thead>
+          <tbody id="detBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+      const imageInput = document.getElementById("imageInput");
+      const batchImageInput = document.getElementById("batchImageInput");
+      const modeSelect = document.getElementById("modeSelect");
+      const modelSelect = document.getElementById("modelSelect");
+      const modelFileInput = document.getElementById("modelFileInput");
+      const uploadModelBtn = document.getElementById("uploadModelBtn");
+      const refreshModelsBtn = document.getElementById("refreshModelsBtn");
+      const presetSelect = document.getElementById("presetSelect");
+      const singleUploadBlock = document.getElementById("singleUploadBlock");
+      const batchUploadBlock = document.getElementById("batchUploadBlock");
+      const confInput = document.getElementById("confInput");
+      const iouInput = document.getElementById("iouInput");
+      const runBtn = document.getElementById("runBtn");
+      const statusEl = document.getElementById("status");
+      const resultImage = document.getElementById("resultImage");
+      const detBody = document.getElementById("detBody");
+      const summary = document.getElementById("summary");
+      const activeMeta = document.getElementById("activeMeta");
+      const batchSummary = document.getElementById("batchSummary");
+      const detailsCard = document.getElementById("detailsCard");
+      let lastSingleSummary = "尚未检测";
+
+      const PRESETS = {
+        balanced: { conf: 0.25, iou: 0.6, text: "平衡：综合精度与召回，适合大多数场景" },
+        high_recall: { conf: 0.1, iou: 0.7, text: "高召回：降低 conf，尽量少漏检" },
+        high_precision: { conf: 0.5, iou: 0.5, text: "高精度：提高 conf，尽量少误检" },
+      };
+
+      function setStatus(msg, ok = true) {
+        statusEl.textContent = msg;
+        statusEl.className = ok ? "status ok" : "status err";
+      }
+
+      function applyPreset(name) {
+        const preset = PRESETS[name];
+        if (!preset) return;
+        confInput.value = preset.conf.toFixed(2);
+        iouInput.value = preset.iou.toFixed(2);
+        activeMeta.textContent = `当前预设：${preset.text}`;
+      }
+
+      function updateModeUI() {
+        const isSingle = modeSelect.value === "single";
+        singleUploadBlock.classList.toggle("hidden", !isSingle);
+        batchUploadBlock.classList.toggle("hidden", isSingle);
+        resultImage.classList.toggle("hidden", !isSingle);
+        batchSummary.classList.toggle("hidden", isSingle);
+        detailsCard.classList.toggle("hidden", !isSingle);
+        if (isSingle) {
+          summary.textContent = lastSingleSummary;
+        }
+      }
+
+      async function loadModels() {
+        try {
+          const resp = await fetch("/models");
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.detail || "加载模型失败");
+
+          modelSelect.innerHTML = "";
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = `默认模型（${data.default_model}）`;
+          defaultOption.selected = true;
+          modelSelect.appendChild(defaultOption);
+
+          data.models.forEach((modelPath) => {
+            const option = document.createElement("option");
+            option.value = modelPath;
+            option.textContent = modelPath;
+            modelSelect.appendChild(option);
+          });
+        } catch (err) {
+          setStatus(`模型列表加载失败: ${err.message}`, false);
+        }
+      }
+
+      function renderDetections(detections) {
+        detBody.innerHTML = "";
+        if (!detections.length) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = "<td colspan='4'>无检测框</td>";
+          detBody.appendChild(tr);
+          return;
+        }
+
+        detections.forEach((det, idx) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${idx + 1}</td>
+            <td>${det.class_name} (${det.class_id})</td>
+            <td>${det.confidence.toFixed(4)}</td>
+            <td>[${det.bbox_xyxy.join(", ")}]</td>
+          `;
+          detBody.appendChild(tr);
+        });
+      }
+
+      function renderBatchResults(items) {
+        detBody.innerHTML = "";
+        items.forEach((item, idx) => {
+          const tr = document.createElement("tr");
+          if (item.error) {
+            tr.innerHTML = `
+              <td>${item.filename || idx + 1}</td>
+              <td>失败</td>
+              <td>-</td>
+              <td>${item.error}</td>
+            `;
+          } else {
+            tr.innerHTML = `
+              <td>${item.filename || idx + 1}</td>
+              <td>成功</td>
+              <td>${item.num_detections}</td>
+              <td>${item.detections.slice(0, 3).map(d => `${d.class_name}:${d.confidence.toFixed(2)}`).join(" | ") || "无检测框"}</td>
+            `;
+          }
+          detBody.appendChild(tr);
+        });
+      }
+
+      runBtn.addEventListener("click", async () => {
+        const isSingle = modeSelect.value === "single";
+
+        runBtn.disabled = true;
+        setStatus("运行中，请稍候...");
+
+        try {
+          const query = new URLSearchParams({
+            conf: confInput.value,
+            iou: iouInput.value,
+            imgsz: "640",
+            max_det: "300",
+            model: modelSelect.value,
+          });
+
+          if (isSingle) {
+            const file = imageInput.files?.[0];
+            if (!file) throw new Error("请先选择一张图片");
+
+            const formData = new FormData();
+            formData.append("file", file);
+
+            const resp = await fetch(`/predict?${query.toString()}`, {
+              method: "POST",
+              body: formData,
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || "请求失败");
+
+            resultImage.src = `data:image/png;base64,${data.annotated_image_base64}`;
+            summary.textContent = `图片尺寸 ${data.image_size.width}x${data.image_size.height}，检测框数量 ${data.num_detections}`;
+            lastSingleSummary = summary.textContent;
+            activeMeta.innerHTML = `<span class="tag">模式：单图</span><span class="tag">模型：${data.model_path}</span>`;
+            renderDetections(data.detections);
+            batchSummary.classList.add("hidden");
+          } else {
+            const files = batchImageInput.files;
+            if (!files || files.length === 0) throw new Error("请至少选择一张图片");
+
+            const formData = new FormData();
+            for (const file of files) {
+              formData.append("files", file, file.webkitRelativePath || file.name);
+            }
+
+            const resp = await fetch(`/predict_batch?${query.toString()}`, {
+              method: "POST",
+              body: formData,
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || "请求失败");
+
+            const lines = [
+              `共 ${data.total_files} 张，成功 ${data.success_count} 张，失败 ${data.failure_count} 张`,
+              `输出目录：${data.output_dir}`,
+              `汇总文件：${data.output_dir}/summary.json`,
+            ];
+            batchSummary.innerHTML = `${lines[0]}<br/><span class="mono">${lines[1]}</span><br/><span class="mono">${lines[2]}</span>`;
+            batchSummary.classList.remove("hidden");
+            activeMeta.innerHTML = `<span class="tag">模式：批量</span><span class="tag">模型：${data.model_path}</span>`;
+            setStatus(`批量完成，结果已保存到 ${data.output_dir}`, true);
+          }
+          if (isSingle) setStatus("运行完成", true);
+        } catch (err) {
+          setStatus(`运行失败: ${err.message}`, false);
+        } finally {
+          runBtn.disabled = false;
+        }
+      });
+
+      modeSelect.addEventListener("change", updateModeUI);
+      presetSelect.addEventListener("change", () => {
+        if (presetSelect.value === "custom") {
+          activeMeta.textContent = "当前预设：自定义（你可手动调整 conf 与 iou）";
+          return;
+        }
+        applyPreset(presetSelect.value);
+      });
+      refreshModelsBtn.addEventListener("click", loadModels);
+      uploadModelBtn.addEventListener("click", async () => {
+        const file = modelFileInput.files?.[0];
+        if (!file) {
+          setStatus("请先选择一个 .pt 模型文件", false);
+          return;
+        }
+        if (!file.name.toLowerCase().endsWith(".pt")) {
+          setStatus("只支持 .pt 模型文件", false);
+          return;
+        }
+
+        uploadModelBtn.disabled = true;
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+          const resp = await fetch("/models/upload", { method: "POST", body: formData });
+          const data = await resp.json();
+          if (!resp.ok) throw new Error(data.detail || "上传失败");
+
+          await loadModels();
+          modelSelect.value = data.model_path;
+          setStatus(`模型上传成功：${data.model_path}`, true);
+        } catch (err) {
+          setStatus(`模型上传失败: ${err.message}`, false);
+        } finally {
+          uploadModelBtn.disabled = false;
+          modelFileInput.value = "";
+        }
+      });
+
+      updateModeUI();
+      applyPreset("balanced");
+      loadModels();
+    </script>
+  </body>
+</html>

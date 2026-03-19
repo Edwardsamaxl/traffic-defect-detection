@@ -17,6 +17,8 @@ src/runs/
 src/utils/runs/
 src/04_semi_supervised/runs/
 experiments/
+output/
+tmp_untracked/
 
 # Local datasets and model artifacts
 data/

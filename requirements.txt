@@ -1,0 +1,42 @@
+# Core
+torch>=1.10.0
+torchvision>=0.11.0
+numpy>=1.19.0
+opencv-python>=4.5.0
+Pillow>=8.0.0
+
+# Ultralytics (use local source)
+# - Install from ultralytics-main/ directory
+-e ./ultralytics-main
+
+# Data processing
+pyyaml>=5.4.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+
+# Web framework
+fastapi>=0.68.0
+uvicorn>=0.15.0
+python-multipart>=0.1.3
+
+# Experiment tracking (optional)
+wandb>=0.12.0
+
+# Development
+ipython>=7.0.0
+jupyter>=1.0.0
+pytest>=6.0.0
+black>=22.0.0
+ruff>=0.1.0
+
+# Utilities
+tqdm>=4.60.0
+shapely>=1.7.0
+albumentations>=1.0.0
+
+# GPU memory management
+nvidia-ml-py3>=7.352.0

@@ -30,13 +30,24 @@ from collections import defaultdict
 # 第二部分: 数据准备
 # ============================================================
 
-# 数据集根目录 (Kaggle上NEU-DET数据集路径)
-# 如果使用Kaggle数据集，数据会在 /kaggle/input/ 目录下
-DATA_ROOT = Path("/kaggle/input/neu-det")  # Kaggle数据集路径
-OUTPUT_ROOT = Path("/kaggle/working/outputs")
+# 数据集根目录
+# 优先检查 Kaggle dataset 模式，其次检查仓库本地 data 目录
+# Kaggle dataset 模式: /kaggle/input/neu-det/
+# 仓库clone模式: {REPO_ROOT}/data/NEU-DET/
 
-# 如果是其他数据集路径，修改这里
-# DATA_ROOT = Path("your_dataset_path")
+REPO_ROOT = Path("/kaggle/working/traffic-defect-detection")
+KAGGLE_INPUT = Path("/kaggle/input/neu-det")
+LOCAL_DATA = REPO_ROOT / "data" / "NEU-DET"
+
+# 自动选择数据路径
+if KAGGLE_INPUT.exists():
+    DATA_ROOT = KAGGLE_INPUT
+elif LOCAL_DATA.exists():
+    DATA_ROOT = LOCAL_DATA
+else:
+    raise FileNotFoundError(f"数据集未找到: {KAGGLE_INPUT} 或 {LOCAL_DATA}")
+
+OUTPUT_ROOT = Path("/kaggle/working/outputs")
 
 def setup_directories():
     """创建必要的目录结构"""

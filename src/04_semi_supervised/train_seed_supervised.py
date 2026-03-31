@@ -12,7 +12,7 @@ def main():
 
     model.train(
         data=str(datapath),
-        epochs=120,
+        epochs=200,
         patience=50,
         imgsz=640,
         batch=4,

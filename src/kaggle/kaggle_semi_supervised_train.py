@@ -13,10 +13,22 @@ Kaggle半监督训练完整脚本
 # ============================================================
 # 第一部分: 环境配置
 # ============================================================
-"""
-# 安装依赖(如果需要)
-!pip install -q ultralytics pyyaml opencv-python
-"""
+
+# 安装依赖
+import subprocess
+import sys
+
+def install_if_missing(package):
+    """安装包（如果未安装）"""
+    try:
+        __import__(package)
+    except ImportError:
+        print(f"安装 {package}...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-q", package])
+
+install_if_missing("ultralytics")
+install_if_missing("pyyaml")
+install_if_missing("cv2")  # opencv-python
 
 import os
 import sys

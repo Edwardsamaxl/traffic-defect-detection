@@ -324,9 +324,20 @@ def main():
         seed_copy=3,
     )
 
-    print("\n[4/6] 加载模型...")
+    print("\n[4/6] 下载预训练权重...")
+    import urllib.request
+    weights_path = REPO_ROOT / "yolov8s.pt"
+    if not weights_path.exists():
+        print("下载 yolov8s.pt...")
+        urllib.request.urlretrieve(
+            "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8s.pt",
+            str(weights_path)
+        )
+        print(f"已下载到: {weights_path}")
+
+    print("\n[5/6] 加载模型...")
     from ultralytics import YOLO
-    model = YOLO("yolov8s.pt")
+    model = YOLO(str(weights_path))
 
     print("\n[5/6] 训练监督学习基线...")
     seed_yaml = OUTPUT_ROOT / "seed.yaml"

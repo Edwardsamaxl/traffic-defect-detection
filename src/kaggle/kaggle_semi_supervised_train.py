@@ -15,13 +15,17 @@ Kaggle半监督训练完整脚本
 # ============================================================
 
 # 安装依赖 - editable mode
-import subprocess
+import os
 import sys
 
 print("安装 ultralytics (editable mode)...")
-subprocess.check_call([sys.executable, "-m", "pip", "install", "-e", "ultralytics-main", "-q"])
+os.system(f"{sys.executable} -m pip install -e ultralytics-main -q")
 
-import os
+# 刷新模块缓存
+import importlib
+if 'ultralytics' in sys.modules:
+    importlib.reload(sys.modules['ultralytics'])
+
 import yaml
 import shutil
 import numpy as np
@@ -525,12 +529,12 @@ val: seed/images/train
 test: {DATA_ROOT}/images/test
 
 names:
-  0: crazing
-  1: inclusion
-  2: patches
-  3: pitted_surface
-  4: rolled-in_scale
-  5: scratches
+ 0: crazing
+ 1: inclusion
+ 2: patches
+ 3: pitted_surface
+ 4: rolled-in_scale
+ 5: scratches
 """)
 
     # 训练基线
@@ -580,12 +584,12 @@ val: seed/images/train
 test: {DATA_ROOT}/images/test
 
 names:
-  0: crazing
-  1: inclusion
-  2: patches
-  3: pitted_surface
-  4: rolled-in_scale
-  5: scratches
+ 0: crazing
+ 1: inclusion
+ 2: patches
+ 3: pitted_surface
+ 4: rolled-in_scale
+ 5: scratches
 """)
 
     # 复制unlabeled图像到merge目录

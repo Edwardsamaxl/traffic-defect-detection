@@ -14,38 +14,30 @@
 
 ### 2. 运行训练（每次跑一个）
 
-**基线模型**:
+**640基线**:
 ```python
-!python src/kaggle/kaggle_01_baseline.py
+!python src/kaggle/kaggle_01_baseline_640.py
 ```
 
-**Stage4 (标准增强)**:
+**1024高分辨率**:
 ```python
-!python src/kaggle/kaggle_02_stage4.py
-```
-
-**Stage9 (无增强消融)**:
-```python
-!python src/kaggle/kaggle_03_stage9.py
+!python src/kaggle/kaggle_02_baseline_1024.py
 ```
 
 ## 训练配置
 
-| 脚本 | 模型 | Epochs | 增强 | 说明 |
-|------|------|--------|------|------|
-| `kaggle_01_baseline.py` | baseline_s | 200 | 默认 | 基线模型 |
-| `kaggle_02_stage4.py` | stage4_overall | 200 | mosaic+flip | 标准增强 |
-| `kaggle_03_stage9.py` | stage9_no_aug | 200 | 无 | 无增强对比 |
+| 脚本 | 模型 | Epochs | 分辨率 | Batch | 说明 |
+|------|------|--------|--------|-------|------|
+| `kaggle_01_baseline_640.py` | baseline_640 | 200 | 640 | 4 | 基线分辨率 |
+| `kaggle_02_baseline_1024.py` | baseline_1024 | 200 | 1024 | 2 | 高分辨率 |
 
 ## 输出
 
 训练结果保存在:
 ```
 /kaggle/working/traffic-defect-detection/experiments/
-├── baseline_s/
+├── baseline_640/
 │   └── weights/best.pt
-├── stage4_overall/
-│   └── weights/best.pt
-└── stage9_no_aug/
+└── baseline_1024/
     └── weights/best.pt
 ```

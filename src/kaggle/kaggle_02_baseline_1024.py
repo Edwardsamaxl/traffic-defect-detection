@@ -1,5 +1,5 @@
 """
-Kaggle训练脚本 1: 基线模型
+Kaggle训练脚本 2: 高分辨率模型 (1024分辨率)
 """
 from pathlib import Path
 from ultralytics import YOLO
@@ -12,10 +12,10 @@ def main():
         data=str(ROOT / "datasets/neu.yaml"),
         epochs=200,
         patience=50,
-        imgsz=640,
-        batch=4,
+        imgsz=1024,  # 高分辨率，捕获细粒度缺陷
+        batch=2,      # 1024需要更小batch
         project=str(ROOT / "experiments"),
-        name="baseline_s",
+        name="baseline_1024",
     )
 
 if __name__ == "__main__":

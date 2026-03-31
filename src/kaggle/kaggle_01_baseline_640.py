@@ -1,5 +1,5 @@
 """
-Kaggle训练脚本 2: Stage4 - 标准增强版本
+Kaggle训练脚本 1: 基线模型 (640分辨率)
 """
 from pathlib import Path
 from ultralytics import YOLO
@@ -10,15 +10,12 @@ def main():
     model = YOLO(str(ROOT / "yolov8s.pt"))
     model.train(
         data=str(ROOT / "datasets/neu.yaml"),
-        imgsz=640,
         epochs=200,
-        mosaic=1.0,
-        flipud=0.5,
-        fliplr=0.5,
-        close_mosaic=20,
         patience=50,
+        imgsz=640,
+        batch=4,
         project=str(ROOT / "experiments"),
-        name="stage4_overall",
+        name="baseline_640",
     )
 
 if __name__ == "__main__":

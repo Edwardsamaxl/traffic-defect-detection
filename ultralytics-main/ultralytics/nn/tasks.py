@@ -31,6 +31,9 @@ from ultralytics.nn.modules import (
     Bottleneck,
     BottleneckCSP,
     C2f,
+    CBAM,
+    ChannelAttention,
+    SpatialAttention,
     C2fAttn,
     C2fCIB,
     C2fPSA,
@@ -1676,6 +1679,15 @@ def parse_model(d, ch, verbose=True):
             c2 = args[1] if args[3] else args[1] * 4
         elif m is torch.nn.BatchNorm2d:
             args = [ch[f]]
+        elif m is CBAM:
+            c1, c2 = ch[f], ch[f]  # CBAM输出通道数=输入通道数
+            args = [c1]
+        elif m is SpatialAttention:
+            c1 = ch[f]  # SpatialAttention只接收kernel_size，默认7
+            args = [7]  # 默认kernel_size=7
+        elif m is ChannelAttention:
+            c1 = ch[f]  # ChannelAttention只接收channels
+            args = [c1]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
         elif m in frozenset(

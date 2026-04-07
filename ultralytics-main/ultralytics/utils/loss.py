@@ -118,7 +118,7 @@ class BboxLoss(nn.Module):
         self,
         pred_dist: torch.Tensor,
         pred_bboxes: torch.Tensor,
-        anchor_points: torch.Tensor,
+        anchor_points,
         target_bboxes: torch.Tensor,
         target_scores: torch.Tensor,
         target_scores_sum: torch.Tensor,

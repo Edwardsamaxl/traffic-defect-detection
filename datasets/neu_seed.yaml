@@ -1,8 +1,8 @@
-path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET-semi/seed
+path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET
 
-train: images/train
+train: seed/images/train
 val: images/val
-test: ../test/images   # 测试集相对 seed，保持独立
+test: images/test  
 
 names:
   0: crazing

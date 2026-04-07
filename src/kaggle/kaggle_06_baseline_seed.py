@@ -9,10 +9,10 @@ ROOT = Path("/kaggle/working/traffic-defect-detection")
 def create_yaml():
     yaml_path = ROOT / "datasets/neu_seed.yaml"
     with open(yaml_path, "w") as f:
-        f.write(f"""path: {ROOT}/data/NEU-DET-semi/seed
-train: images/train
+        f.write(f"""path: {ROOT}/data/NEU-DET
+train: seed/images/train
 val: images/val
-test: ../test/images
+test: images/test
 
 names:
  0: crazing

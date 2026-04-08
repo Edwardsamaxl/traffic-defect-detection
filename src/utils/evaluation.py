@@ -14,7 +14,7 @@ from ultralytics import YOLO
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA = ROOT / "datasets/neu.yaml"
 # 默认模型：CBAM
-DEFAULT_MODEL = ROOT / "experiments/exp03_p2_layer/weights/best.pt"
+DEFAULT_MODEL = ROOT / "experiments/baseline_seed/weights/baseline_seed.pt"
 
 
 def evaluate(model_path: str = None, data_yaml: str = None, split: str = "test",  # pyright: ignore[reportArgumentType]

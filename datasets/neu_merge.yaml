@@ -1,7 +1,12 @@
-path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET-semi/merge
-train: images/train
+# 半监督训练数据集 - 合并后数据
+# train: 合并后的seed+伪标签数据 (由 merge_dataset.py 生成)
+# val/test: 使用原始有标签划分
+
+path: E:/PycharmProjects/traffic-defect-detection/data/NEU-DET
+
+train: merge-adaptive/images/train
 val: images/val
-test: ../test/images
+test: images/test
 
 names:
   0: crazing

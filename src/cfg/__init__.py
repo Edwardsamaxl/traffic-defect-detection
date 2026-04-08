@@ -319,6 +319,43 @@ STRATEGIES = {
         strong_aug=True,
     ),
 
+    # ---- 三种伪标签策略对应训练配置 ----
+    "semi_standard": TrainConfig(
+        name="semi_standard",
+        model="yolov8s.pt",
+        data="neu_merge_standard",
+        epochs=200,
+        batch=4,
+        patience=50,
+        cos_lr=True,
+        close_mosaic=10,
+        amp=True,
+    ),
+
+    "semi_adaptive_new": TrainConfig(
+        name="semi_adaptive_new",
+        model="yolov8s.pt",
+        data="neu_merge_adaptive",
+        epochs=200,
+        batch=4,
+        patience=50,
+        cos_lr=True,
+        close_mosaic=10,
+        amp=True,
+    ),
+
+    "semi_adaptive_consistency_new": TrainConfig(
+        name="semi_adaptive_consistency_new",
+        model="yolov8s.pt",
+        data="neu_merge_adaptive_consistency",
+        epochs=200,
+        batch=4,
+        patience=50,
+        cos_lr=True,
+        close_mosaic=10,
+        amp=True,
+    ),
+
     # ---- 课程学习 ----
     "curriculum": TrainConfig(
         name="curriculum",

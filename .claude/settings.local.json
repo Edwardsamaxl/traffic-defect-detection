@@ -31,7 +31,8 @@
       "Read(//e/PycharmProjects/traffic-defect-detection/experiments/$exp/**)",
       "Bash(done)",
       "Bash(ls:*)",
-      "Bash(yolo detect:*)"
+      "Bash(yolo detect:*)",
+      "Bash(wc:*)"
     ]
   }
 }

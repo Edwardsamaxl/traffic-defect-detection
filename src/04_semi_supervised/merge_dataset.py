@@ -55,10 +55,11 @@ def main():
     print(f"合并输出: {merge_root}")
     print(f"{'='*60}")
 
-    # 创建目录
-    for split in ["train", "val"]:
-        (merge_root / "images" / split).mkdir(parents=True, exist_ok=True)
-        (merge_root / "labels" / split).mkdir(parents=True, exist_ok=True)
+    # 删除旧目录并重建 (只创建train，val使用原始images/val)
+    if merge_root.exists():
+        shutil.rmtree(merge_root)
+    (merge_root / "images" / "train").mkdir(parents=True, exist_ok=True)
+    (merge_root / "labels" / "train").mkdir(parents=True, exist_ok=True)
 
     # 收集所有训练样本对
     all_pairs = []
@@ -101,28 +102,16 @@ def main():
     # 打乱
     random.shuffle(all_pairs)
 
-    # 划分: 80% train, 20% val
-    train_ratio = 0.8
-    num_total = len(all_pairs)
-    num_train = int(num_total * train_ratio)
-
-    train_pairs = all_pairs[:num_train]
-    val_pairs = all_pairs[num_train:]
-
     # 拷贝函数
-    def copy_pairs(pairs, split):
-        for idx, (img, lbl) in enumerate(pairs):
-            new_name = f"{img.stem}_{idx}{img.suffix}"
-            shutil.copy(img, merge_root / "images" / split / new_name)
-            shutil.copy(lbl, merge_root / "labels" / split / f"{Path(new_name).stem}.txt")
-
-    copy_pairs(train_pairs, "train")
-    copy_pairs(val_pairs, "val")
+    for idx, (img, lbl) in enumerate(all_pairs):
+        new_name = f"{img.stem}_{idx}{img.suffix}"
+        shutil.copy(img, merge_root / "images" / "train" / new_name)
+        shutil.copy(lbl, merge_root / "labels" / "train" / f"{Path(new_name).stem}.txt")
 
     print(f"\n===== 合并完成 =====")
-    print(f"Train: {len(train_pairs)}")
-    print(f"Val  : {len(val_pairs)}")
+    print(f"Train: {len(all_pairs)}")
     print(f"输出目录: {merge_root}")
+    print(f"Val: 使用原始 images/val (有真实标签)")
 
 
 if __name__ == "__main__":

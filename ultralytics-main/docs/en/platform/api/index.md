@@ -18,6 +18,10 @@ keywords: Ultralytics Platform, REST API, API reference, authentication, endpoin
       https://platform.ultralytics.com/api/datasets
     ```
 
+!!! tip "Interactive API Docs"
+
+    Explore the full interactive API reference in the [Ultralytics Platform API docs](https://platform.ultralytics.com/api/docs).
+
 ## API Overview
 
 The API is organized around the core platform resources:
@@ -35,20 +39,20 @@ graph LR
     B -->|auto-annotate| B
 ```
 
-| Resource                                   | Description                   | Key Operations                          |
-| ------------------------------------------ | ----------------------------- | --------------------------------------- |
-| [Datasets](../data/datasets.md)            | Labeled image collections     | CRUD, images, labels, export, clone     |
-| [Projects](../train/projects.md)           | Training workspaces           | CRUD, clone, icon                       |
-| [Models](../train/models.md)               | Trained checkpoints           | CRUD, predict, download, clone, export  |
-| [Deployments](../deploy/endpoints.md)      | Dedicated inference endpoints | CRUD, start/stop, metrics, logs, health |
-| [Exports](../train/models.md#export-model) | Format conversion jobs        | Create, status, download                |
-| [Training](../train/cloud-training.md)     | Cloud GPU training jobs       | Start, status, cancel                   |
-| [Billing](../account/billing.md)           | Credits and subscriptions     | Balance, top-up, payment methods        |
-| [Teams](../account/settings.md#teams-tab)  | Workspace collaboration       | Members, invites, roles                 |
+| Resource                                   | Description                   | Key Operations                                |
+| ------------------------------------------ | ----------------------------- | --------------------------------------------- |
+| [Datasets](../data/datasets.md)            | Labeled image collections     | CRUD, images, labels, export, versions, clone |
+| [Projects](../train/projects.md)           | Training workspaces           | CRUD, clone, icon                             |
+| [Models](../train/models.md)               | Trained checkpoints           | CRUD, predict, download, clone, export        |
+| [Deployments](../deploy/endpoints.md)      | Dedicated inference endpoints | CRUD, start/stop, metrics, logs, health       |
+| [Exports](../train/models.md#export-model) | Format conversion jobs        | Create, status, download                      |
+| [Training](../train/cloud-training.md)     | Cloud GPU training jobs       | Start, status, cancel                         |
+| [Billing](../account/billing.md)           | Credits and subscriptions     | Balance, top-up, payment methods              |
+| [Teams](../account/teams.md)               | Workspace collaboration       | Members, invites, roles                       |
 
 ## Authentication
 
-Most API requests require authentication via API key. Public endpoints (listing public datasets, projects, and models) support anonymous read access without a key.
+Resource APIs such as datasets, projects, models, training, exports, and predictions use API-key authentication. Public endpoints (listing public datasets, projects, and models) support anonymous read access without a key. Account-oriented routes — including activity, settings, teams, billing, and GDPR flows — currently require an authenticated browser session and are not available via API key.
 
 ### Get API Key
 
@@ -63,7 +67,7 @@ See [API Keys](../account/api-keys.md) for detailed instructions.
 Include your API key in all requests:
 
 ```
-Authorization: Bearer ul_your_api_key_here
+Authorization: Bearer YOUR_API_KEY
 ```
 
 !!! info "API Key Format"
@@ -75,7 +79,7 @@ Authorization: Bearer ul_your_api_key_here
 === "cURL"
 
     ```bash
-    curl -H "Authorization: Bearer ul_abc123..." \
+    curl -H "Authorization: Bearer YOUR_API_KEY" \
       https://platform.ultralytics.com/api/datasets
     ```
 
@@ -84,7 +88,7 @@ Authorization: Bearer ul_your_api_key_here
     ```python
     import requests
 
-    headers = {"Authorization": "Bearer ul_abc123..."}
+    headers = {"Authorization": "Bearer YOUR_API_KEY"}
     response = requests.get(
         "https://platform.ultralytics.com/api/datasets",
         headers=headers,
@@ -96,7 +100,7 @@ Authorization: Bearer ul_your_api_key_here
 
     ```javascript
     const response = await fetch("https://platform.ultralytics.com/api/datasets", {
-      headers: { Authorization: "Bearer ul_abc123..." },
+      headers: { Authorization: "Bearer YOUR_API_KEY" },
     });
     const data = await response.json();
     ```
@@ -127,21 +131,21 @@ X-RateLimit-Reset: 2026-02-21T12:34:56.000Z
 
 Rate limits are applied automatically based on the endpoint being called. Expensive operations have tighter limits to prevent abuse, while standard CRUD operations share a generous default:
 
-| Endpoint      | Limit            | Applies To                                                                      |
-| ------------- | ---------------- | ------------------------------------------------------------------------------- |
-| **Default**   | 100 requests/min | All endpoints not listed below (list, get, create, update, delete)              |
-| **Training**  | 10 requests/min  | Starting cloud training jobs (`POST /api/training/start`)                       |
-| **Upload**    | 10 requests/min  | File uploads, signed URLs, and dataset ingest                                   |
-| **Predict**   | 20 requests/min  | Shared model inference (`POST /api/models/{id}/predict`)                        |
-| **Export**    | 20 requests/min  | Model format exports (`POST /api/exports`) and dataset NDJSON exports           |
-| **Download**  | 30 requests/min  | Model weight file downloads (`GET /api/models/{id}/download`)                   |
-| **Dedicated** | **Unlimited**    | [Dedicated endpoints](../deploy/endpoints.md) — your own service, no API limits |
+| Endpoint      | Limit            | Applies To                                                                               |
+| ------------- | ---------------- | ---------------------------------------------------------------------------------------- |
+| **Default**   | 100 requests/min | All endpoints not listed below (list, get, create, update, delete)                       |
+| **Training**  | 10 requests/min  | Starting cloud training jobs (`POST /api/training/start`)                                |
+| **Upload**    | 10 requests/min  | File uploads, signed URLs, and dataset ingest                                            |
+| **Predict**   | 20 requests/min  | Shared model inference (`POST /api/models/{id}/predict`)                                 |
+| **Export**    | 20 requests/min  | Model format exports (`POST /api/exports`), dataset NDJSON exports, and version creation |
+| **Download**  | 30 requests/min  | Model weight file downloads (`GET /api/models/{id}/download`)                            |
+| **Dedicated** | **Unlimited**    | [Dedicated endpoints](../deploy/endpoints.md) — your own service, no API limits          |
 
 Each category has an independent counter per API key. For example, making 20 predict requests does not affect your 100 request/min default allowance.
 
 ### Dedicated Endpoints (Unlimited)
 
-[Dedicated endpoints](../deploy/endpoints.md) are **not subject to API key rate limits**. When you deploy a model to a dedicated endpoint, requests to that endpoint URL (e.g., `https://predict-abc123.run.app/predict`) go directly to your dedicated service with no rate limiting from the Platform. You're paying for the compute, so you get unlimited throughput up to your endpoint's scaling configuration.
+[Dedicated endpoints](../deploy/endpoints.md) are **not subject to API key rate limits**. When you deploy a model to a dedicated endpoint, requests to that endpoint URL (e.g., `https://predict-abc123.run.app/predict`) go directly to your dedicated service with no rate limiting from the Platform. You're paying for the compute, so you get throughput from your dedicated service configuration rather than the shared API limits.
 
 !!! tip "Handling Rate Limits"
 
@@ -164,7 +168,7 @@ Responses return JSON with resource-specific fields:
 
 ```json
 {
-    "error": "Invalid dataset ID"
+    "error": "Dataset not found"
 }
 ```
 
@@ -184,7 +188,7 @@ Responses return JSON with resource-specific fields:
 
 ## Datasets API
 
-Manage labeled image collections for training YOLO models.
+Create, browse, and manage labeled image datasets for training YOLO models. See [Datasets documentation](../data/datasets.md).
 
 ### List Datasets
 
@@ -204,7 +208,7 @@ GET /api/datasets
 === "cURL"
 
     ```bash
-    curl -H "Authorization: Bearer $API_KEY" \
+    curl -H "Authorization: Bearer YOUR_API_KEY" \
       "https://platform.ultralytics.com/api/datasets?limit=10"
     ```
 
@@ -336,7 +340,13 @@ Creates a copy of the dataset with all images and labels. Only public datasets c
 GET /api/datasets/{datasetId}/export
 ```
 
-Returns a JSON response with a signed download URL for the dataset export file.
+Returns a JSON response with a signed download URL for the latest dataset export.
+
+**Query Parameters:**
+
+| Parameter | Type    | Description                                                               |
+| --------- | ------- | ------------------------------------------------------------------------- |
+| `v`       | integer | Version number (1-indexed). If omitted, returns latest (uncached) export. |
 
 **Response:**
 
@@ -344,6 +354,58 @@ Returns a JSON response with a signed download URL for the dataset export file.
 {
     "downloadUrl": "https://storage.example.com/export.ndjson?signed=...",
     "cached": true
+}
+```
+
+### Create Dataset Version
+
+```
+POST /api/datasets/{datasetId}/export
+```
+
+Create a new numbered version snapshot of the dataset. Owner-only. The version captures current image count, class count, annotation count, and split distribution, then generates and stores an immutable NDJSON export.
+
+**Request Body:**
+
+```json
+{
+    "description": "Added 500 training images"
+}
+```
+
+All fields are optional. The `description` field is a user-provided label for the version.
+
+**Response:**
+
+```json
+{
+    "version": 3,
+    "downloadUrl": "https://storage.example.com/v3.ndjson?signed=..."
+}
+```
+
+### Update Version Description
+
+```
+PATCH /api/datasets/{datasetId}/export
+```
+
+Update the description of an existing version. Owner-only.
+
+**Request Body:**
+
+```json
+{
+    "version": 2,
+    "description": "Fixed mislabeled classes"
+}
+```
+
+**Response:**
+
+```json
+{
+    "ok": true
 }
 ```
 
@@ -454,12 +516,12 @@ Run YOLO inference on dataset images to auto-generate annotations. Uses a select
 POST /api/datasets/ingest
 ```
 
-Create a dataset ingest job to process uploaded ZIP files containing images and labels.
+Create a dataset ingest job to process uploaded ZIP or TAR files, including `.tar.gz` and `.tgz`, containing images and labels.
 
 ```mermaid
 graph LR
-    A[Upload ZIP] --> B[POST /api/datasets/ingest]
-    B --> C[Process ZIP]
+    A[Upload Archive] --> B[POST /api/datasets/ingest]
+    B --> C[Process Archive]
     C --> D[Extract images]
     C --> E[Parse labels]
     C --> F[Generate thumbnails]
@@ -546,7 +608,7 @@ DELETE /api/datasets/{datasetId}/images/bulk
 
 ## Projects API
 
-Manage training workspaces that group models together.
+Organize your models into projects. Each model belongs to one project. See [Projects documentation](../train/projects.md).
 
 ### List Projects
 
@@ -578,7 +640,7 @@ POST /api/projects
 
     ```bash
     curl -X POST \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{"name": "my-project", "slug": "my-project", "description": "Detection experiments"}' \
       https://platform.ultralytics.com/api/projects
@@ -633,7 +695,7 @@ DELETE /api/projects/{projectId}/icon
 
 ## Models API
 
-Manage trained model checkpoints within projects.
+Manage trained YOLO models — view metrics, download weights, run inference, and export to other formats. See [Models documentation](../train/models.md).
 
 ### List Models
 
@@ -757,7 +819,7 @@ POST /api/models/{modelId}/predict
 
     ```bash
     curl -X POST \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
       -F "file=@image.jpg" \
       -F "conf=0.5" \
       https://platform.ultralytics.com/api/models/MODEL_ID/predict
@@ -819,7 +881,7 @@ Pre-load a model for faster first inference. Call this before running prediction
 
 ## Training API
 
-Start, monitor, and cancel cloud training jobs.
+Launch YOLO training on cloud GPUs (RTX 4090, A100, H100) and monitor progress in real time. See [Cloud Training documentation](../train/cloud-training.md).
 
 ```mermaid
 graph LR
@@ -841,14 +903,14 @@ POST /api/training/start
 
     ```bash
     curl -X POST \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{
         "modelId": "MODEL_ID",
         "projectId": "PROJECT_ID",
         "gpuType": "rtx-4090",
         "trainArgs": {
-          "model": "yolo11n.pt",
+          "model": "yolo26n.pt",
           "data": "ul://username/datasets/my-dataset",
           "epochs": 100,
           "imgsz": 640,
@@ -869,7 +931,7 @@ POST /api/training/start
             "projectId": "PROJECT_ID",
             "gpuType": "rtx-4090",
             "trainArgs": {
-                "model": "yolo11n.pt",
+                "model": "yolo26n.pt",
                 "data": "ul://username/datasets/my-dataset",
                 "epochs": 100,
                 "imgsz": 640,
@@ -903,7 +965,7 @@ Terminates the running compute instance and marks the job as cancelled.
 
 ## Deployments API
 
-Create and manage dedicated inference endpoints.
+Deploy models to dedicated inference endpoints with health checks and monitoring. New deployments use scale-to-zero by default, and the API accepts an optional `resources` object. See [Endpoints documentation](../deploy/endpoints.md).
 
 ```mermaid
 graph LR
@@ -953,14 +1015,18 @@ POST /api/deployments
 }
 ```
 
-| Field       | Type   | Required | Description                                                        |
-| ----------- | ------ | -------- | ------------------------------------------------------------------ |
-| `modelId`   | string | Yes      | Model ID to deploy                                                 |
-| `name`      | string | Yes      | Deployment name                                                    |
-| `region`    | string | Yes      | Deployment region                                                  |
-| `resources` | object | No       | Resource configuration (cpu, memoryGi, minInstances, maxInstances) |
+| Field       | Type   | Required | Description                                                                |
+| ----------- | ------ | -------- | -------------------------------------------------------------------------- |
+| `modelId`   | string | Yes      | Model ID to deploy                                                         |
+| `name`      | string | Yes      | Deployment name                                                            |
+| `region`    | string | Yes      | Deployment region                                                          |
+| `resources` | object | No       | Resource configuration (`cpu`, `memoryGi`, `minInstances`, `maxInstances`) |
 
 Creates a dedicated inference endpoint in the specified region. The endpoint is globally accessible via a unique URL.
+
+!!! note "Default Resources"
+
+    The deployment dialog currently submits fixed defaults of `cpu=1`, `memoryGi=2`, `minInstances=0`, and `maxInstances=1`. The API route accepts a `resources` object, but plan limits cap `minInstances` at `0` and `maxInstances` at `1`.
 
 !!! tip "Region Selection"
 
@@ -1064,7 +1130,7 @@ Returns aggregated metrics across all user deployments: total requests, active d
 
 ## Export API
 
-Convert models to optimized formats for edge deployment.
+Convert models to optimized formats like ONNX, TensorRT, CoreML, and TFLite for edge deployment. See [Deploy documentation](../deploy/index.md).
 
 ### List Exports
 
@@ -1099,7 +1165,7 @@ POST /api/exports
 
     ```bash
     curl -X POST \
-      -H "Authorization: Bearer $API_KEY" \
+      -H "Authorization: Bearer YOUR_API_KEY" \
       -H "Content-Type: application/json" \
       -d '{"modelId": "MODEL_ID", "format": "onnx"}' \
       https://platform.ultralytics.com/api/exports
@@ -1160,7 +1226,11 @@ POST /api/exports/{exportId}/track-download
 
 ## Activity API
 
-Track and manage activity events for your account.
+View a feed of recent actions on your account — training runs, uploads, and more. See [Activity documentation](../account/activity.md).
+
+!!! note "Browser Session Only"
+
+    The Activity routes are powered by browser-authenticated requests from the platform UI. They are not exposed as a public API, do not accept API-key authentication, and the route shapes below are documented only for reference. Use the Activity feed in the platform UI to view, mark, or archive events.
 
 ### List Activity
 
@@ -1227,7 +1297,7 @@ Or pass specific IDs:
 
 ## Trash API
 
-Manage soft-deleted resources (30-day retention).
+View and restore deleted items. Items are permanently removed after 30 days. See [Trash documentation](../account/trash.md).
 
 ### List Trash
 
@@ -1286,11 +1356,15 @@ DELETE /api/trash/empty
 
 Permanently deletes all items in trash.
 
+!!! note "Authentication"
+
+    `DELETE /api/trash/empty` requires an authenticated browser session and is not available via API key. Use the **Empty Trash** button in the UI instead.
+
 ---
 
 ## Billing API
 
-Manage credits, subscriptions, and payment methods.
+Check your credit balance, purchase credits, view transaction history, and configure auto top-up. See [Billing documentation](../account/billing.md).
 
 !!! note "Currency Units"
 
@@ -1389,13 +1463,21 @@ Creates a checkout session for Pro subscription upgrade.
 | `billingCycle` | string | No       | Billing cycle: `monthly` (default) or `yearly`             |
 | `owner`        | string | No       | Team username for workspace upgrades (requires admin role) |
 
-### Create Portal Session
+### Cancel or Resume Subscription
 
 ```
-POST /api/billing/portal-session
+DELETE /api/billing/subscription-checkout
 ```
 
-Returns URL to billing portal for subscription management.
+Cancels a Pro subscription at period end by default. Send `{"resume": true}` to resume an already scheduled cancellation before the billing period ends.
+
+**Body:**
+
+```json
+{
+    "resume": true
+}
+```
 
 ### Auto Top-Up
 
@@ -1490,6 +1572,8 @@ DELETE /api/billing/payment-methods/{id}
 
 ## Storage API
 
+Check your storage usage breakdown by category (datasets, models, exports) and see your largest items.
+
 ### Get Storage Info
 
 ```
@@ -1551,7 +1635,7 @@ Triggers a recalculation of storage usage.
 
 ## Upload API
 
-Direct file uploads use a two-step signed URL flow.
+Upload files directly to cloud storage using signed URLs for fast, reliable transfers. Uses a two-step flow: get a signed URL, then upload the file. See [Data documentation](../data/index.md).
 
 ### Get Signed Upload URL
 
@@ -1617,6 +1701,8 @@ Notify the platform that a file upload is complete so it can begin processing.
 
 ## API Keys API
 
+Manage your API keys for programmatic access. See [API Keys documentation](../account/api-keys.md).
+
 ### List API Keys
 
 ```
@@ -1653,7 +1739,7 @@ DELETE /api/api-keys
 
 ```bash
 curl -X DELETE \
-  -H "Authorization: Bearer $API_KEY" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
   "https://platform.ultralytics.com/api/api-keys?keyId=KEY_ID"
 ```
 
@@ -1661,7 +1747,7 @@ curl -X DELETE \
 
 ## Teams & Members API
 
-Manage workspace collaboration with teams, members, and invites.
+Create team workspaces, invite members, and manage roles for collaboration. See [Teams documentation](../account/teams.md).
 
 ### List Teams
 
@@ -1715,7 +1801,7 @@ POST /api/members
     | `editor` | Create, edit, and delete resources          |
     | `admin`  | Full access including member management     |
 
-    See [Teams](../account/settings.md#teams-tab) for role details in the UI.
+    See [Teams](../account/teams.md) for role details in the UI.
 
 ### Update Member Role
 
@@ -1771,6 +1857,8 @@ POST /api/invites/{inviteId}/resend
 
 ## Explore API
 
+Search and browse public datasets and projects shared by the community. See [Explore documentation](../explore.md).
+
 ### Search Public Content
 
 ```
@@ -1797,6 +1885,8 @@ Returns curated content for the Explore sidebar.
 ---
 
 ## User & Settings APIs
+
+Manage your profile, API keys, storage usage, and data privacy settings. See [Settings documentation](../account/settings.md).
 
 ### Get User by Username
 
@@ -1868,7 +1958,7 @@ Complete onboarding flow (set data region, username).
 
 ## GDPR API
 
-GDPR compliance endpoints for data export and deletion.
+Request an export of all your data or permanently delete your account. See [Settings documentation](../account/settings.md).
 
 ### Get GDPR Job Status
 
@@ -1952,7 +2042,7 @@ yolo check
 
 !!! warning "Package Version Requirement"
 
-    Platform integration requires **ultralytics>=8.4.14**. Lower versions will NOT work with Platform.
+    Platform integration requires **ultralytics>=8.4.35**. Lower versions will NOT work with Platform.
 
 ### Authentication
 
@@ -1983,11 +2073,11 @@ Reference datasets with `ul://` URIs:
 ```python
 from ultralytics import YOLO
 
-model = YOLO("yolo11n.pt")
+model = YOLO("yolo26n.pt")
 
 # Train on your Platform dataset
 model.train(
-    data="ul://your-username/your-dataset",
+    data="ul://your-username/datasets/your-dataset",
     epochs=100,
     imgsz=640,
 )
@@ -2009,13 +2099,13 @@ Send results to a Platform project:
 ```python
 from ultralytics import YOLO
 
-model = YOLO("yolo11n.pt")
+model = YOLO("yolo26n.pt")
 
 # Results automatically sync to Platform
 model.train(
     data="coco8.yaml",
     epochs=100,
-    project="ul://your-username/my-project",
+    project="your-username/my-project",
     name="experiment-1",
 )
 ```
@@ -2069,7 +2159,7 @@ model.export(format="coreml", imgsz=640)
 **Validation:**
 
 ```python
-metrics = model.val(data="ul://username/my-dataset")
+metrics = model.val(data="ul://username/datasets/my-dataset")
 
 print(f"mAP50: {metrics.box.map50}")
 print(f"mAP50-95: {metrics.box.map}")
@@ -2089,9 +2179,11 @@ Webhooks notify your server of Platform events via HTTP POST callbacks:
 | `training.failed`    | Training failed      |
 | `export.completed`   | Export ready         |
 
-!!! info "Enterprise Feature"
+!!! info "Plan Availability"
 
-    Custom webhook endpoints are available on Enterprise plans. Training webhooks for the Python SDK work automatically on all plans.
+    **All plans**: Training webhooks via the Python SDK (real-time metrics, completion notifications) work automatically on every plan -- no configuration required.
+
+    **Enterprise only**: Custom webhook endpoints that send HTTP POST callbacks to your own server URL require an Enterprise plan. See [Ultralytics Licensing](https://www.ultralytics.com/licensing) for details.
 
 ---
 
@@ -2102,14 +2194,14 @@ Webhooks notify your server of Platform events via HTTP POST callbacks:
 Most endpoints use a `limit` parameter to control how many results are returned per request:
 
 ```bash
-curl -H "Authorization: Bearer $API_KEY" \
+curl -H "Authorization: Bearer YOUR_API_KEY" \
   "https://platform.ultralytics.com/api/datasets?limit=50"
 ```
 
 The Activity and Trash endpoints also support a `page` parameter for page-based pagination:
 
 ```bash
-curl -H "Authorization: Bearer $API_KEY" \
+curl -H "Authorization: Bearer YOUR_API_KEY" \
   "https://platform.ultralytics.com/api/activity?page=2&limit=20"
 ```
 
@@ -2121,7 +2213,7 @@ curl "https://platform.ultralytics.com/api/explore/search?type=datasets&offset=2
 
 ### Can I use the API without an SDK?
 
-Yes, all functionality is available via REST. The Python SDK is a convenience wrapper that adds features like real-time metric streaming and automatic model uploads.
+Yes, all functionality is available via REST. The Python SDK is a convenience wrapper that adds features like real-time metric streaming and automatic model uploads. You can also explore all endpoints interactively at [platform.ultralytics.com/api/docs](https://platform.ultralytics.com/api/docs).
 
 ### Are there API client libraries?
 

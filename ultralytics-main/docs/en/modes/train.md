@@ -117,6 +117,16 @@ Multi-GPU training allows for more efficient utilization of available hardware r
         yolo detect train data=coco8.yaml model=yolo26n.pt epochs=100 imgsz=640 device=-1,-1
         ```
 
+!!! note "Multi-GPU Training with Custom Code"
+
+    When you specify multiple devices (e.g., `device=[0, 1]`), Ultralytics internally spawns a new trainer instance and executes `torch.distributed.run` under the hood. This works seamlessly for standard CLI usage and unmodified Python scripts.
+
+    However, if your script contains custom components—such as a custom trainer, validator, dataset, or augmentation pipeline—these objects cannot be automatically serialized and transferred to the DDP subprocesses. In this case, you must launch your script directly with `torch.distributed.run`:
+
+    ```bash
+    python -m torch.distributed.run --nproc_per_node 2 your_training_script.py
+    ```
+
 ### Idle GPU Training
 
 Idle GPU Training enables automatic selection of the least utilized GPUs in multi-GPU systems, optimizing resource usage without manual GPU selection. This feature identifies available GPUs based on utilization metrics and VRAM availability.
@@ -225,6 +235,24 @@ Remember that checkpoints are saved at the end of every epoch by default, or at 
 ## Train Settings
 
 The training settings for YOLO models encompass various hyperparameters and configurations used during the training process. These settings influence the model's performance, speed, and [accuracy](https://www.ultralytics.com/glossary/accuracy). Key training settings include batch size, learning rate, momentum, and weight decay. Additionally, the choice of optimizer, [loss function](https://www.ultralytics.com/glossary/loss-function), and training dataset composition can impact the training process. Careful tuning and experimentation with these settings are crucial for optimizing performance.
+
+### MuSGD Optimizer
+
+In YOLO26, **MuSGD** is a hybrid optimizer that combines standard **SGD** updates with **Muon-style orthogonalized updates**.
+
+It is **recommended for longer YOLO26 training runs and larger datasets**, where orthogonalized Muon updates can help stabilize optimization.
+
+Only parameters with `param.ndim >= 2` (such as convolutional weights) receive the Muon style update together with SGD, while lower dimensional parameters like batch normalization layers and bias terms remain on standard SGD.
+
+When `optimizer=auto` is used, Ultralytics automatically selects **MuSGD** for longer training runs (typically when iterations > 10000). For shorter runs, the trainer falls back to **AdamW**.
+
+Example usage:
+
+```bash
+yolo train model=yolo26n.pt data=coco8.yaml optimizer=MuSGD
+```
+
+See the implementation in `ultralytics/optim/muon.py` and the optimizer auto-selection logic in `BaseTrainer.build_optimizer`.
 
 {% include "macros/train-args.md" %}
 
@@ -386,6 +414,49 @@ To resume training from an interrupted session, set the `resume` argument to `Tr
         ```
 
 Check the section on [Resuming Interrupted Trainings](#resuming-interrupted-trainings) for more information.
+
+### How do I train a model on an imbalanced dataset?
+
+Class imbalance occurs when some classes have significantly fewer examples than others in your training data. This can cause the model to perform poorly on rare classes. Ultralytics YOLO supports class weighting through the `cls_pw` argument to address this issue.
+
+The `cls_pw` argument controls class weighting power based on inverse class frequency:
+
+- `cls_pw=0.0` (default): Disables class weighting
+- `cls_pw=1.0`: Applies full inverse frequency weighting
+- Values between `0.0` and `1.0`: Provide partial weighting for moderate imbalance
+
+The class weights are computed as `(1.0 / class_counts) ^ cls_pw` and normalized so their mean equals 1.0.
+
+!!! example "Training on Imbalanced Dataset"
+
+    === "Python"
+
+        ```python
+        from ultralytics import YOLO
+
+        # Load a pretrained model
+        model = YOLO("yolo26n.pt")
+
+        # Train with full class weighting for severely imbalanced data
+        results = model.train(data="custom.yaml", epochs=100, imgsz=640, cls_pw=1.0)
+
+        # Or use partial weighting (0.25) for moderate imbalance
+        results = model.train(data="custom.yaml", epochs=100, imgsz=640, cls_pw=0.25)
+        ```
+
+    === "CLI"
+
+        ```bash
+        # Train with full inverse frequency weighting
+        yolo detect train data=custom.yaml model=yolo26n.pt epochs=100 imgsz=640 cls_pw=1.0
+
+        # Train with partial weighting for moderate imbalance
+        yolo detect train data=custom.yaml model=yolo26n.pt epochs=100 imgsz=640 cls_pw=0.25
+        ```
+
+!!! tip
+
+    Start with `cls_pw=0.25` for moderately imbalanced datasets and increase to `1.0` if the rare classes still underperform. You can check the computed class weights in the training logs to verify the weight distribution.
 
 ### Can I train YOLO26 models on Apple silicon chips?
 

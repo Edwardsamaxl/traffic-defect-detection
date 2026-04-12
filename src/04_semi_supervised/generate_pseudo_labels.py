@@ -23,8 +23,8 @@ UNLABELED_IMG_DIR = ROOT / "data/NEU-DET/unlabeled/images/train"
 PSEUDO_LABEL_DIR = ROOT / "data/NEU-DET/unlabeled/pseudo_labels"
 
 IMG_SIZE = 640
-BASE_CONF = 0.65
-ADAPTIVE_LAMBDA = 0.25
+BASE_CONF = 0.7
+ADAPTIVE_LAMBDA = 0.2
 IOU_MATCH = 0.6
 STANDARD_CONF = 0.7
 CONSERVATIVE_CONF = 0.8
@@ -182,7 +182,7 @@ def generate_adaptive_consistency(model, output_dir, base_conf=BASE_CONF,
     for cls_id, ap in enumerate(baseline_ap):
         norm = (ap - ap_min) / (ap_max - ap_min + 1e-6)
         thres = base_conf + lambda_val * (1 - norm)
-        class_thresholds[cls_id] = max(0.3, min(0.95, thres))
+        class_thresholds[cls_id] = max(0.6, min(0.95, thres))
 
     print(f"\n[Adaptive+Consistency] 自适应阈值: {class_thresholds}")
     print(f"[Adaptive+Consistency] IOU_MATCH={iou_match}")

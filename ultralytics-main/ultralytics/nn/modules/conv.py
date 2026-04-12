@@ -667,3 +667,11 @@ class Index(nn.Module):
             (torch.Tensor): Selected tensor.
         """
         return x[self.index]
+
+
+# ============================================================================
+# SPD-Conv: Space-to-Depth Convolution (ECML PKDD 2022)
+# Paper: https://arxiv.org/pdf/2208.03641
+# Code: https://github.com/LabSAINT/SPD-Conv
+# ============================================================================
+

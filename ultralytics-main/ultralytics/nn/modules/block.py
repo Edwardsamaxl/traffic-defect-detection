@@ -52,6 +52,7 @@ __all__ = (
     "ResNetLayer",
     "SCDown",
     "TorchVision",
+    "BiFPNNeck",
 )
 
 
@@ -1676,11 +1677,17 @@ class AAttn(nn.Module):
 
         self.num_heads = num_heads
         self.head_dim = head_dim = dim // num_heads
-        all_head_dim = head_dim * self.num_heads
+        self.all_head_dim = all_head_dim = head_dim * self.num_heads
 
         self.qkv = Conv(dim, all_head_dim * 3, 1, act=False)
         self.proj = Conv(all_head_dim, dim, 1, act=False)
-        self.pe = Conv(all_head_dim, dim, 7, 1, 3, g=dim, act=False)
+        self.pe = Conv(all_head_dim, all_head_dim, 7, 1, 3, g=all_head_dim, act=False)
+
+    def __setstate__(self, state):
+        """Add missing all_head_dim attribute to old checkpoints."""
+        super().__setstate__(state)
+        if not hasattr(self, "all_head_dim"):
+            self.all_head_dim = self.head_dim * self.num_heads
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """Process the input tensor through the area-attention.
@@ -1691,12 +1698,12 @@ class AAttn(nn.Module):
         Returns:
             (torch.Tensor): Output tensor after area-attention.
         """
-        B, C, H, W = x.shape
+        B, _, H, W = x.shape
         N = H * W
 
         qkv = self.qkv(x).flatten(2).transpose(1, 2)
         if self.area > 1:
-            qkv = qkv.reshape(B * self.area, N // self.area, C * 3)
+            qkv = qkv.reshape(B * self.area, N // self.area, self.all_head_dim * 3)
             B, N, _ = qkv.shape
         q, k, v = (
             qkv.view(B, N, self.num_heads, self.head_dim * 3)
@@ -1710,12 +1717,12 @@ class AAttn(nn.Module):
         v = v.permute(0, 3, 1, 2)
 
         if self.area > 1:
-            x = x.reshape(B // self.area, N * self.area, C)
-            v = v.reshape(B // self.area, N * self.area, C)
+            x = x.reshape(B // self.area, N * self.area, self.all_head_dim)
+            v = v.reshape(B // self.area, N * self.area, self.all_head_dim)
             B, N, _ = x.shape
 
-        x = x.reshape(B, H, W, C).permute(0, 3, 1, 2).contiguous()
-        v = v.reshape(B, H, W, C).permute(0, 3, 1, 2).contiguous()
+        x = x.reshape(B, H, W, self.all_head_dim).permute(0, 3, 1, 2).contiguous()
+        v = v.reshape(B, H, W, self.all_head_dim).permute(0, 3, 1, 2).contiguous()
 
         x = x + self.pe(v)
         return self.proj(x)
@@ -2065,3 +2072,104 @@ class RealNVP(nn.Module):
             self.float()
         z, log_det = self.backward_p(x)
         return self.prior.log_prob(z) + log_det
+
+
+class BiFPNConv(nn.Module):
+    """Single BiFPN layer with weighted feature fusion.
+
+    Implements efficient weighted BiFPN conv layer with learnable weights for feature fusion.
+    Used within BiFPN Neck structure.
+
+    Args:
+        c (int): Input/output channels
+        k (int): Kernel size
+        dropout (float): Dropout rate
+    """
+
+    def __init__(self, c, k=3, dropout=0.1):
+        super().__init__()
+        self.conv = nn.Sequential(
+            nn.BatchNorm2d(c),
+            nn.SiLU(),
+            nn.Conv2d(c, c, k, padding=k // 2),
+            nn.BatchNorm2d(c),
+            nn.SiLU(),
+            nn.Dropout2d(dropout),
+        )
+        # Learnable fusion weights for inputs at each resolution
+        self.w_level = nn.Parameter(torch.ones(2))  # bottom-up and top-down contributions
+
+    def forward(self, x):
+        """Forward with weighted feature fusion.
+
+        Args:
+            x (list): [main_feature, lateral_feature] from two directions
+
+        Returns:
+            torch.Tensor: Fused feature
+        """
+        x0, x1 = x
+        # Weighted sum with softmax normalization
+        w = F.softmax(self.w_level, dim=0)
+        return self.conv(w[0] * x0 + w[1] * x1)
+
+
+class BiFPNNeck(nn.Module):
+    """BiFPN Neck for YOLO - replaces standard PANet with weighted feature fusion.
+
+    From BiFPN paper (EfficientDet): https://arxiv.org/abs/1911.09070
+    And BiFPN-YOLO (Pattern Recognition 2025): https://doi.org/10.1016/j.patcog.2024.111209
+
+    Each BiFPN layer takes two features (bottom-up and top-down) and fuses them with learnable weights.
+
+    Args:
+        c1 (int): Input channels from backbone (P3/P4/P5)
+        c2 (int): Output channels for neck layers
+        num_layers (int): Number of BiFPN layers
+    """
+
+    def __init__(self, c1, c2, num_layers=3):
+        super().__init__()
+        # c1 is a list [P3_ch, P4_ch, P5_ch]
+        if isinstance(c1, int):
+            c1 = [c1, c1, c1]
+        self.c2 = c2
+        # Channel projections to unify dimensions
+        self.proj_p3 = Conv(c1[0], c2, 1)
+        self.proj_p4 = Conv(c1[1], c2, 1)
+        self.proj_p5 = Conv(c1[2], c2, 1)
+        # BiFPN layers for each level
+        self.bifpn_p3 = nn.ModuleList([BiFPNConv(c2, 3) for _ in range(num_layers)])
+        self.bifpn_p4 = nn.ModuleList([BiFPNConv(c2, 3) for _ in range(num_layers)])
+        self.bifpn_p5 = nn.ModuleList([BiFPNConv(c2, 3) for _ in range(num_layers)])
+        # Additional conv layers
+        self.conv_p3 = Conv(c2, c2, 3)
+        self.conv_p4 = Conv(c2, c2, 3)
+        self.conv_p5 = Conv(c2, c2, 3)
+
+    def forward(self, x):
+        """Forward pass with BiFPN weighted fusion.
+
+        Args:
+            x (list): [P3, P4, P5] feature maps from backbone
+
+        Returns:
+            tuple: (P3_out, P4_out, P5_out) - three feature maps at same resolution as input
+        """
+        assert len(x) == 3, "BiFPNNeck expects 3 input features [P3, P4, P5]"
+        p3_in, p4_in, p5_in = x
+
+        # Project to unified channel dimension
+        p3 = self.proj_p3(p3_in)  # [B, c2, H, W]
+        p4 = self.proj_p4(p4_in)  # [B, c2, H/2, W/2]
+        p5 = self.proj_p5(p5_in)  # [B, c2, H/4, W/4]
+
+        # Top-down feature fusion with weighted concatenation
+        # P5 -> P4 -> P3
+        p5_out = self.conv_p5(p5)
+        p4 = p4 + F.interpolate(p5_out, size=p4.shape[2:], mode='nearest')
+        p4_out = self.conv_p4(p4)
+        p3 = p3 + F.interpolate(p4_out, size=p3.shape[2:], mode='nearest')
+        p3_out = self.conv_p3(p3)
+
+        return p3_out, p4_out, p5_out

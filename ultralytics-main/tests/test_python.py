@@ -122,7 +122,7 @@ def test_predict_img(model_name):
     batch = [
         str(SOURCE),  # filename
         Path(SOURCE),  # Path
-        f"{ASSETS_URL}/zidane.jpg?token=123" if ONLINE else SOURCE,  # URI
+        "https://cdn.jsdelivr.net/gh/ultralytics/assets@main/im/zidane.jpg?token=123" if ONLINE else SOURCE,  # URI
         im,  # OpenCV
         Image.open(SOURCE),  # PIL
         np.zeros((320, 640, channels), dtype=np.uint8),  # numpy
@@ -305,7 +305,7 @@ def test_predict_callback_and_setup():
 @pytest.mark.parametrize("model", MODELS)
 def test_results(model: str, tmp_path):
     """Test YOLO model results processing and output in various formats."""
-    im = f"{ASSETS_URL}/boats.jpg" if model == "yolo26n-obb.pt" else SOURCE
+    im = "https://cdn.jsdelivr.net/gh/ultralytics/assets@main/im/boats.jpg" if model == "yolo26n-obb.pt" else SOURCE
     results = YOLO(WEIGHTS_DIR / model)([im, im], imgsz=160)
     for r in results:
         assert len(r), f"'{model}' results should not be empty!"
@@ -641,8 +641,27 @@ def test_classify_transforms_train(image, auto_augment, erasing, force_color_jit
 @pytest.mark.skipif(not ONLINE, reason="environment is offline")
 def test_model_tune():
     """Tune YOLO model for performance improvement."""
+    YOLO("yolo26n.pt").tune(
+        data=["coco8.yaml", "coco8-grayscale.yaml"], plots=False, imgsz=32, epochs=1, iterations=2, device="cpu"
+    )
     YOLO("yolo26n-pose.pt").tune(data="coco8-pose.yaml", plots=False, imgsz=32, epochs=1, iterations=2, device="cpu")
     YOLO("yolo26n-cls.pt").tune(data="imagenet10", plots=False, imgsz=32, epochs=1, iterations=2, device="cpu")
+
+
+@pytest.mark.slow
+@pytest.mark.skipif(not ONLINE or not checks.IS_PYTHON_MINIMUM_3_10, reason="environment is offline")
+def test_model_tune_ray():
+    """Tune YOLO model for performance improvement."""
+    YOLO("yolo26n-cls.pt").tune(
+        data="imagenet10",
+        use_ray=True,
+        plots=False,
+        imgsz=32,
+        epochs=1,
+        iterations=2,
+        search_alg="random",
+        device="cpu",
+    )
 
 
 def test_model_embeddings():
@@ -795,11 +814,7 @@ def test_grayscale(task: str, model: str, data: str, tmp_path) -> None:
             npy_file.unlink()
 
     model = YOLO(model)
-    model.train(data=grayscale_data, epochs=1, imgsz=32, close_mosaic=1, cache="disk")
-    # remove npy files in train/val splits if exists, avoiding interference with other tests
-    for split in {"train", "val"}:
-        for npy_file in (Path(data["path"]) / data[split]).glob("*.npy"):
-            npy_file.unlink()
+    model.train(data=grayscale_data, epochs=1, imgsz=32, close_mosaic=1, cache="ram")
     model.val(data=grayscale_data)
     im = np.zeros((32, 32, 1), dtype=np.uint8)
     model.predict(source=im, imgsz=32, save_txt=True, save_crop=True, augment=True)

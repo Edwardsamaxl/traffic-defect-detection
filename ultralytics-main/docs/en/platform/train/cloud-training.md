@@ -62,12 +62,12 @@ Choose a dataset to train on (see [Datasets](../data/datasets.md)):
 
 Set core training parameters:
 
-| Parameter      | Description                                                                 | Default |
-| -------------- | --------------------------------------------------------------------------- | ------- |
-| **Epochs**     | Number of training iterations                                               | 100     |
-| **Batch Size** | Samples per iteration                                                       | 16      |
-| **Image Size** | Input resolution (320/416/512/640/1280 dropdown, or 32-4096 in YAML editor) | 640     |
-| **Run Name**   | Optional name for the training run                                          | auto    |
+| Parameter      | Description                                                                 | Default   |
+| -------------- | --------------------------------------------------------------------------- | --------- |
+| **Epochs**     | Number of training iterations                                               | 100       |
+| **Batch Size** | Samples per iteration                                                       | -1 (auto) |
+| **Image Size** | Input resolution (320/416/512/640/1280 dropdown, or 32-4096 in YAML editor) | 640       |
+| **Run Name**   | Optional name for the training run                                          | auto      |
 
 ### Step 4: Advanced Settings (Optional)
 
@@ -105,37 +105,14 @@ Choose your GPU from Ultralytics Cloud:
 
 ![Ultralytics Platform Training Dialog Gpu Selector And Cost](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/platform/platform-training-dialog-gpu-selector-and-cost.avif)
 
-| GPU          | VRAM   | Cost/Hour |
-| ------------ | ------ | --------- |
-| RTX 2000 Ada | 16 GB  | $0.24     |
-| RTX A4500    | 20 GB  | $0.24     |
-| RTX A5000    | 24 GB  | $0.26     |
-| RTX 4000 Ada | 20 GB  | $0.38     |
-| L4           | 24 GB  | $0.39     |
-| A40          | 48 GB  | $0.40     |
-| RTX 3090     | 24 GB  | $0.46     |
-| RTX A6000    | 48 GB  | $0.49     |
-| RTX 4090     | 24 GB  | $0.59     |
-| RTX 6000 Ada | 48 GB  | $0.77     |
-| L40S         | 48 GB  | $0.86     |
-| RTX 5090     | 32 GB  | $0.89     |
-| L40          | 48 GB  | $0.99     |
-| A100 PCIe    | 80 GB  | $1.39     |
-| A100 SXM     | 80 GB  | $1.49     |
-| RTX PRO 6000 | 96 GB  | $1.89     |
-| H100 PCIe    | 80 GB  | $2.39     |
-| H100 SXM     | 80 GB  | $2.69     |
-| H100 NVL     | 94 GB  | $3.07     |
-| H200 NVL     | 143 GB | $3.39     |
-| H200 SXM     | 141 GB | $3.59     |
-| B200         | 180 GB | $4.99     |
+{% include "macros/platform-gpu-table.md" %}
 
 !!! tip "GPU Selection"
 
     - **RTX PRO 6000**: 96 GB Blackwell generation, recommended default for most jobs
     - **A100 SXM**: Required for large batch sizes or big models
-    - **H100/H200**: Maximum performance for time-sensitive training
-    - **B200**: NVIDIA Blackwell architecture for cutting-edge workloads
+    - **H100/H200**: Maximum performance for time-sensitive training (H200 requires [Pro or Enterprise](../account/billing.md#plans))
+    - **B200**: NVIDIA Blackwell architecture for cutting-edge workloads (requires [Pro or Enterprise](../account/billing.md#plans))
 
 The dialog shows your current **balance** and a **Top Up** button. An estimated cost and duration are calculated based on your configuration (model size, dataset images, epochs, GPU speed).
 
@@ -192,11 +169,7 @@ Real-time GPU utilization, memory, temperature, CPU, and disk usage.
 
 ### Checkpoints
 
-Checkpoints are saved automatically:
-
-- **Every epoch**: Latest weights saved
-- **Best model**: Highest mAP checkpoint preserved
-- **Final model**: Weights at training completion
+After training completes, the **best model** (`best.pt`, the highest-mAP checkpoint) is uploaded to the platform and made available for download, export, and deployment.
 
 ## Cancel Training
 
@@ -204,7 +177,7 @@ Click **Cancel Training** on the model page to stop a running job:
 
 - The compute instance is terminated
 - Credits stop being charged
-- Checkpoints saved up to that point are preserved
+- The best checkpoint remains available if it was reached before cancellation
 
 ## Remote Training
 
@@ -224,7 +197,7 @@ Train on your own hardware while streaming metrics to the platform.
 
 !!! warning "Package Version Requirement"
 
-    Platform integration requires **ultralytics>=8.4.14**. Lower versions will NOT work with Platform.
+    Platform integration requires **ultralytics>=8.4.35**. Lower versions will NOT work with Platform.
 
     ```bash
     pip install -U ultralytics
@@ -237,7 +210,7 @@ Train on your own hardware while streaming metrics to the platform.
 3. Set the environment variable:
 
 ```bash
-export ULTRALYTICS_API_KEY="your_api_key"
+export ULTRALYTICS_API_KEY="YOUR_API_KEY"
 ```
 
 ### Train with Streaming
@@ -353,7 +326,20 @@ Cloud training billing flow:
 
 !!! success "Consumer Protection"
 
-    Billing tracks actual compute usage, including partial runs that are cancelled.
+    Billing tracks actual compute usage, including partial runs that are cancelled. **You are never charged for failed training runs.**
+
+### Billing by Job Status
+
+| Status        | Charged?                                    |
+| ------------- | ------------------------------------------- |
+| **Completed** | Yes — actual GPU time used                  |
+| **Cancelled** | Yes — GPU time from start to cancellation   |
+| **Failed**    | No — failed runs are not charged            |
+| **Stuck**     | Partial — only actual training time charged |
+
+!!! tip "No Charge for Errors"
+
+    If a training run fails due to a configuration error, out-of-memory issue, or any other failure, you are **not charged**. Only successful compute time is billed. Stuck jobs (no activity for 4+ hours) are automatically terminated and charged only for the time the GPU was actively training, not the idle time.
 
 ### Payment Methods
 
@@ -420,11 +406,15 @@ Training time depends on:
 
 Typical times (1000 images, 100 epochs):
 
-| Model   | RTX PRO 6000 | A100   |
-| ------- | ------------ | ------ |
-| YOLO26n | 20 min       | 20 min |
-| YOLO26m | 40 min       | 40 min |
-| YOLO26x | 80 min       | 80 min |
+| Model   | RTX PRO 6000 | A100 SXM |
+| ------- | ------------ | -------- |
+| YOLO26n | ~20 min      | ~15 min  |
+| YOLO26m | ~40 min      | ~30 min  |
+| YOLO26x | ~80 min      | ~60 min  |
+
+!!! note "Approximate Times"
+
+    Training times are approximate and vary with dataset complexity, augmentation settings, and batch size. Use the training dialog's cost estimate for more accurate predictions.
 
 ### Can I train overnight?
 
@@ -432,15 +422,41 @@ Yes, training continues until completion. You'll receive a notification when tra
 
 ### What happens if I run out of credits?
 
-Training pauses at the end of the current epoch. Your checkpoint is saved, and you can resume after adding credits.
+If your credit balance reaches zero during a training run, training **continues to completion** and your balance goes negative. This ensures your training job is never interrupted mid-run.
+
+After training completes, you'll need to add credits to bring your balance back to positive before starting new training jobs. Your completed model, checkpoints, and all training artifacts are fully preserved regardless of balance.
+
+!!! note "Negative Balance"
+
+    A negative balance only prevents starting **new** training jobs. Existing deployments and other platform features continue to work normally. Add credits via [Settings > Billing](../account/billing.md) or enable [auto top-up](../account/billing.md#auto-top-up) to avoid interruptions.
+
+### What happens if my training costs more than the estimate?
+
+Cost estimates are approximate — actual training time may vary due to factors like data loading speed, GPU warmup, and model convergence behavior. If the actual cost exceeds the estimate, your balance may go negative (see above). The platform **does not stop training** based on the estimate.
+
+To manage costs:
+
+- Monitor training progress in real-time and cancel early if needed
+- Enable [auto top-up](../account/billing.md#auto-top-up) to automatically replenish credits
+- Start with shorter runs (fewer epochs) to calibrate expectations
 
 ### Can I use custom training arguments?
 
 Yes, expand the **Advanced Settings** section in the training dialog to access a YAML editor with 40+ configurable parameters. Non-default values are included in both cloud and local training commands.
 
+The YAML editor also supports **importing configurations from previous training runs**:
+
+- **Copy from existing model**: On any completed model's page, the Training Configuration card has a **Copy as JSON** button. Copy the JSON and paste it directly into the YAML editor — it auto-detects JSON format and imports all parameters.
+- **Paste YAML or JSON**: Paste any valid YAML or JSON training configuration into the editor. Parameters are validated automatically, with out-of-range values clamped and warnings displayed.
+- **Drag and drop files**: Drag a `.yaml` or `.json` file directly into the editor to import its parameters.
+
+![Ultralytics Platform Training Dialog Copy Training Config JSON](https://cdn.jsdelivr.net/gh/ultralytics/assets@main/docs/platform/platform-training-dialog-copy-training-config-json.avif)
+
+This makes it easy to reproduce or iterate on previous training configurations without manually re-entering each parameter.
+
 ### Can I train from a dataset page?
 
-Yes, the **Train** button on dataset pages opens the training dialog with the dataset pre-selected and locked. You then select a project and model to begin training.
+Yes, the **Train** button on dataset pages opens the training dialog with the dataset preselected and locked. You then select a project and model to begin training.
 
 ## Training Parameters Reference
 

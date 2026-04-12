@@ -31,9 +31,6 @@ from ultralytics.nn.modules import (
     Bottleneck,
     BottleneckCSP,
     C2f,
-    CBAM,
-    ChannelAttention,
-    SpatialAttention,
     C2fAttn,
     C2fCIB,
     C2fPSA,
@@ -42,6 +39,7 @@ from ultralytics.nn.modules import (
     C3x,
     CBFuse,
     CBLinear,
+    CBAM,
     Classify,
     Concat,
     Conv,
@@ -53,6 +51,7 @@ from ultralytics.nn.modules import (
     Focus,
     GhostBottleneck,
     GhostConv,
+    BiFPNNeck,
     HGBlock,
     HGStem,
     ImagePoolingAttn,
@@ -69,6 +68,8 @@ from ultralytics.nn.modules import (
     SCDown,
     Segment,
     Segment26,
+    SpatialAttention,
+    ChannelAttention,
     TorchVision,
     WorldDetect,
     YOLOEDetect,
@@ -439,7 +440,7 @@ class DetectionModel(BaseModel):
         """Set attributes of the model head (last layer).
 
         Args:
-            **kwargs: Arbitrary keyword arguments representing attributes to set.
+            **kwargs (Any): Arbitrary keyword arguments representing attributes to set.
         """
         head = self.model[-1]
         for k, v in kwargs.items():
@@ -1682,12 +1683,11 @@ def parse_model(d, ch, verbose=True):
         elif m is CBAM:
             c1, c2 = ch[f], ch[f]  # CBAM输出通道数=输入通道数
             args = [c1]
-        elif m is SpatialAttention:
-            c1 = ch[f]  # SpatialAttention只接收kernel_size，默认7
-            args = [7]  # 默认kernel_size=7
-        elif m is ChannelAttention:
-            c1 = ch[f]  # ChannelAttention只接收channels
-            args = [c1]
+        elif m is BiFPNNeck:
+            # BiFPNNeck: takes list of [P3, P4, P5] features
+            c1_list = [ch[x] for x in f]  # [P3_ch, P4_ch, P5_ch]
+            c2 = args[0] if args else 256
+            args = [c1_list, c2, *args[1:]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
         elif m in frozenset(

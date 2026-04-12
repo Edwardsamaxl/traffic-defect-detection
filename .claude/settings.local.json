@@ -32,7 +32,11 @@
       "Bash(done)",
       "Bash(ls:*)",
       "Bash(yolo detect:*)",
-      "Bash(wc:*)"
+      "Bash(wc:*)",
+      "Bash(dir E:\\\\PycharmProjects\\\\traffic-defect-detection\\\\data\\\\NEU-DET:*)",
+      "Bash(do cat:*)",
+      "Bash(start:*)",
+      "Bash(.venv/Scripts/python.exe:*)"
     ]
   }
 }

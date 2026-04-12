@@ -1,0 +1,40 @@
+# Ultralytics YOLOv8s + SPD-Conv (无CBAM)
+# SPD-Conv: Space-to-Depth 替代传统下采样
+
+# Parameters
+nc: 6
+scales:
+  s: [0.33, 0.50, 1024]
+
+# Backbone with SPD-Conv (替换第1层和第3层下采样)
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2  640->320
+  - [-1, 1, SPDConv, [128, 3, 2, 2]] # 1-P2/4  320->160 (SPD)
+  - [-1, 3, C2f, [128, True]] # 2
+  - [-1, 1, SPDConv, [256, 3, 2, 2]] # 3-P3/8  160->80 (SPD)
+  - [-1, 6, C2f, [256, True]] # 4
+  - [-1, 1, Conv, [512, 3, 2]] # 5-P4/16  80->40
+  - [-1, 6, C2f, [512, True]] # 6
+  - [-1, 1, Conv, [1024, 3, 2]] # 7-P5/32  40->20
+  - [-1, 3, C2f, [1024, True]] # 8
+  - [-1, 1, SPPF, [1024, 5]] # 9
+
+# Head (标准YOLOv8 head)
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 10
+  - [[-1, 6], 1, Concat, [1]] # 11 cat backbone P4
+  - [-1, 3, C2f, [512]] # 12
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 13
+  - [[-1, 4], 1, Concat, [1]] # 14 cat backbone P3
+  - [-1, 3, C2f, [256]] # 15
+
+  - [-1, 1, Conv, [256, 3, 2]] # 16
+  - [[-1, 12], 1, Concat, [1]] # 17 cat head P4
+  - [-1, 3, C2f, [512]] # 18
+
+  - [-1, 1, Conv, [512, 3, 2]] # 19
+  - [[-1, 9], 1, Concat, [1]] # 20 cat head P5
+  - [-1, 3, C2f, [1024]] # 21
+
+  - [[15, 18, 21], 1, Detect, [nc]] # 22

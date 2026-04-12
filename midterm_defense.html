@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>钢材表面缺陷检测系统 - 中期答辩</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Nunito:wght@400;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================================
+           VIEWPORT FITTING: MANDATORY BASE STYLES
+           =========================================== */
+        html, body {
+            height: 100%;
+            overflow-x: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            overflow: hidden;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            padding: var(--slide-padding);
+        }
+
+        :root {
+            --title-size: clamp(1.8rem, 5vw, 3.8rem);
+            --h2-size: clamp(1.4rem, 3.5vw, 2.8rem);
+            --h3-size: clamp(1.1rem, 2.5vw, 1.8rem);
+            --body-size: clamp(0.85rem, 1.5vw, 1.15rem);
+            --small-size: clamp(0.65rem, 1vw, 0.9rem);
+            --slide-padding: clamp(1.5rem, 5vw, 5rem);
+            --content-gap: clamp(0.6rem, 2vw, 2rem);
+            --element-gap: clamp(0.3rem, 1vw, 1rem);
+
+            /* Palette - Academic Navy Theme */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-accent: #1a2332;
+            --text-primary: #1a1a1a;
+            --text-secondary: #4a5568;
+            --text-light: #e2e8f0;
+            --accent-red: #e63946;
+            --accent-blue: #3182ce;
+            --accent-gold: #d69e2e;
+            --grid-line: #e2e8f0;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        /* Navigation */
+        .nav-dots {
+            position: fixed;
+            right: clamp(1rem, 3vw, 2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--text-secondary);
+            opacity: 0.3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .nav-dot.active {
+            opacity: 1;
+            background: var(--accent-red);
+            transform: scale(1.4);
+        }
+
+        .slide-number {
+            position: absolute;
+            bottom: clamp(1rem, 3vw, 2rem);
+            right: clamp(1rem, 3vw, 2rem);
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .keyboard-hint {
+            position: fixed;
+            bottom: clamp(1rem, 3vw, 2rem);
+            left: clamp(1rem, 3vw, 2rem);
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-red), var(--accent-gold));
+            z-index: 101;
+            transition: width 0.3s ease;
+        }
+
+        /* ===========================================
+           SLIDE 1: TITLE
+           =========================================== */
+        .slide-title {
+            background: var(--bg-accent);
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slide-title::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 80%;
+            height: 200%;
+            background: radial-gradient(ellipse, rgba(49,130,206,0.15) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .slide-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, var(--accent-red) 0%, var(--accent-gold) 50%, var(--accent-blue) 100%);
+        }
+
+        .title-content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .title-content .section-tag {
+            display: inline-block;
+            background: rgba(230,57,70,0.2);
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 0.4em 1.2em;
+            border-radius: 30px;
+            font-size: var(--small-size);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--content-gap);
+        }
+
+        .title-content h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--title-size);
+            color: white;
+            margin: 0 0 var(--element-gap) 0;
+            line-height: 1.15;
+        }
+
+        .title-content h1 span {
+            color: var(--accent-gold);
+        }
+
+        .title-content .subtitle {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--h3-size);
+            color: rgba(255,255,255,0.8);
+            margin-bottom: var(--content-gap);
+            font-style: italic;
+        }
+
+        .title-meta {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: var(--content-gap);
+            margin-top: var(--content-gap);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: var(--body-size);
+            color: rgba(255,255,255,0.7);
+        }
+
+        .meta-item .icon {
+            width: 20px;
+            height: 20px;
+            fill: var(--accent-gold);
+        }
+
+        .keywords {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: var(--content-gap);
+        }
+
+        .keyword {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 0.3em 0.8em;
+            border-radius: 20px;
+            font-size: var(--small-size);
+            color: rgba(255,255,255,0.9);
+        }
+
+        /* ===========================================
+           SLIDE 2: BACKGROUND
+           =========================================== */
+        .slide-background {
+            background: var(--bg-primary);
+        }
+
+        .slide-background .slide-content {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: var(--content-gap);
+            align-items: start;
+        }
+
+        .section-label {
+            font-size: var(--small-size);
+            color: var(--accent-red);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: var(--element-gap);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 30px;
+            height: 3px;
+            background: var(--accent-red);
+        }
+
+        .slide-background h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h2-size);
+            color: var(--text-primary);
+            margin: 0 0 var(--content-gap) 0;
+            line-height: 1.2;
+        }
+
+        .left-panel {
+            padding-right: var(--content-gap);
+        }
+
+        .challenges {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        .challenge-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: var(--element-gap);
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        .challenge-item .num {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: var(--accent-blue);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: var(--small-size);
+        }
+
+        .challenge-item p {
+            margin: 0;
+            font-size: var(--body-size);
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .challenge-item strong {
+            color: var(--accent-blue);
+        }
+
+        .right-panel h3 {
+            font-size: var(--h3-size);
+            color: var(--text-primary);
+            margin: 0 0 var(--element-gap) 0;
+        }
+
+        .dataset-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: var(--element-gap);
+        }
+
+        .stat-box {
+            background: var(--bg-secondary);
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--grid-line);
+        }
+
+        .stat-box.highlight {
+            background: linear-gradient(135deg, var(--bg-accent) 0%, #2d3748 100%);
+            color: white;
+            border: none;
+        }
+
+        .stat-box .number {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h2-size);
+            color: var(--accent-red);
+            line-height: 1;
+        }
+
+        .stat-box.highlight .number {
+            color: var(--accent-gold);
+        }
+
+        .stat-box .label {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            margin-top: 0.3rem;
+        }
+
+        .stat-box.highlight .label {
+            color: rgba(255,255,255,0.8);
+        }
+
+        .defect-classes {
+            margin-top: var(--content-gap);
+        }
+
+        .defect-classes h4 {
+            font-size: var(--body-size);
+            color: var(--text-primary);
+            margin: 0 0 var(--element-gap) 0;
+        }
+
+        .class-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+
+        .class-tag {
+            background: var(--bg-secondary);
+            border: 1px solid var(--grid-line);
+            padding: 0.25em 0.6em;
+            border-radius: 4px;
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+        }
+
+        /* ===========================================
+           SLIDE 3: METHODOLOGY
+           =========================================== */
+        .slide-methodology {
+            background: var(--bg-secondary);
+        }
+
+        .slide-methodology h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h2-size);
+            color: var(--text-primary);
+            margin: 0 0 var(--content-gap) 0;
+            text-align: center;
+        }
+
+        .methodology-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--content-gap);
+            flex: 1;
+        }
+
+        .method-card {
+            background: white;
+            border-radius: 12px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        .method-card .card-num {
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 5rem;
+            color: rgba(0,0,0,0.03);
+            line-height: 1;
+        }
+
+        .method-card h3 {
+            font-size: var(--h3-size);
+            color: var(--accent-blue);
+            margin: 0 0 var(--element-gap) 0;
+            padding-bottom: var(--element-gap);
+            border-bottom: 2px solid var(--grid-line);
+        }
+
+        .method-card p {
+            font-size: var(--body-size);
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+            margin: 0 0 var(--element-gap) 0;
+        }
+
+        .method-card .formula {
+            background: var(--bg-secondary);
+            padding: 0.6em 0.8em;
+            border-radius: 6px;
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--small-size);
+            color: var(--text-primary);
+            text-align: center;
+            border-left: 3px solid var(--accent-gold);
+        }
+
+        .workflow-bar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            margin-top: var(--content-gap);
+            padding: var(--element-gap);
+            background: white;
+            border-radius: 10px;
+            flex-wrap: wrap;
+        }
+
+        .workflow-step {
+            background: var(--accent-blue);
+            color: white;
+            padding: 0.5em 1em;
+            border-radius: 6px;
+            font-size: var(--small-size);
+            font-weight: 600;
+        }
+
+        .workflow-arrow {
+            color: var(--accent-red);
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .workflow-plus {
+            background: var(--accent-gold);
+            color: white;
+            padding: 0.3em 0.6em;
+            border-radius: 4px;
+            font-size: var(--small-size);
+            font-weight: 700;
+        }
+
+        /* ===========================================
+           SLIDE 4: RESULTS
+           =========================================== */
+        .slide-results {
+            background: var(--bg-primary);
+        }
+
+        .slide-results h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h2-size);
+            color: var(--text-primary);
+            margin: 0 0 var(--content-gap) 0;
+            text-align: center;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1.3fr 1fr;
+            gap: var(--content-gap);
+            flex: 1;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px var(--shadow);
+        }
+
+        .table-header {
+            background: var(--bg-accent);
+            color: white;
+            padding: 0.8rem 1rem;
+            font-weight: 700;
+            font-size: var(--body-size);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: var(--body-size);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 0.6rem 0.8rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: var(--small-size);
+            border-bottom: 2px solid var(--grid-line);
+        }
+
+        td {
+            padding: 0.5rem 0.8rem;
+            text-align: center;
+            border-bottom: 1px solid var(--grid-line);
+            color: var(--text-primary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: var(--bg-secondary);
+        }
+
+        .best-cell {
+            background: #f0fff4 !important;
+            color: #2f855a !important;
+            font-weight: 700;
+        }
+
+        .worse-cell {
+            color: #c53030 !important;
+        }
+
+        .findings-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--element-gap);
+        }
+
+        .finding-card {
+            background: var(--bg-secondary);
+            padding: clamp(0.8rem, 1.5vw, 1.2rem);
+            border-radius: 10px;
+            border-left: 4px solid var(--accent-blue);
+        }
+
+        .finding-card.success {
+            border-left-color: #38a169;
+        }
+
+        .finding-card.warning {
+            border-left-color: var(--accent-gold);
+        }
+
+        .finding-card h4 {
+            font-size: var(--body-size);
+            color: var(--accent-blue);
+            margin: 0 0 0.3rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .finding-card.success h4 {
+            color: #2f855a;
+        }
+
+        .finding-card.warning h4 {
+            color: var(--accent-gold);
+        }
+
+        .finding-card p {
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .metrics-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--element-gap);
+            margin-top: auto;
+        }
+
+        .metric-box {
+            background: var(--bg-accent);
+            color: white;
+            padding: clamp(0.6rem, 1vw, 1rem);
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .metric-box .value {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h3-size);
+            color: var(--accent-gold);
+        }
+
+        .metric-box .desc {
+            font-size: var(--small-size);
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* ===========================================
+           SLIDE 5: SYSTEM & CONCLUSION
+           =========================================== */
+        .slide-conclusion {
+            background: linear-gradient(135deg, var(--bg-accent) 0%, #2d3748 100%);
+            color: white;
+        }
+
+        .slide-conclusion h2 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: var(--h2-size);
+            color: white;
+            margin: 0 0 var(--content-gap) 0;
+            text-align: center;
+        }
+
+        .conclusion-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--content-gap);
+            flex: 1;
+        }
+
+        .conclusion-card {
+            background: rgba(255,255,255,0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: clamp(1rem, 2vw, 1.5rem);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .conclusion-card h3 {
+            font-size: var(--h3-size);
+            color: white;
+            margin: 0 0 var(--element-gap) 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .conclusion-card h3 .icon {
+            width: 24px;
+            height: 24px;
+            fill: var(--accent-gold);
+        }
+
+        .conclusion-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-size: var(--body-size);
+            line-height: 1.9;
+            color: rgba(255,255,255,0.85);
+        }
+
+        .conclusion-card ul li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+
+        .conclusion-card ul li::before {
+            content: '✓';
+            color: #48bb78;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .future-card ul li::before {
+            content: '→' !important;
+            color: var(--accent-gold) !important;
+        }
+
+        .system-arch {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: var(--element-gap);
+            margin-top: var(--element-gap);
+            font-size: var(--small-size);
+        }
+
+        .system-arch .arch-line {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.3rem 0;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .system-arch .arch-line .node {
+            background: var(--accent-blue);
+            padding: 0.2em 0.6em;
+            border-radius: 4px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .thank-section {
+            text-align: center;
+            margin-top: var(--content-gap);
+        }
+
+        .thank-section .thanks {
+            font-family: 'Source Serif 4', serif;
+            font-size: var(--h2-size);
+            font-style: italic;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: var(--element-gap);
+        }
+
+        .thank-section .qa {
+            font-size: var(--body-size);
+            color: var(--accent-gold);
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .slide-background .slide-content,
+            .results-grid,
+            .conclusion-grid {
+                grid-template-columns: 1fr;
+            }
+            .methodology-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2.5rem);
+                --content-gap: clamp(0.4rem, 1.5vw, 1rem);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html {
+                scroll-behavior: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Navigation Dots -->
+    <nav class="nav-dots">
+        <div class="nav-dot active" onclick="scrollToSlide(0)"></div>
+        <div class="nav-dot" onclick="scrollToSlide(1)"></div>
+        <div class="nav-dot" onclick="scrollToSlide(2)"></div>
+        <div class="nav-dot" onclick="scrollToSlide(3)"></div>
+        <div class="nav-dot" onclick="scrollToSlide(4)"></div>
+    </nav>
+
+    <div class="keyboard-hint">↑ ↓ 切换 | 点击导航点 | 1-5跳转</div>
+
+    <!-- ===========================================
+         SLIDE 1: TITLE
+         =========================================== -->
+    <section class="slide slide-title" id="slide-0">
+        <div class="slide-content title-content">
+            <div class="section-tag">硕士论文中期答辩</div>
+            <h1>基于<span>YOLOv8</span>与半监督学习的<br>钢材表面缺陷检测系统</h1>
+            <p class="subtitle">Steel Surface Defect Detection Based on YOLOv8 and Semi-Supervised Learning</p>
+            <div class="title-meta">
+                <div class="meta-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                    <span>计算机科学与技术</span>
+                </div>
+                <div class="meta-item">
+                    <svg class="icon" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+                    <span>2026年4月</span>
+                </div>
+            </div>
+            <div class="keywords">
+                <span class="keyword">YOLOv8</span>
+                <span class="keyword">半监督学习</span>
+                <span class="keyword">伪标签</span>
+                <span class="keyword">自适应阈值</span>
+                <span class="keyword">工业质检</span>
+            </div>
+        </div>
+        <div class="slide-number">01 / 05</div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 2: BACKGROUND
+         =========================================== -->
+    <section class="slide slide-background" id="slide-1">
+        <div class="slide-content">
+            <div class="left-panel">
+                <div class="section-label">研究背景</div>
+                <h2>问题定义与研究动机</h2>
+
+                <div class="challenges">
+                    <div class="challenge-item">
+                        <span class="num">1</span>
+                        <p><strong>工业质检需求迫切</strong> — 人工检测效率低、成本高、漏检率高；钢材表面缺陷直接影响产品质量和使用安全</p>
+                    </div>
+                    <div class="challenge-item">
+                        <span class="num">2</span>
+                        <p><strong>标注数据获取困难</strong> — 缺陷检测需要专业领域知识，标注效率低、成本高；深度学习模型依赖大量标注数据</p>
+                    </div>
+                    <div class="challenge-item">
+                        <span class="num">3</span>
+                        <p><strong>数据分布不均衡</strong> — 各类缺陷样本数量差异大；部分缺陷（如crazing）样本稀少，检测困难</p>
+                    </div>
+                    <div class="challenge-item">
+                        <span class="num">4</span>
+                        <p><strong>伪标签质量控制</strong> — 如何筛选高质量伪标签是半监督学习成功的关键；低质量伪标签会导致误差累积</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <h3>NEU-DET 数据集统计</h3>
+                <div class="dataset-stats">
+                    <div class="stat-box highlight">
+                        <div class="number">1260</div>
+                        <div class="label">总图像数</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">378</div>
+                        <div class="label">已标注 (30%)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">882</div>
+                        <div class="label">无标注 (70%)</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="number">6</div>
+                        <div class="label">缺陷类别</div>
+                    </div>
+                </div>
+
+                <div class="defect-classes">
+                    <h4>六类缺陷</h4>
+                    <div class="class-tags">
+                        <span class="class-tag">crazing 裂纹</span>
+                        <span class="class-tag">inclusion 夹杂</span>
+                        <span class="class-tag">patches 斑块</span>
+                        <span class="class-tag">pitted_surface 点蚀</span>
+                        <span class="class-tag">rolled-in_scale 氧化皮</span>
+                        <span class="class-tag">scratches 划痕</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">02 / 05</div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 3: METHODOLOGY
+         =========================================== -->
+    <section class="slide slide-methodology" id="slide-2">
+        <div class="slide-content">
+            <h2>核心方法：三大半监督策略</h2>
+
+            <div class="methodology-grid">
+                <div class="method-card">
+                    <span class="card-num">01</span>
+                    <h3>YOLOv8s 基线模型</h3>
+                    <p>采用 YOLOv8s 作为检测器，在精度与速度间取得良好平衡。11.1M 参数，适合工业场景部署。</p>
+                    <div class="formula">
+                        Backbone: CSPDarknet + C2f + SPPF<br>
+                        Neck: PAFPN | Head: Decoupled
+                    </div>
+                    <p style="margin-top: var(--element-gap);">损失函数：CIoU + Focal Loss + DFL</p>
+                </div>
+
+                <div class="method-card">
+                    <span class="card-num">02</span>
+                    <h3>自适应置信度阈值</h3>
+                    <p>根据每类AP动态调整阈值：AP高的类别用低阈值捕获更多正样本，AP低的类别用高阈值保证质量。</p>
+                    <div class="formula">
+                        threshold[c] = base + λ × (1 - norm_AP<sub>c</sub>)
+                    </div>
+                    <p style="margin-top: var(--element-gap);">例如：scratches (AP高) → 低阈值<br>crazing (AP低) → 高阈值</p>
+                </div>
+
+                <div class="method-card">
+                    <span class="card-num">03</span>
+                    <h3>翻转一致性筛选</h3>
+                    <p>原图与水平翻转图双重预测，仅保留IoU≥0.6匹配且类别一致的检测框，大幅提升伪标签可靠性。</p>
+                    <div class="formula">
+                        if IoU(box<sub>orig</sub>, box<sub>flip</sub>) ≥ τ:<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;accept pseudo-label
+                    </div>
+                    <p style="margin-top: var(--element-gap);">τ = 0.6 (IoU阈值)</p>
+                </div>
+            </div>
+
+            <div class="workflow-bar">
+                <span class="workflow-step">标注数据 (378张)</span>
+                <span class="workflow-plus">+</span>
+                <span class="workflow-step">无标注数据 (882张)</span>
+                <span class="workflow-arrow">→</span>
+                <span class="workflow-step">伪标签生成</span>
+                <span class="workflow-arrow">→</span>
+                <span class="workflow-step">混合训练</span>
+                <span class="workflow-arrow">→</span>
+                <span class="workflow-step">缺陷检测模型</span>
+            </div>
+        </div>
+        <div class="slide-number">03 / 05</div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 4: RESULTS
+         =========================================== -->
+    <section class="slide slide-results" id="slide-3">
+        <div class="slide-content">
+            <h2>实验结果与消融分析</h2>
+
+            <div class="results-grid">
+                <div class="table-container">
+                    <div class="table-header">表1: 监督学习基线与消融实验对比</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>模型</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>mAP@0.5</th>
+                                <th>mAP@0.5:0.95</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Baseline (YOLOv8s)</strong></td>
+                                <td>0.700</td>
+                                <td>0.730</td>
+                                <td>0.773</td>
+                                <td class="best-cell">0.434</td>
+                            </tr>
+                            <tr>
+                                <td>+ CBAM注意力</td>
+                                <td class="best-cell">0.760</td>
+                                <td>0.701</td>
+                                <td class="best-cell">0.787</td>
+                                <td>0.426</td>
+                            </tr>
+                            <tr>
+                                <td>+ WIoU损失</td>
+                                <td>0.700</td>
+                                <td>0.713</td>
+                                <td>0.766</td>
+                                <td>0.412</td>
+                            </tr>
+                            <tr>
+                                <td>+ Focal Loss (γ=2.0)</td>
+                                <td>0.618</td>
+                                <td>0.697</td>
+                                <td>0.729</td>
+                                <td class="worse-cell">0.363</td>
+                            </tr>
+                            <tr>
+                                <td>+ P2检测层</td>
+                                <td>0.734</td>
+                                <td>0.725</td>
+                                <td>0.766</td>
+                                <td>0.397</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="findings-panel">
+                    <div class="finding-card success">
+                        <h4>✓ 最佳模型</h4>
+                        <p>Baseline (YOLOv8s) 在 mAP@0.5:0.95 上最优，达到 <strong>0.434</strong></p>
+                    </div>
+                    <div class="finding-card success">
+                        <h4>✓ CBAM有效</h4>
+                        <p>CBAM注意力机制在 mAP@0.5 上表现最佳 (<strong>0.787</strong>)，Precision显著提升至0.76</p>
+                    </div>
+                    <div class="finding-card warning">
+                        <h4>⚠ 待优化类别</h4>
+                        <p>crazing 缺陷的 recall 较低 (~0.23)，漏检严重，是后续优化的重点</p>
+                    </div>
+                    <div class="finding-card">
+                        <h4>○ 半监督实验</h4>
+                        <p>Seed强化策略正在验证中；当Seed数据有限时，半监督方法效果有待提升</p>
+                    </div>
+
+                    <div class="metrics-summary">
+                        <div class="metric-box">
+                            <div class="value">11.1M</div>
+                            <div class="desc">模型参数量</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">640</div>
+                            <div class="desc">输入分辨率</div>
+                        </div>
+                        <div class="metric-box">
+                            <div class="value">200</div>
+                            <div class="desc">训练轮数</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slide-number">04 / 05</div>
+    </section>
+
+    <!-- ===========================================
+         SLIDE 5: SYSTEM & CONCLUSION
+         =========================================== -->
+    <section class="slide slide-conclusion" id="slide-4">
+        <div class="slide-content">
+            <h2>系统展示与总结展望</h2>
+
+            <div class="conclusion-grid">
+                <div class="conclusion-card">
+                    <h3>
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/></svg>
+                        已完成工作
+                    </h3>
+                    <ul>
+                        <li>YOLOv8s 基线模型搭建与训练</li>
+                        <li>CBAM/WIoU/Focal Loss/P2层消融实验</li>
+                        <li>半监督学习框架实现</li>
+                        <li>三种伪标签生成策略开发</li>
+                        <li>动态置信度阈值 + 翻转一致性筛选</li>
+                        <li>FastAPI 推理服务部署</li>
+                    </ul>
+
+                    <div class="system-arch">
+                        <div class="arch-line">
+                            <span class="node">工业相机</span>
+                            <span>→</span>
+                            <span class="node">FastAPI</span>
+                            <span>→</span>
+                            <span class="node">YOLOv8s</span>
+                            <span>→</span>
+                            <span class="node">质检报告</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="conclusion-card future-card">
+                    <h3>
+                        <svg class="icon" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                        未来研究方向
+                    </h3>
+                    <ul>
+                        <li>类别权重平衡优化策略</li>
+                        <li>更激进的Mosaic+MixUp数据增强</li>
+                        <li>多尺度训练与TTA推理</li>
+                        <li>半监督学习中Seed数据量效分析</li>
+                        <li>主动学习结合半监督策略</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="thank-section">
+                <p class="thanks">感谢聆听，欢迎批评指正</p>
+                <p class="qa">Q & A</p>
+            </div>
+        </div>
+        <div class="slide-number">05 / 05</div>
+    </section>
+
+    <script>
+        // Navigation
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots = document.querySelectorAll('.nav-dot');
+        const progressBar = document.getElementById('progressBar');
+
+        function scrollToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                slides[index].scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function updateProgress() {
+            const scrollTop = window.scrollY;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const progress = (scrollTop / docHeight) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        // Update dots and progress on scroll
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(slides).indexOf(entry.target);
+                    currentSlide = index;
+                    dots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+            });
+        }, { threshold: 0.5 });
+
+        slides.forEach(slide => observer.observe(slide));
+        window.addEventListener('scroll', updateProgress);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') {
+                e.preventDefault();
+                if (currentSlide < slides.length - 1) scrollToSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowUp' || e.key === 'PageUp') {
+                e.preventDefault();
+                if (currentSlide > 0) scrollToSlide(currentSlide - 1);
+            } else if (e.key >= '1' && e.key <= '5') {
+                scrollToSlide(parseInt(e.key) - 1);
+            }
+        });
+
+        // Wheel navigation
+        let wheelTimeout;
+        document.addEventListener('wheel', (e) => {
+            clearTimeout(wheelTimeout);
+            wheelTimeout = setTimeout(() => {
+                if (e.deltaY > 0 && currentSlide < slides.length - 1) {
+                    scrollToSlide(currentSlide + 1);
+                } else if (e.deltaY < 0 && currentSlide > 0) {
+                    scrollToSlide(currentSlide - 1);
+                }
+            }, 50);
+        }, { passive: true });
+
+        // Initial progress
+        updateProgress();
+    </script>
+</body>
+</html>

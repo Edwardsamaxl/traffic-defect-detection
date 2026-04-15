@@ -1,47 +1,47 @@
-// Admin View - user management
+// Admin View — Premium B&W Minimal
 const { createApp, ref, onMounted } = Vue
 
 export default {
   template: `
-    <div class="space-y-5">
-      <h2 class="text-xl font-semibold text-white">用户管理</h2>
-
-      <div class="bg-surface-800 rounded-xl border border-surface-700 p-5">
-        <div class="flex items-center justify-between mb-4">
-          <div class="text-sm text-surface-400">共 <strong class="text-white">{{ users.length }}</strong> 位用户</div>
+    <div class="admin-root">
+      <div class="admin-header">
+        <div>
+          <div class="page-eyebrow">管理</div>
+          <h1 class="page-title">用户管理</h1>
         </div>
+      </div>
 
-        <div v-if="loading" class="text-center py-8 text-surface-400">加载中...</div>
-        <div v-else class="overflow-x-auto">
-          <table class="w-full">
-            <thead>
-              <tr class="text-left text-xs text-surface-400 uppercase tracking-wider border-b border-surface-700">
-                <th class="pb-3 pr-4 font-medium">用户名</th>
-                <th class="pb-3 pr-4 font-medium">角色</th>
-                <th class="pb-3 pr-4 font-medium">注册时间</th>
-                <th class="pb-3 font-medium">操作</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-surface-700">
-              <tr v-for="u in users" :key="u.id" class="text-sm">
-                <td class="py-3 pr-4 text-white font-medium">{{ u.username }}</td>
-                <td class="py-3 pr-4">
-                  <select v-model="u.role" @change="updateRole(u)"
-                    class="bg-surface-700 border border-surface-600 rounded px-2 py-1 text-xs text-white focus:outline-none focus:border-accent-500">
-                    <option value="user">user</option>
-                    <option value="admin">admin</option>
-                  </select>
-                </td>
-                <td class="py-3 pr-4 text-surface-400 text-xs">{{ formatDate(u.created_at) }}</td>
-                <td class="py-3">
-                  <button @click="deleteUser(u)" class="text-surface-500 hover:text-red-400 text-xs transition-colors"
-                    :disabled="u.id === currentUserId">
-                    删除
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+      <div class="panel">
+        <div class="panel-title">用户列表 <span class="title-count">{{ users.length }}</span></div>
+
+        <div v-if="loading" class="list-state">加载中...</div>
+        <div v-else class="user-table">
+          <div class="table-head">
+            <div class="col-user">用户名</div>
+            <div class="col-role">角色</div>
+            <div class="col-date">注册时间</div>
+            <div class="col-action">操作</div>
+          </div>
+          <div v-for="u in users" :key="u.id" class="table-row">
+            <div class="col-user">
+              <div class="user-avatar">{{ u.username[0].toUpperCase() }}</div>
+              <span class="user-name">{{ u.username }}</span>
+            </div>
+            <div class="col-role">
+              <select v-model="u.role" @change="updateRole(u)" class="role-select">
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+              </select>
+            </div>
+            <div class="col-date text-muted">{{ formatDate(u.created_at) }}</div>
+            <div class="col-action">
+              <button
+                @click="deleteUser(u)"
+                :disabled="u.id === currentUserId"
+                :class="['action-btn', u.id === currentUserId ? 'action-btn--disabled' : 'action-btn--danger']"
+              >删除</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

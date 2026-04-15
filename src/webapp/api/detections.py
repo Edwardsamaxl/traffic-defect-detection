@@ -301,6 +301,16 @@ def list_detections(
     )
 
 
+@router.delete("/clear")
+def clear_detections(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> dict:
+    db.query(DetectionRecord).filter(DetectionRecord.user_id == current_user.id).delete()
+    db.commit()
+    return {"message": "已清除所有检测记录"}
+
+
 @router.get("/{record_id}")
 def get_detection(
     record_id: int,

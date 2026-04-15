@@ -4,8 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>交通缺陷检测系统</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><path d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>" />
-  <!-- Tailwind CSS CDN with custom colors -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect x='1' y='1' width='38' height='38' rx='8' stroke='%23e2e8f0' stroke-width='2' fill='none'/><path d='M12 20h16M20 12v16' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round'/></svg>" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
     tailwind.config = {
@@ -13,123 +12,1340 @@
         extend: {
           colors: {
             surface: {
-              700: '#334155', 800: '#1e293b', 900: '#0f172a',
-              400: '#94a3b8', 500: '#64748b',
+              700: '#e5e5e3', 800: '#f5f5f3', 900: '#fafaf9',
+              400: '#9ca3af', 500: '#6b7280',
             },
             accent: {
-              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+              400: '#374151', 500: '#111111', 600: '#000000',
             },
           },
         },
       },
     }
   </script>
-  <!-- Vue 3 local -->
   <script src="/static/lib/vue.global.prod.js"></script>
-  <!-- Axios local -->
+  <script src="/static/lib/vue-router.global.prod.js"></script>
   <script src="/static/lib/axios.min.js"></script>
+  <style>
+    /* ============================================================
+       DESIGN SYSTEM — B&W Light Brutalist Minimal
+       ============================================================ */
+
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html { font-size: 14px; }
+
+    body {
+      background: #f5f5f3;
+      color: #111111;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    ::selection { background: #111111; color: #f5f5f3; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 2px; }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 2px;
+      background: #d4d4d4;
+      border-radius: 1px;
+      outline: none;
+      cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #111111;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 0 0 2px #f5f5f3;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── Utility ── */
+    .text-muted { color: #6b7280; }
+    .text-active { color: #111111; }
+    .text-green { color: #16a34a; }
+    .text-red { color: #dc2626; }
+    .font-mono { font-family: 'JetBrains Mono', 'Fira Code', monospace; }
+
+    /* ============================================================
+       APP SHELL
+       ============================================================ */
+    #appShell {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #f5f5f3;
+    }
+
+    /* ── Top Header ── */
+    .app-header {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      border-bottom: 1px solid #e5e5e3;
+      background: #f5f5f3;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+    }
+    .header-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .header-logo-icon {
+      width: 30px;
+      height: 30px;
+      color: #111111;
+    }
+    .header-logo-text {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #111111;
+    }
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .user-badge {
+      font-size: 11px;
+      color: #6b7280;
+      padding: 4px 10px;
+      border: 1px solid #e5e5e3;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
+    }
+    .logout-btn {
+      font-size: 11px;
+      color: #6b7280;
+      padding: 4px 10px;
+      border: 1px solid #e5e5e3;
+      border-radius: 20px;
+      transition: all 0.15s;
+      cursor: pointer;
+      background: transparent;
+      letter-spacing: 0.03em;
+    }
+    .logout-btn:hover {
+      color: #dc2626;
+      border-color: #dc2626;
+    }
+
+    /* ── Nav Bar ── */
+    .app-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 28px;
+      border-bottom: 1px solid #e5e5e3;
+      background: #f5f5f3;
+      position: sticky;
+      top: 56px;
+      z-index: 39;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      color: #9ca3af;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .nav-link:hover { color: #374151; }
+    .nav-link.active {
+      color: #111111;
+      border-bottom-color: #111111;
+    }
+    .nav-link svg { width: 13px; height: 13px; }
+
+    /* ── Page Container ── */
+    .page-container {
+      flex: 1;
+      padding: 36px 28px;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ── Page Header ── */
+    .page-eyebrow {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #111111;
+    }
+
+    /* ============================================================
+       SHARED COMPONENTS
+       ============================================================ */
+
+    /* ── Panel ── */
+    .panel {
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 10px;
+      padding: 22px 24px;
+    }
+    .panel-title {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .title-count {
+      background: #f5f5f3;
+      color: #6b7280;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    /* ── Buttons ── */
+    .submit-btn {
+      width: 100%;
+      height: 44px;
+      background: #111111;
+      color: #f5f5f3;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .submit-btn:hover { background: #374151; }
+    .submit-btn--disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+    .submit-btn--disabled:hover { background: #111111; }
+
+    .add-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      color: #374151;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .add-btn:hover { border-color: #111111; color: #111111; }
+
+    .delete-btn, .action-btn {
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: 1px solid;
+      background: transparent;
+      letter-spacing: 0.03em;
+    }
+    .action-btn--danger {
+      color: #dc2626;
+      border-color: rgba(220, 38, 38, 0.3);
+    }
+    .action-btn--danger:hover { background: rgba(220, 38, 38, 0.06); border-color: #dc2626; }
+    .action-btn--disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .clear-btn {
+      padding: 7px 14px;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      background: transparent;
+      color: #6b7280;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .clear-btn:hover { border-color: #374151; color: #374151; }
+
+    .page-btn {
+      padding: 7px 16px;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      background: transparent;
+      color: #6b7280;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: #111111; color: #111111; }
+    .page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 420px;
+      overflow: hidden;
+    }
+    .modal-box--wide { max-width: 680px; }
+    .modal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 20px 22px 16px;
+      border-bottom: 1px solid #e5e5e3;
+    }
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #111111;
+    }
+    .modal-sub {
+      font-size: 11px;
+      color: #9ca3af;
+      margin-top: 3px;
+    }
+    .modal-close {
+      background: transparent;
+      border: none;
+      color: #9ca3af;
+      cursor: pointer;
+      padding: 2px;
+      border-radius: 4px;
+      transition: color 0.15s;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { color: #111111; }
+    .modal-body { padding: 20px 22px; }
+
+    /* ── Upload Zone ── */
+    .upload-zone {
+      border: 1px dashed #d4d4d4;
+      border-radius: 8px;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-bottom: 14px;
+    }
+    .upload-zone:hover { border-color: #111111; }
+    .upload-zone svg { color: #9ca3af; margin: 0 auto 10px; }
+    .upload-text {
+      font-size: 12px;
+      color: #9ca3af;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Form Fields ── */
+    .field { margin-bottom: 14px; }
+    .field-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #9ca3af;
+      margin-bottom: 8px;
+    }
+    .field-input {
+      width: 100%;
+      height: 40px;
+      background: #ffffff;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      padding: 0 14px;
+      font-size: 13px;
+      color: #111111;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .field-input::placeholder { color: #d4d4d4; }
+    .field-input:focus { border-color: #111111; }
+    .error-msg {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      color: #dc2626;
+      margin-bottom: 12px;
+      padding: 8px 10px;
+      background: rgba(220, 38, 38, 0.06);
+      border: 1px solid rgba(220, 38, 38, 0.15);
+      border-radius: 5px;
+    }
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #f5f5f3;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Select ── */
+    .config-select {
+      width: 100%;
+      height: 38px;
+      background: #ffffff;
+      border: 1px solid #d4d4d4;
+      border-radius: 6px;
+      padding: 0 32px 0 12px;
+      font-size: 12px;
+      color: #111111;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .config-select:focus { border-color: #111111; }
+    .model-path {
+      font-size: 10px;
+      color: #9ca3af;
+      margin-top: 5px;
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ── Empty & Loading States ── */
+    .empty-state, .list-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: #d4d4d4;
+      gap: 10px;
+      font-size: 12px;
+    }
+
+    /* ============================================================
+       LOGIN / REGISTER
+       ============================================================ */
+    .login-root {
+      min-height: 100vh;
+      background: #f5f5f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .bg-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.06;
+    }
+    .bg-orb-1 {
+      width: 500px;
+      height: 500px;
+      background: #e5e5e3;
+      top: -150px;
+      right: -80px;
+    }
+    .bg-orb-2 {
+      width: 300px;
+      height: 300px;
+      background: #f0f0ee;
+      bottom: -80px;
+      left: -80px;
+    }
+    .noise-overlay {
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.5;
+    }
+
+    .login-container {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 720px;
+      min-height: 480px;
+      box-shadow: 0 4px 40px rgba(0,0,0,0.08);
+    }
+
+    .login-brand {
+      flex: 1;
+      padding: 44px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid #e5e5e3;
+      background: #fafaf9;
+    }
+    .brand-mark {
+      color: #111111;
+      margin-bottom: 8px;
+    }
+    .brand-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      color: #111111;
+      margin: 0;
+    }
+    .brand-sub {
+      font-size: 12px;
+      color: #9ca3af;
+      letter-spacing: 0.05em;
+      margin-top: 10px;
+    }
+
+    .login-form-wrap {
+      flex: 1;
+      padding: 44px 36px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .form-header { margin-bottom: 28px; }
+    .form-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111111;
+      letter-spacing: -0.02em;
+    }
+    .form-desc {
+      font-size: 13px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+    .form-body { flex: 1; }
+    .form-footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #9ca3af;
+    }
+    .footer-text { color: #9ca3af; }
+    .footer-link {
+      color: #374151;
+      font-weight: 600;
+      margin-left: 4px;
+      transition: color 0.15s;
+    }
+    .footer-link:hover { color: #111111; }
+
+    /* ============================================================
+       DETECT PAGE
+       ============================================================ */
+    .detect-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+
+    .detect-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .header-right {}
+    .header-left { display: flex; flex-direction: column; gap: 0; }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 7px 16px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #9ca3af;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: all 0.15s;
+      letter-spacing: 0.03em;
+    }
+    .mode-btn:hover { color: #374151; }
+    .mode-btn--active {
+      background: #111111;
+      color: #f5f5f3;
+    }
+    .mode-icon { font-size: 13px; }
+
+    .detect-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .panel--config, .panel--result {
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 10px;
+      padding: 22px 24px;
+    }
+
+    .step-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f5f5f3;
+      color: #6b7280;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: 1px solid #d4d4d4;
+    }
+    .step-num--green { background: #f5f5f3; color: #9ca3af; }
+    .step-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+
+    .config-section { margin-bottom: 18px; }
+    .config-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    .drop-zone {
+      border: 1px dashed #d4d4d4;
+      border-radius: 6px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: #fafaf9;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .drop-zone:hover { border-color: #9ca3af; }
+    .drop-zone--over { border-color: #111111; background: #f5f5f3; }
+    .drop-zone svg { color: #9ca3af; flex-shrink: 0; }
+    .drop-text { font-size: 13px; color: #6b7280; }
+    .drop-zone--batch { min-height: auto; }
+
+    /* ── Detect Layout ── */
+    .detect-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+    .detect-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .header-left { display: flex; flex-direction: column; gap: 4px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .mode-toggle { display: flex; background: #f0f0ee; border-radius: 7px; padding: 3px; gap: 2px; }
+    .mode-btn {
+      display: flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border-radius: 5px; border: none;
+      font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s;
+      background: transparent; color: #6b7280; font-family: inherit; letter-spacing: 0.02em;
+    }
+    .mode-btn:hover { color: #374151; }
+    .mode-btn--active { background: #ffffff; color: #111111; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+    .detect-layout { display: grid; grid-template-columns: 340px 1fr; gap: 20px; align-items: start; }
+
+    .panel--config {
+      background: #ffffff; border: 1px solid #e5e5e3;
+      border-radius: 10px; padding: 22px;
+    }
+    .panel--result {
+      background: #ffffff; border: 1px solid #e5e5e3;
+      border-radius: 10px; padding: 22px;
+      min-height: 400px;
+    }
+
+    .step-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+    .step-num {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #f5f5f3; border: 1px solid #e5e5e3;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #9ca3af; flex-shrink: 0;
+    }
+    .step-num--green { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+    .step-label { font-size: 12px; font-weight: 600; color: #6b7280; letter-spacing: 0.05em; }
+
+    .config-section { margin-bottom: 16px; }
+    .config-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: #9ca3af; margin-bottom: 8px; display: block;
+    }
+    .config-select {
+      width: 100%; height: 36px; background: #fafaf9; border: 1px solid #e5e5e3;
+      border-radius: 6px; padding: 0 28px 0 10px; font-size: 13px; color: #374151;
+      outline: none; cursor: pointer; font-family: inherit;
+    }
+    .config-select:focus { border-color: #9ca3af; }
+    .model-path { font-size: 10px; color: #9ca3af; font-family: monospace; margin-top: 5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .preset-row { display: flex; gap: 6px; }
+    .preset-btn {
+      flex: 1; height: 36px; background: #fafaf9; border: 1px solid #e5e5e3;
+      border-radius: 5px; font-size: 13px; color: #6b7280; cursor: pointer;
+      transition: all 0.15s; font-family: inherit;
+    }
+    .preset-btn:hover { border-color: #9ca3af; color: #374151; }
+    .preset-btn--active { background: #111111; color: #f5f5f3; border-color: #111111; font-weight: 600; }
+
+    .slider-row { margin-bottom: 14px; }
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .slider-label { font-size: 12px; color: #6b7280; }
+    .slider-val { font-size: 13px; color: #111111; font-family: monospace; font-weight: 600; }
+
+    .run-btn {
+      width: 100%; height: 46px; background: #111111; color: #f5f5f3;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+      border: none; border-radius: 6px; cursor: pointer; transition: all 0.15s;
+      display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 6px;
+    }
+    .run-btn:hover:not(.run-btn--disabled) { background: #374151; }
+    .run-btn--disabled { opacity: 0.3; cursor: not-allowed; }
+    .spin-icon { animation: spin 1s linear infinite; }
+
+    /* Result side */
+    .result-empty {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 60px 20px; color: #e5e5e3; gap: 12px;
+    }
+    .result-empty svg { color: #e5e5e3; }
+    .empty-text { font-size: 13px; color: #d4d4d4; }
+
+    .result-content {}
+
+    .preset-row { display: flex; gap: 6px; }
+    .preset-btn {
+      flex: 1;
+      height: 34px;
+      background: #fafaf9;
+      border: 1px solid #e5e5e3;
+      border-radius: 5px;
+      font-size: 13px;
+      color: #6b7280;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .preset-btn:hover { border-color: #9ca3af; color: #374151; }
+    .preset-btn--active {
+      background: #111111;
+      color: #f5f5f3;
+      border-color: #111111;
+      font-weight: 600;
+    }
+
+    .slider-row { margin-bottom: 14px; }
+    .slider-header { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .slider-label { font-size: 12px; color: #6b7280; }
+    .slider-val { font-size: 12px; color: #111111; font-family: monospace; }
+
+    .run-btn {
+      width: 100%;
+      height: 46px;
+      background: #111111;
+      color: #f5f5f3;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .run-btn:hover:not(.run-btn--disabled) { background: #374151; }
+    .run-btn--disabled { opacity: 0.3; cursor: not-allowed; }
+    .spin-icon { animation: spin 1s linear infinite; }
+
+    /* Result side */
+    .result-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: #e5e5e3;
+      gap: 12px;
+    }
+    .result-empty svg { color: #e5e5e3; }
+    .empty-text { font-size: 12px; color: #d4d4d4; }
+
+    .result-content {}
+
+    .result-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .result-summary--batch {
+      grid-template-columns: repeat(3, 1fr);
+    }
+    .result-summary-card {
+      background: #fafaf9;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      padding: 18px 14px;
+      text-align: center;
+    }
+    .result-summary-label {
+      font-size: 12px;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+    .result-summary-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #111111;
+      letter-spacing: -0.02em;
+    }
+    .result-summary-val--active { color: #111111; }
+    .result-summary-val--empty { color: #d4d4d4; }
+
+    .detections-list { max-height: 260px; overflow-y: auto; }
+    .detection-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      background: #fafaf9;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      margin-bottom: 6px;
+    }
+    .detection-item--error { background: #fef2f2; border-color: #fecaca; }
+    .detection-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .detection-info { flex: 1; min-width: 0; }
+    .detection-name { font-size: 13px; color: #111111; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .detection-bbox { font-size: 11px; color: #9ca3af; font-family: monospace; margin-top: 3px; }
+    .detection-conf { font-size: 13px; font-weight: 700; color: #374151; flex-shrink: 0; font-family: monospace; }
+
+    .batch-outdir { font-size: 12px; color: #9ca3af; margin-bottom: 14px; }
+    .batch-outdir code { color: #6b7280; font-family: monospace; }
+    .batch-info {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13px; color: #6b7280;
+    }
+    .drop-prompt { display: flex; align-items: center; gap: 10px; }
+
+    /* ============================================================
+       DASHBOARD
+       ============================================================ */
+    .dash-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+    .dash-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+    .header-note { font-size: 11px; color: #9ca3af; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #6b7280;
+      margin-bottom: 10px;
+    }
+    .stat-val { font-size: 36px; font-weight: 800; color: #111111; letter-spacing: -0.03em; }
+    .stat-val--accent { color: #111111; }
+
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .chart-panel { background: #ffffff; border: 1px solid #e5e5e3; border-radius: 10px; padding: 20px 22px; }
+
+    .recent-panel { background: #ffffff; border: 1px solid #e5e5e3; border-radius: 10px; padding: 20px 22px; }
+    .recent-list {}
+    .recent-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      border-bottom: 1px solid #f5f5f3;
+      transition: background 0.15s;
+      border-radius: 6px;
+      margin-bottom: 2px;
+    }
+    .recent-item:last-child { border-bottom: none; }
+    .recent-item:hover { background: #fafaf9; }
+    .recent-info { flex: 1; min-width: 0; }
+    .recent-name { font-size: 13px; color: #111111; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent-meta { font-size: 12px; color: #9ca3af; margin-top: 3px; }
+    .recent-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 10px;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       MODELS PAGE
+       ============================================================ */
+    .models-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+    .models-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .models-grid { display: flex; flex-direction: column; gap: 8px; }
+    .model-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 8px;
+      padding: 14px 18px;
+      transition: border-color 0.15s;
+    }
+    .model-card:hover { border-color: #d4d4d4; }
+    .model-card-left { display: flex; align-items: center; gap: 14px; }
+    .model-icon {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      flex-shrink: 0;
+    }
+    .model-info {}
+    .model-name { font-size: 14px; font-weight: 600; color: #111111; }
+    .model-path { font-size: 11px; color: #9ca3af; font-family: monospace; margin-top: 3px; }
+    .model-date { font-size: 11px; color: #9ca3af; margin-top: 3px; }
+
+    /* ============================================================
+       HISTORY PAGE
+       ============================================================ */
+    .history-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+    .history-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      margin-bottom: 22px;
+    }
+    .header-total { font-size: 13px; color: #9ca3af; }
+    .header-total strong { color: #374151; }
+
+    .clear-history-btn {
+      color: #ffffff;
+      background: #dc2626;
+      font-size: 12px;
+      font-weight: 600;
+      border: 1px solid rgba(220, 38, 38, 0.4);
+      border-radius: 5px;
+      cursor: pointer;
+      padding: 5px 12px;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .clear-history-btn:hover { background: #b91c1c; border-color: #b91c1c; }
+    .filter-input {
+      flex: 1;
+      height: 36px;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 12px;
+      color: #111111;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+      max-width: 300px;
+    }
+    .filter-input::placeholder { color: #d4d4d4; }
+    .filter-input:focus { border-color: #111111; }
+    .filter-select {
+      height: 36px;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      padding: 0 28px 0 10px;
+      font-size: 12px;
+      color: #374151;
+      outline: none;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .filter-select:focus { border-color: #111111; }
+
+    .records-list { display: flex; flex-direction: column; gap: 6px; }
+    .record-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 8px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .record-item:hover { border-color: #d4d4d4; background: #fafaf9; }
+    .record-thumb {
+      width: 44px;
+      height: 44px;
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid #e5e5e3;
+      flex-shrink: 0;
+      background: #f5f5f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .thumb-img { width: 100%; height: 100%; object-fit: cover; }
+    .thumb-placeholder { color: #d4d4d4; }
+    .record-info { flex: 1; min-width: 0; }
+    .record-name { font-size: 12px; font-weight: 500; color: #111111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .record-meta { font-size: 10px; color: #9ca3af; margin-top: 2px; }
+    .record-right { text-align: right; flex-shrink: 0; }
+    .record-count { font-size: 12px; font-weight: 600; color: #9ca3af; }
+    .count--active { color: #111111; }
+    .record-size { font-size: 10px; color: #d4d4d4; margin-top: 2px; font-family: monospace; }
+
+    .pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
+    .page-info { font-size: 12px; color: #9ca3af; }
+
+    .detail-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px; }
+    .detail-stat {
+      background: #fafaf9;
+      border: 1px solid #e5e5e3;
+      border-radius: 6px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    .detail-stat-val { font-size: 18px; font-weight: 800; color: #111111; letter-spacing: -0.02em; }
+    .detail-stat-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+
+    /* ============================================================
+       ADMIN PAGE
+       ============================================================ */
+    .admin-root { max-width: 1200px; margin: 0 auto; padding: 36px 28px; }
+    .admin-header { margin-bottom: 28px; }
+
+    .user-table {}
+    .table-head {
+      display: grid;
+      grid-template-columns: 1fr 120px 160px 80px;
+      gap: 12px;
+      padding: 0 16px 10px;
+      border-bottom: 1px solid #e5e5e3;
+      margin-bottom: 4px;
+    }
+    .table-head > div {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #9ca3af;
+    }
+    .table-row {
+      display: grid;
+      grid-template-columns: 1fr 120px 160px 80px;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    .table-row:hover { background: #fafaf9; }
+    .col-user { display: flex; align-items: center; gap: 10px; }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f5f5f3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: #9ca3af;
+      flex-shrink: 0;
+      border: 1px solid #e5e5e3;
+    }
+    .user-name { font-size: 13px; font-weight: 500; color: #111111; }
+    .role-select {
+      height: 28px;
+      background: #ffffff;
+      border: 1px solid #e5e5e3;
+      border-radius: 4px;
+      padding: 0 20px 0 8px;
+      font-size: 11px;
+      color: #374151;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .col-date { font-size: 11px; }
+    .col-action { text-align: right; }
+
+    /* ============================================================
+       BADGE UTILITIES
+       ============================================================ */
+    .badge--active {
+      background: rgba(17, 17, 17, 0.08);
+      color: #111111;
+    }
+  </style>
 </head>
 <body>
 
-  <!-- ======================== AUTH PAGE ======================== -->
-  <div id="authApp" class="min-h-screen bg-surface-900 flex items-center justify-center p-4">
-    <!-- Login Card -->
-    <div id="loginCard" class="w-full max-w-sm">
-      <div class="bg-surface-800 border border-surface-700 rounded-2xl p-8 shadow-2xl">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+  <!-- ======================== AUTH PAGE (fallback) ======================== -->
+  <div id="authApp" class="login-root">
+    <div class="login-bg">
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="noise-overlay"></div>
+    </div>
+    <div class="login-container">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-white text-center mb-1">交通缺陷检测</h1>
-        <p class="text-surface-400 text-sm text-center mb-6">登录到您的账号</p>
-        <div id="loginMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm"></div>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-surface-400 mb-1.5">用户名</label>
-            <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username"
-              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+        <h1 class="brand-title">Traffic<br/>Defect<br/>Detection</h1>
+        <p class="brand-sub">智能交通缺陷检测系统</p>
+      </div>
+      <div class="login-form-wrap">
+        <div class="form-header">
+          <h2 class="form-title">登录</h2>
+          <p class="form-desc">输入您的凭证以继续</p>
+        </div>
+        <div class="form-body">
+          <div class="field">
+            <label class="field-label">用户名</label>
+            <input type="text" id="loginUsername" placeholder="username" autocomplete="username" class="field-input" />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-surface-400 mb-1.5">密码</label>
-            <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password"
-              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          <div class="field">
+            <label class="field-label">密码</label>
+            <input type="password" id="loginPassword" placeholder="password" autocomplete="current-password" class="field-input" />
           </div>
-          <button id="loginBtn" onclick="doLogin()"
-            class="w-full py-2.5 rounded-xl font-semibold text-sm bg-accent-600 hover:bg-accent-500 text-white transition-colors flex items-center justify-center gap-2">
-            登录
-          </button>
-          <div class="text-center text-sm text-surface-400">
-            还没有账号？<a href="javascript:void(0)" onclick="showRegister()" class="text-accent-400 hover:text-accent-300 font-medium">立即注册</a>
-          </div>
+          <div id="loginMsg" class="error-msg" style="display:none"></div>
+          <button id="loginBtn" onclick="doLogin()" class="submit-btn">登录</button>
+        </div>
+        <div class="form-footer">
+          <span class="footer-text">没有账号？</span>
+          <a href="javascript:void(0)" onclick="showRegister()" class="footer-link">立即注册</a>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Register Card (hidden by default) -->
-    <div id="registerCard" class="w-full max-w-sm hidden">
-      <div class="bg-surface-800 border border-surface-700 rounded-2xl p-8 shadow-2xl">
-        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-6 shadow-lg">
-          <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+  <!-- Register card (hidden) -->
+  <div id="registerCard" class="login-root" style="display:none">
+    <div class="login-bg">
+      <div class="bg-orb bg-orb-1"></div>
+      <div class="bg-orb bg-orb-2"></div>
+      <div class="noise-overlay"></div>
+    </div>
+    <div class="login-container">
+      <div class="login-brand">
+        <div class="brand-mark">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <rect x="1" y="1" width="38" height="38" rx="8" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h1 class="text-2xl font-bold text-white text-center mb-1">创建账号</h1>
-        <p class="text-surface-400 text-sm text-center mb-6">注册交通缺陷检测系统</p>
-        <div id="registerMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm"></div>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-surface-400 mb-1.5">用户名</label>
-            <input type="text" id="regUsername" placeholder="至少3个字符" autocomplete="username"
-              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+        <h1 class="brand-title">Traffic<br/>Defect<br/>Detection</h1>
+        <p class="brand-sub">智能交通缺陷检测系统</p>
+      </div>
+      <div class="login-form-wrap">
+        <div class="form-header">
+          <h2 class="form-title">注册</h2>
+          <p class="form-desc">创建您的账户</p>
+        </div>
+        <div class="form-body">
+          <div class="field">
+            <label class="field-label">用户名</label>
+            <input type="text" id="regUsername" placeholder="username" autocomplete="username" class="field-input" />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-surface-400 mb-1.5">密码</label>
-            <input type="password" id="regPassword" placeholder="至少6个字符" autocomplete="new-password"
-              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          <div class="field">
+            <label class="field-label">密码</label>
+            <input type="password" id="regPassword" placeholder="password" autocomplete="new-password" class="field-input" />
           </div>
-          <div>
-            <label class="block text-sm font-medium text-surface-400 mb-1.5">确认密码</label>
-            <input type="password" id="regConfirm" placeholder="再次输入密码" autocomplete="new-password"
-              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          <div class="field">
+            <label class="field-label">确认密码</label>
+            <input type="password" id="regConfirm" placeholder="confirm password" autocomplete="new-password" class="field-input" />
           </div>
-          <button id="registerBtn" onclick="doRegister()"
-            class="w-full py-2.5 rounded-xl font-semibold text-sm bg-accent-600 hover:bg-accent-500 text-white transition-colors flex items-center justify-center gap-2">
-            注册
-          </button>
-          <div class="text-center text-sm text-surface-400">
-            已有账号？<a href="javascript:void(0)" onclick="showLogin()" class="text-accent-400 hover:text-accent-300 font-medium">立即登录</a>
-          </div>
+          <div id="registerMsg" class="error-msg" style="display:none"></div>
+          <button id="registerBtn" onclick="doRegister()" class="submit-btn">注册</button>
+        </div>
+        <div class="form-footer">
+          <span class="footer-text">已有账号？</span>
+          <a href="javascript:void(0)" onclick="showLogin()" class="footer-link">立即登录</a>
         </div>
       </div>
     </div>
   </div>
 
   <!-- ======================== APP SHELL ======================== -->
-  <div id="appShell" class="hidden min-h-screen bg-surface-900 flex flex-col">
-
-    <header class="bg-surface-800 border-b border-surface-700 px-6 h-16 flex items-center justify-between shrink-0">
-      <div class="flex items-center gap-3">
-        <svg class="w-7 h-7 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+  <div id="appShell" class="hidden">
+    <header class="app-header">
+      <div class="header-logo">
+        <svg class="header-logo-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="1" y="1" width="38" height="38" rx="8" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
         </svg>
-        <span class="font-bold text-white text-lg">交通缺陷检测</span>
+        <span class="header-logo-text">TDD</span>
       </div>
-      <div class="flex items-center gap-3">
-        <span id="userBadge" class="text-sm text-surface-400 bg-surface-900 px-3 py-1.5 rounded-lg"></span>
-        <button onclick="doLogout()" class="text-sm text-surface-400 hover:text-red-400 border border-surface-700 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-colors">退出登录</button>
+      <div class="header-user">
+        <span id="userBadge" class="user-badge"></span>
+        <button onclick="doLogout()" class="logout-btn">退出登录</button>
       </div>
     </header>
 
-    <nav class="bg-surface-800 border-b border-surface-700 px-6 flex gap-1 shrink-0">
-      <a href="#/dashboard" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">概览</a>
-      <a href="#/detect" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">缺陷检测</a>
-      <a href="#/history" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">检测记录</a>
-      <a href="#/models" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">模型管理</a>
-      <a href="#/admin" id="navAdmin" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors hidden">系统管理</a>
+    <nav class="app-nav">
+      <a href="#/dashboard" class="nav-link" id="navDashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        概览
+      </a>
+      <a href="#/detect" class="nav-link" id="navDetect">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        缺陷检测
+      </a>
+      <a href="#/history" class="nav-link" id="navHistory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        检测记录
+      </a>
+      <a href="#/models" class="nav-link" id="navModels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+        模型管理
+      </a>
+      <a href="#/admin" class="nav-link" id="navAdmin" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        系统管理
+      </a>
     </nav>
 
-    <div id="vueApp" class="flex-1"></div>
+    <div id="vueApp" class="page-container"></div>
   </div>
 
   <!-- ======================== JAVASCRIPT ======================== -->
@@ -139,32 +1355,24 @@
     const user = JSON.parse(localStorage.getItem('user') || 'null')
 
     function showRegister() {
-      document.getElementById('loginCard').classList.add('hidden')
-      document.getElementById('registerCard').classList.remove('hidden')
+      document.getElementById('authApp').style.display = 'none'
+      document.getElementById('registerCard').style.display = 'flex'
     }
     function showLogin() {
-      document.getElementById('registerCard').classList.add('hidden')
-      document.getElementById('loginCard').classList.remove('hidden')
+      document.getElementById('registerCard').style.display = 'none'
+      document.getElementById('authApp').style.display = 'flex'
     }
 
-    function setMsg(id, text, type) {
-      const el = document.getElementById(id)
+    function setError(el, text) {
       el.textContent = text
-      el.className = 'mb-4 px-4 py-3 rounded-lg text-sm ' + (type === 'error'
-        ? 'bg-red-500/15 border border-red-500/30 text-red-400'
-        : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400')
-    }
-
-    function setLoading(btn, text, on) {
-      btn.disabled = on
-      btn.textContent = text
+      el.style.display = 'flex'
     }
 
     if (token && user) {
-      document.getElementById('authApp').classList.add('hidden')
+      document.getElementById('authApp').style.display = 'none'
       document.getElementById('appShell').classList.remove('hidden')
-      document.getElementById('userBadge').textContent = user.username + ' (' + user.role + ')'
-      if (user.role === 'admin') document.getElementById('navAdmin').classList.remove('hidden')
+      document.getElementById('userBadge').textContent = user.username + ' · ' + user.role
+      if (user.role === 'admin') document.getElementById('navAdmin').style.display = 'flex'
       initVueApp()
     }
 
@@ -172,8 +1380,9 @@
       const u = document.getElementById('loginUsername').value.trim()
       const p = document.getElementById('loginPassword').value
       const btn = document.getElementById('loginBtn')
-      if (!u || !p) { setMsg('loginMsg', '请填写用户名和密码', 'error'); return }
-      setLoading(btn, '登录中...', true)
+      const msg = document.getElementById('loginMsg')
+      if (!u || !p) { setError(msg, '请填写用户名和密码'); return }
+      btn.disabled = true; btn.textContent = '登录中...'
       try {
         const res = await fetch(API + '/login', {
           method: 'POST',
@@ -181,15 +1390,14 @@
           body: JSON.stringify({ username: u, password: p })
         })
         const data = await res.json()
-        if (!res.ok) { setMsg('loginMsg', data.detail || '登录失败', 'error'); return }
+        if (!res.ok) { setError(msg, data.detail || '登录失败'); return }
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        setMsg('loginMsg', '登录成功，正在跳转...', 'success')
-        setTimeout(() => window.location.reload(), 500)
+        window.location.reload()
       } catch {
-        setMsg('loginMsg', '网络错误，请稍后重试', 'error')
+        setError(msg, '网络错误，请稍后重试')
       } finally {
-        setLoading(btn, '登录', false)
+        btn.disabled = false; btn.textContent = '登录'
       }
     }
 
@@ -198,9 +1406,10 @@
       const p = document.getElementById('regPassword').value
       const c = document.getElementById('regConfirm').value
       const btn = document.getElementById('registerBtn')
-      if (!u || !p || !c) { setMsg('registerMsg', '请填写所有字段', 'error'); return }
-      if (p !== c) { setMsg('registerMsg', '两次密码不一致', 'error'); return }
-      setLoading(btn, '注册中...', true)
+      const msg = document.getElementById('registerMsg')
+      if (!u || !p) { setError(msg, '请填写所有字段'); return }
+      if (p !== c) { setError(msg, '两次密码不一致'); return }
+      btn.disabled = true; btn.textContent = '注册中...'
       try {
         const res = await fetch(API + '/register', {
           method: 'POST',
@@ -208,15 +1417,14 @@
           body: JSON.stringify({ username: u, password: p })
         })
         const data = await res.json()
-        if (!res.ok) { setMsg('registerMsg', data.detail || '注册失败', 'error'); return }
+        if (!res.ok) { setError(msg, data.detail || '注册失败'); return }
         localStorage.setItem('token', data.token)
         localStorage.setItem('user', JSON.stringify(data.user))
-        setMsg('registerMsg', '注册成功，正在跳转...', 'success')
-        setTimeout(() => window.location.reload(), 500)
+        window.location.reload()
       } catch {
-        setMsg('registerMsg', '网络错误，请稍后重试', 'error')
+        setError(msg, '网络错误，请稍后重试')
       } finally {
-        setLoading(btn, '注册', false)
+        btn.disabled = false; btn.textContent = '注册'
       }
     }
 
@@ -231,257 +1439,269 @@
     document.getElementById('regConfirm').addEventListener('keyup', e => { if (e.key === 'Enter') doRegister() })
 
     function updateNav(path) {
-      document.querySelectorAll('.nav-link').forEach(a => {
-        const active = a.getAttribute('href') === '#' + path
-        a.classList.toggle('text-accent-400', active)
-        a.classList.toggle('border-accent-400', active)
-        a.classList.toggle('text-white', active)
-        a.classList.toggle('text-surface-400', !active)
-        a.classList.toggle('border-transparent', !active)
+      const map = {
+        '/dashboard': 'navDashboard', '/detect': 'navDetect',
+        '/history': 'navHistory', '/models': 'navModels', '/admin': 'navAdmin'
+      }
+      Object.values(map).forEach(id => {
+        const el = document.getElementById(id)
+        if (el) el.classList.remove('active')
       })
+      const activeId = map[path]
+      if (activeId) {
+        const el = document.getElementById(activeId)
+        if (el) el.classList.add('active')
+      }
     }
 
     function initVueApp() {
       const { createApp, ref, computed, reactive, onMounted } = Vue
 
-      // ── Dashboard View ────────────────────────────────────────
       const DashboardView = {
         template: `
-          <div class="p-6 max-w-6xl mx-auto">
-            <h2 class="text-2xl font-bold text-white mb-6">概览</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">今日检测</div>
-                <div class="text-3xl font-bold text-white">{{ stats.detections_today ?? '--' }}</div>
-                <div class="text-xs text-surface-500 mt-1">次</div>
+          <div class="dash-root">
+            <div class="dash-header">
+              <div>
+                <div class="page-eyebrow">概览</div>
+                <h1 class="page-title">数据统计</h1>
               </div>
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">总检测量</div>
-                <div class="text-3xl font-bold text-accent-400">{{ stats.total_detections ?? 0 }}</div>
-                <div class="text-xs text-surface-500 mt-1">所有时间</div>
+              <span class="header-note">最近30天</span>
+            </div>
+            <div class="stats-row">
+              <div class="stat-card">
+                <div class="stat-label">总检测次数</div>
+                <div class="stat-val">{{ stats.total_detections }}</div>
               </div>
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">本周趋势</div>
-                <div class="text-3xl font-bold text-white">{{ weekCount }}</div>
-                <div class="text-xs text-surface-500 mt-1">近7天</div>
+              <div class="stat-card">
+                <div class="stat-label">今日检测</div>
+                <div class="stat-val stat-val--accent">{{ stats.detections_today }}</div>
               </div>
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">系统状态</div>
-                <div class="text-3xl font-bold text-emerald-400">正常</div>
-                <div class="text-xs text-surface-500 mt-1">运行中</div>
+              <div class="stat-card">
+                <div class="stat-label">日均检测</div>
+                <div class="stat-val">{{ avgPerDay }}</div>
               </div>
             </div>
-            <div v-if="stats.by_class?.length" class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-              <div class="text-sm font-semibold text-white mb-4">缺陷类型分布</div>
-              <div class="space-y-3">
-                <div v-for="c in stats.by_class.slice(0,8)" :key="c.class_name" class="flex items-center gap-3">
-                  <div class="text-sm text-surface-400 w-40 truncate">{{ c.class_name }}</div>
-                  <div class="flex-1 bg-surface-700 rounded-full h-2">
-                    <div class="bg-accent-500 h-2 rounded-full transition-all" :style="{width: Math.max(2, c.count / stats.by_class[0].count * 100) + '%'}"></div>
+            <div class="charts-row">
+              <div class="chart-panel">
+                <div class="panel-title">每日检测趋势</div>
+                <canvas id="dailyChart" height="180"></canvas>
+              </div>
+              <div class="chart-panel">
+                <div class="panel-title">缺陷类型分布</div>
+                <canvas id="classChart" height="180"></canvas>
+              </div>
+            </div>
+            <div class="recent-panel">
+              <div class="panel-title">最近检测记录</div>
+              <div v-if="recentLoading" class="list-state">加载中...</div>
+              <div v-else-if="!recentRecords.length" class="empty-state">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <p>暂无数据</p>
+              </div>
+              <div v-else class="recent-list">
+                <div v-for="r in recentRecords" :key="r.id" class="recent-item">
+                  <div class="recent-info">
+                    <div class="recent-name">{{ r.filename }}</div>
+                    <div class="recent-meta">{{ r.model_name }} · {{ formatDate(r.created_at) }}</div>
                   </div>
-                  <div class="text-sm text-accent-400 font-mono w-12 text-right">{{ c.count }}</div>
+                  <div :class="['recent-badge', r.num_detections > 0 ? 'badge--active' : '']">{{ r.num_detections }} 个</div>
                 </div>
               </div>
             </div>
           </div>
         `,
         setup() {
-          const stats = ref({})
-          const weekCount = computed(() => {
-            if (!stats.value.by_day) return '--'
-            const now = new Date()
-            const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7)
-            return stats.value.by_day.filter(d => new Date(d.date) >= weekAgo).reduce((s, d) => s + d.count, 0)
+          const stats = ref({ total_detections: 0, detections_today: 0, by_day: [], by_class: [] })
+          const recentRecords = ref([])
+          const recentLoading = ref(false)
+          const avgPerDay = computed(() => {
+            const days = stats.value.by_day?.length || 1
+            return Math.round(stats.value.total_detections / days)
           })
-          onMounted(async () => {
+          const formatDate = (iso) => {
+            if (!iso) return ''
+            return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+          }
+          const loadStats = async () => {
             try {
               const res = await axios.get('/api/dashboard/stats')
-              stats.value = res.data || {}
+              stats.value = res.data
+              setTimeout(() => {
+                drawDailyChart(stats.value.by_day || [])
+                drawClassChart(stats.value.by_class || [])
+              }, 80)
             } catch {}
-          })
-          return { stats, weekCount }
+          }
+          const loadRecent = async () => {
+            recentLoading.value = true
+            try {
+              const res = await axios.get('/api/detections?limit=5')
+              recentRecords.value = res.data.records || []
+            } catch {}
+            finally { recentLoading.value = false }
+          }
+          const drawDailyChart = (data) => {
+            const canvas = document.getElementById('dailyChart')
+            if (!canvas || !data.length) return
+            const ctx = canvas.getContext('2d')
+            new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: data.map(d => d.date.slice(5)),
+                datasets: [{ label: '检测数', data: data.map(d => d.count), borderColor: '#e2e8f0', backgroundColor: 'rgba(226,232,240,0.05)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#e2e8f0' }]
+              },
+              options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#4b5563' }, grid: { color: '#161616' } }, y: { ticks: { color: '#4b5563' }, grid: { color: '#161616' }, beginAtZero: true } } }
+            })
+          }
+          const drawClassChart = (data) => {
+            const canvas = document.getElementById('classChart')
+            if (!canvas || !data.length) return
+            const ctx = canvas.getContext('2d')
+            new Chart(ctx, {
+              type: 'doughnut',
+              data: { labels: data.map(d => d.class_name), datasets: [{ data: data.map(d => d.count), backgroundColor: ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#f43f5e','#6366f1'], borderWidth: 0 }] },
+              options: { responsive: true, plugins: { legend: { position: 'right', labels: { color: '#6b7280', boxWidth: 10, padding: 8 } } } }
+            })
+          }
+          onMounted(() => { loadStats(); loadRecent() })
+          return { stats, recentRecords, recentLoading, avgPerDay, formatDate }
         }
       }
 
-      // ── Detect View ────────────────────────────────────────────
       const DetectView = {
         template: `
-          <div class="p-6 max-w-6xl mx-auto space-y-6">
-            <!-- Mode Tabs -->
-            <div class="flex gap-1 bg-surface-800 p-1 rounded-xl w-fit">
-              <button v-for="m in modes" :key="m.id" @click="settings.mode = m.id"
-                :class="['flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all', settings.mode === m.id ? 'bg-accent-600 text-white shadow' : 'text-surface-400 hover:text-white']">
-                {{ m.icon }} {{ m.label }}
-              </button>
+          <div class="detect-root">
+            <div class="detect-header">
+              <div class="header-left">
+                <div class="page-eyebrow">检测</div>
+                <h1 class="page-title">缺陷识别</h1>
+              </div>
+              <div class="header-right">
+                <div class="mode-toggle">
+                  <button v-for="m in modes" :key="m.id" @click="settings.mode = m.id" :class="['mode-btn', settings.mode === m.id ? 'mode-btn--active' : '']">
+                    <span>{{ m.icon }}</span>{{ m.label }}
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="detect-layout">
               <!-- LEFT: Config -->
-              <div class="bg-surface-800 rounded-2xl border border-surface-700 p-5 space-y-5">
-                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-accent-600 flex items-center justify-center text-xs text-white">1</span>
-                  上传与设置
-                </h2>
-
-                <!-- Model -->
-                <div>
-                  <label class="block text-sm font-medium text-surface-400 mb-2">模型选择</label>
-                  <select v-model="settings.modelId" class="w-full bg-surface-900 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500">
+              <div class="panel--config">
+                <div class="step-row">
+                  <div class="step-num">1</div>
+                  <span class="step-label">配置与上传</span>
+                </div>
+                <div class="config-section">
+                  <label class="config-label">模型</label>
+                  <select v-model="settings.modelId" class="config-select">
                     <option value="">默认模型</option>
-                    <option v-for="m in modelList" :key="m.id" :value="m.id">{{ m.path }}</option>
+                    <option v-for="m in modelList" :key="m.id" :value="m.id">{{ m.name }}</option>
                   </select>
+                  <div v-if="selectedModelPath" class="model-path">{{ selectedModelPath }}</div>
                 </div>
-
-                <!-- Upload -->
-                <div>
-                  <label class="block text-sm font-medium text-surface-400 mb-2">
-                    {{ settings.mode === 'single' ? '上传图片' : '上传文件夹' }}
-                  </label>
+                <div class="config-section">
+                  <label class="config-label">{{ settings.mode === 'single' ? '图片' : '文件夹' }}</label>
                   <div v-if="settings.mode === 'single'"
-                    @dragover.prevent="isDragOver = true" @dragleave="isDragOver = false" @drop.prevent="onDrop"
                     @click="triggerFileInput"
-                    :class="['border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all', isDragOver ? 'border-accent-500 bg-accent-500/10' : 'border-surface-700 hover:border-surface-500']">
+                    :class="['drop-zone', currentFile ? 'drop-zone--has-file' : '']">
                     <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
-                    <div v-if="preview" class="space-y-2">
-                      <img :src="preview" class="max-h-36 mx-auto rounded-lg object-contain" />
-                      <p class="text-sm text-surface-400">{{ fileName }}</p>
-                    </div>
-                    <div v-else class="space-y-2">
-                      <svg class="w-10 h-10 mx-auto text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                      <p class="text-sm text-surface-500">拖拽图片或点击选择</p>
-                    </div>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="drop-text">{{ currentFile ? fileName : '点击选择图片' }}</span>
                   </div>
-                  <div v-else @click="triggerBatchInput"
-                    :class="['border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all', isDragOver ? 'border-accent-500 bg-accent-500/10' : 'border-surface-700 hover:border-surface-500']">
+                  <div v-else @click="triggerBatchInput" :class="['drop-zone', 'drop-zone--batch', batchFiles.length ? 'drop-zone--has-file' : '']">
                     <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" />
-                    <div v-if="batchFiles.length" class="text-emerald-400 font-medium">{{ batchFiles.length }} 个文件已选择</div>
-                    <div v-else class="space-y-2">
-                      <svg class="w-10 h-10 mx-auto text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                      <p class="text-sm text-surface-500">拖拽文件夹或点击选择</p>
+                    <div v-if="batchFiles.length" class="batch-info">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span class="drop-text">{{ batchFiles.length }} 个文件已选择</span>
+                    </div>
+                    <div v-else class="drop-prompt">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <span class="drop-text">点击选择文件夹</span>
                     </div>
                   </div>
                 </div>
-
-                <!-- Presets -->
-                <div>
-                  <label class="block text-sm font-medium text-surface-400 mb-2">阈值预设</label>
-                  <div class="flex gap-2">
-                    <button v-for="p in presets" :key="p.id" @click="applyPreset(p.id)"
-                      :class="['flex-1 py-1.5 rounded-lg text-sm font-medium transition-all', settings.preset === p.id ? 'bg-accent-600 text-white' : 'bg-surface-900 text-surface-400 hover:bg-surface-700']">
-                      {{ p.label }}
-                    </button>
+                <div class="config-section">
+                  <label class="config-label">阈值预设</label>
+                  <div class="preset-row">
+                    <button v-for="p in presets" :key="p.id" @click="applyPreset(p.id)" :class="['preset-btn', settings.preset === p.id ? 'preset-btn--active' : '']">{{ p.label }}</button>
                   </div>
                 </div>
-
-                <!-- Sliders -->
-                <div class="space-y-3">
-                  <div>
-                    <div class="flex justify-between mb-1">
-                      <label class="text-sm text-surface-400">置信度 conf</label>
-                      <span class="text-sm text-accent-400 font-mono">{{ settings.conf.toFixed(2) }}</span>
-                    </div>
-                    <input type="range" v-model.number="settings.conf" min="0.01" max="0.99" step="0.01" class="w-full" />
+                <div class="config-section">
+                  <div class="slider-row">
+                    <div class="slider-header"><span class="slider-label">置信度</span><span class="slider-val">{{ settings.conf.toFixed(2) }}</span></div>
+                    <input type="range" v-model.number="settings.conf" min="0.01" max="0.99" step="0.01" class="slider" />
                   </div>
-                  <div>
-                    <div class="flex justify-between mb-1">
-                      <label class="text-sm text-surface-400">IoU iou</label>
-                      <span class="text-sm text-accent-400 font-mono">{{ settings.iou.toFixed(2) }}</span>
-                    </div>
-                    <input type="range" v-model.number="settings.iou" min="0.1" max="0.95" step="0.01" class="w-full" />
+                  <div class="slider-row">
+                    <div class="slider-header"><span class="slider-label">IoU</span><span class="slider-val">{{ settings.iou.toFixed(2) }}</span></div>
+                    <input type="range" v-model.number="settings.iou" min="0.1" max="0.95" step="0.01" class="slider" />
                   </div>
                 </div>
-
-                <!-- Run -->
-                <button @click="runDetect" :disabled="isRunning || !canRun"
-                  class="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
-                  :class="isRunning || !canRun ? 'bg-surface-700 text-surface-400 cursor-not-allowed' : 'bg-accent-600 hover:bg-accent-500 text-white'">
-                  <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                <button @click="runDetect" :disabled="isRunning || !canRun" :class="['run-btn', isRunning || !canRun ? 'run-btn--disabled' : '']">
+                  <svg v-if="isRunning" class="spin-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                   {{ isRunning ? (settings.mode === 'single' ? '检测中...' : '处理中...') : '开始检测' }}
                 </button>
-
-                <div v-if="toast.show" :class="['px-4 py-3 rounded-lg text-sm', toast.type === 'error' ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400']">
-                  {{ toast.message }}
-                </div>
               </div>
 
               <!-- RIGHT: Result -->
-              <div class="bg-surface-800 rounded-2xl border border-surface-700 p-5 space-y-5">
-                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
-                  <span class="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-xs text-white">2</span>
-                  检测结果
-                </h2>
-
-                <div v-if="!result && !isRunning" class="flex flex-col items-center justify-center py-16 text-surface-500">
-                  <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                  <p>上传图片开始检测</p>
+              <div class="panel--result">
+                <div class="step-row">
+                  <div class="step-num step-num--green">2</div>
+                  <span class="step-label">检测结果</span>
                 </div>
-
-                <div v-else-if="isRunning && settings.mode === 'single'" class="space-y-4 animate-pulse">
-                  <div class="h-48 bg-surface-700 rounded-xl"></div>
-                  <div class="h-4 bg-surface-700 rounded w-3/4"></div>
+                <div v-if="!result && !isRunning" class="result-empty">
+                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="0.8"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <p class="empty-text">上传图片开始检测</p>
                 </div>
-
-                <div v-else-if="result" class="space-y-4">
-                  <!-- Single -->
-                  <div v-if="settings.mode === 'single'" class="space-y-4">
-                    <div class="relative rounded-xl overflow-hidden bg-surface-900">
-                      <img :src="'data:image/png;base64,' + result.annotated_image_base64" class="w-full max-h-[360px] object-contain" />
-                      <div class="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
-                        :class="result.num_detections > 0 ? 'bg-emerald-500 text-white' : 'bg-surface-700 text-surface-400'">
-                        {{ result.num_detections > 0 ? result.num_detections + ' 个缺陷' : '无缺陷' }}
+                <div v-else-if="isRunning && settings.mode === 'single'" style="padding:48px 0;text-align:center;color:#9ca3af;font-size:14px;">检测中...</div>
+                <div v-else-if="isRunning && settings.mode === 'batch'" style="padding:48px 0;text-align:center;color:#9ca3af;font-size:14px;">处理中...</div>
+                <div v-else-if="result" class="result-content">
+                  <div v-if="settings.mode === 'single'" class="single-result">
+                    <img v-if="result.annotated_image_base64" :src="'data:image/png;base64,' + result.annotated_image_base64" class="annotated-img" />
+                    <div class="result-summary">
+                      <div class="result-summary-card">
+                        <div class="result-summary-label">图片尺寸</div>
+                        <div class="result-summary-val">{{ result.image_size?.width }} × {{ result.image_size?.height }}</div>
+                      </div>
+                      <div class="result-summary-card">
+                        <div class="result-summary-label">检测数量</div>
+                        <div :class="['result-summary-val', result.num_detections > 0 ? 'result-summary-val--active' : 'result-summary-val--empty']">{{ result.num_detections }} 个</div>
                       </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3">
-                      <div class="bg-surface-900 rounded-xl p-3">
-                        <div class="text-xs text-surface-500">图片尺寸</div>
-                        <div class="text-sm font-semibold text-white">{{ result.image_size?.width }} × {{ result.image_size?.height }}</div>
-                      </div>
-                      <div class="bg-surface-900 rounded-xl p-3">
-                        <div class="text-xs text-surface-500">检测数量</div>
-                        <div class="text-sm font-semibold" :class="result.num_detections > 0 ? 'text-accent-400' : 'text-surface-400'">{{ result.num_detections }}</div>
+                    <div v-if="result.model_name" class="batch-outdir">使用模型: <code>{{ result.model_name }}</code></div>
+                    <div v-if="result.detections?.length > 0" class="detections-list">
+                      <div v-for="(d, i) in result.detections" :key="i" class="detection-item">
+                        <div class="detection-dot" :style="{ background: getColor(d.class_id) }"></div>
+                        <div class="detection-info"><div class="detection-name">{{ d.class_name }}</div><div class="detection-bbox">[{{ d.bbox_xyxy.map(v => v.toFixed(0)).join(', ') }}]</div></div>
+                        <div class="detection-conf">{{ (d.confidence * 100).toFixed(1) }}%</div>
                       </div>
                     </div>
-                    <div v-if="result.model_name" class="bg-surface-900 rounded-xl p-3">
-                      <div class="text-xs text-surface-500">使用模型</div>
-                      <div class="text-sm font-medium text-white">{{ result.model_name }}</div>
-                    </div>
-                    <div v-if="result.detections?.length > 0" class="space-y-2 max-h-64 overflow-y-auto">
-                      <div v-for="(d, i) in result.detections" :key="i" class="flex items-center gap-3 bg-surface-900 rounded-lg p-3">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
-                          :style="{ backgroundColor: getColor(d.class_id) + '30', color: getColor(d.class_id) }">{{ d.class_id }}</div>
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-white truncate">{{ d.class_name }}</div>
-                          <div class="text-xs text-surface-500 font-mono">[{{ d.bbox_xyxy.map(v => v.toFixed(0)).join(', ') }}]</div>
-                        </div>
-                        <div class="text-sm font-bold text-accent-400">{{ (d.confidence * 100).toFixed(1) }}%</div>
-                      </div>
+                    <div v-else class="result-empty" style="padding:32px 0">
+                      <p class="empty-text">未检测到缺陷</p>
                     </div>
                   </div>
-
-                  <!-- Batch -->
-                  <div v-else class="space-y-4">
-                    <div class="grid grid-cols-3 gap-3">
-                      <div class="bg-surface-900 rounded-xl p-3 text-center">
-                        <div class="text-xl font-bold text-accent-400">{{ result.total_files }}</div>
-                        <div class="text-xs text-surface-500">总文件</div>
+                  <div v-else class="batch-result">
+                    <div class="result-summary result-summary--batch">
+                      <div class="result-summary-card">
+                        <div class="result-summary-label">总文件</div>
+                        <div class="result-summary-val">{{ result.total_files }}</div>
                       </div>
-                      <div class="bg-surface-900 rounded-xl p-3 text-center">
-                        <div class="text-xl font-bold text-emerald-400">{{ result.success_count }}</div>
-                        <div class="text-xs text-surface-500">成功</div>
+                      <div class="result-summary-card">
+                        <div class="result-summary-label">成功</div>
+                        <div :class="['result-summary-val', result.success_count > 0 ? 'text-green' : 'result-summary-val--empty']">{{ result.success_count }}</div>
                       </div>
-                      <div class="bg-surface-900 rounded-xl p-3 text-center">
-                        <div class="text-xl font-bold" :class="result.failure_count > 0 ? 'text-red-400' : 'text-surface-400'">{{ result.failure_count }}</div>
-                        <div class="text-xs text-surface-500">失败</div>
+                      <div class="result-summary-card">
+                        <div class="result-summary-label">失败</div>
+                        <div :class="['result-summary-val', result.failure_count > 0 ? 'text-red' : 'result-summary-val--empty']">{{ result.failure_count }}</div>
                       </div>
                     </div>
-                    <div v-if="result.results?.length" class="space-y-2 max-h-64 overflow-y-auto">
-                      <div v-for="(r, i) in result.results.slice(0,20)" :key="i" class="flex items-center gap-3 bg-surface-900 rounded-lg px-3 py-2">
-                        <div class="text-sm text-white truncate flex-1">{{ r.filename }}</div>
-                        <div v-if="r.num_detections !== undefined" class="text-sm font-medium" :class="r.num_detections > 0 ? 'text-accent-400' : 'text-surface-500'">{{ r.num_detections }} 个</div>
-                        <div v-else-if="r.error" class="text-xs text-red-400">{{ r.error }}</div>
+                    <div class="batch-outdir">输出目录: <code>{{ result.output_dir }}</code></div>
+                    <div v-if="result.results?.length > 0" class="detections-list">
+                      <div v-for="(r, i) in result.results" :key="i" :class="['detection-item', r.error ? 'detection-item--error' : '']">
+                        <div class="detection-dot" :style="{ background: r.error ? '#dc2626' : (r.num_detections > 0 ? '#16a34a' : '#d4d4d4') }"></div>
+                        <div class="detection-info"><div class="detection-name">{{ r.filename }}</div><div class="detection-bbox">{{ r.error || (r.num_detections + ' 个检测') }}</div></div>
+                        <div class="detection-conf">{{ r.error ? '失败' : (r.num_detections + ' 个') }}</div>
                       </div>
                     </div>
-                    <div class="text-xs text-surface-500">输出目录: <code class="text-surface-400">{{ result.output_dir }}</code></div>
                   </div>
                 </div>
               </div>
@@ -489,17 +1709,9 @@
           </div>
         `,
         setup() {
-          const modes = [
-            { id: 'single', label: '单图检测', icon: '🖼' },
-            { id: 'batch', label: '批量检测', icon: '📁' },
-          ]
-          const presets = [
-            { id: 'balanced', label: '平衡', conf: 0.25, iou: 0.6 },
-            { id: 'high_recall', label: '高召回', conf: 0.1, iou: 0.7 },
-            { id: 'high_precision', label: '高精度', conf: 0.5, iou: 0.5 },
-          ]
+          const modes = [{ id: 'single', label: '单图检测', icon: '◻' }, { id: 'batch', label: '批量检测', icon: '▤' }]
+          const presets = [{ id: 'balanced', label: '平衡', conf: 0.25, iou: 0.6 }, { id: 'high_recall', label: '高召回', conf: 0.1, iou: 0.7 }, { id: 'high_precision', label: '高精度', conf: 0.5, iou: 0.5 }]
           const presetValues = { balanced: { conf: 0.25, iou: 0.6 }, high_recall: { conf: 0.1, iou: 0.7 }, high_precision: { conf: 0.5, iou: 0.5 } }
-
           const settings = reactive({ mode: 'single', modelId: '', conf: 0.25, iou: 0.6, preset: 'balanced' })
           const isRunning = ref(false)
           const isDragOver = ref(false)
@@ -511,318 +1723,210 @@
           const batchFiles = ref([])
           const fileInput = ref(null)
           const batchInput = ref(null)
-          const toast = reactive({ show: false, message: '', type: 'success' })
-
           const classColors = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#f43f5e','#6366f1']
           const getColor = (id) => classColors[(id || 0) % classColors.length]
-
           const canRun = computed(() => settings.mode === 'single' ? !!currentFile.value : batchFiles.value.length > 0)
-
-          const applyPreset = (id) => {
-            settings.preset = id
-            const v = presetValues[id]
-            if (v) { settings.conf = v.conf; settings.iou = v.iou }
-          }
-
+          const selectedModelPath = computed(() => { const m = modelList.value.find(m => m.id === settings.modelId); return m?.path || '' })
+          const applyPreset = (id) => { settings.preset = id; const v = presetValues[id]; if (v) { settings.conf = v.conf; settings.iou = v.iou } }
           const triggerFileInput = () => fileInput.value?.click()
           const triggerBatchInput = () => batchInput.value?.click()
-
-          const onFileChange = (e) => {
-            const file = e.target.files?.[0]
-            if (file) handleFile(file)
-          }
-          const onDrop = (e) => {
-            isDragOver.value = false
-            const file = e.dataTransfer.files?.[0]
-            if (file?.type.startsWith('image/')) handleFile(file)
-          }
-          const handleFile = (file) => {
-            fileName.value = file.name
-            currentFile.value = file
-            const reader = new FileReader()
-            reader.onload = e => { preview.value = e.target.result }
-            reader.readAsDataURL(file)
-          }
-
-          const onBatchChange = (e) => {
-            batchFiles.value = Array.from(e.target.files || [])
-          }
-
-          const showToast = (message, type = 'success') => {
-            toast.message = message; toast.type = type; toast.show = true
-            setTimeout(() => { toast.show = false }, 4000)
-          }
-
-          const loadModels = async () => {
-            try {
-              const res = await axios.get('/api/models')
-              modelList.value = res.data.models || []
-            } catch {}
-          }
-
-          // Build query — only pass model_id when it's a positive integer (not "" or "proj_...")
+          const onFileChange = (e) => { const file = e.target.files?.[0]; if (file) handleFile(file) }
+          const onDrop = (e) => { isDragOver.value = false; const file = e.dataTransfer.files?.[0]; if (file?.type.startsWith('image/')) handleFile(file) }
+          const handleFile = (file) => { fileName.value = file.name; currentFile.value = file; const reader = new FileReader(); reader.onload = e => { preview.value = e.target.result }; reader.readAsDataURL(file) }
+          const onBatchChange = (e) => { batchFiles.value = Array.from(e.target.files || []) }
+          const loadModels = async () => { try { const res = await axios.get('/api/models'); modelList.value = res.data.models || [] } catch {} }
           const buildQuery = () => {
-            const p = new URLSearchParams({
-              conf: settings.conf.toString(), iou: settings.iou.toString(),
-              imgsz: '640', max_det: '300'
-            })
+            const p = new URLSearchParams({ conf: settings.conf.toString(), iou: settings.iou.toString(), imgsz: '640', max_det: '300' })
             const mid = settings.modelId
-            // Only include model_id if it's a numeric string (DB-uploaded model)
-            if (mid && Number.isInteger(Number(mid)) && Number(mid) > 0) {
-              p.set('model_id', mid)
+            if (mid !== '' && mid !== null) {
+              const num = Number(mid)
+              if (Number.isInteger(num) && num > 0) {
+                p.set('model_id', String(num))
+              } else if (String(mid).startsWith('proj_')) {
+                p.set('model_id', String(mid))
+              }
             }
             return p
           }
-
           const runDetect = async () => {
-            if (!canRun.value) { showToast(settings.mode === 'single' ? '请先选择图片' : '请先选择文件', 'error'); return }
+            if (!canRun.value) { alert(settings.mode === 'single' ? '请先选择图片' : '请先选择文件'); return }
             isRunning.value = true
             const q = buildQuery().toString()
             try {
               if (settings.mode === 'single') {
-                const fd = new FormData()
-                fd.append('file', currentFile.value)
-                const res = await axios.post(`/api/detections/predict?${q}`, fd)
+                const fd = new FormData(); fd.append('file', currentFile.value)
+                const res = await axios.post('/api/detections/predict?' + q, fd)
                 result.value = res.data
-                showToast('检测完成')
               } else {
-                const fd = new FormData()
-                batchFiles.value.forEach(f => fd.append('files', f, f.name))
-                const res = await axios.post(`/api/detections/batch?${q}`, fd)
+                const fd = new FormData(); batchFiles.value.forEach(f => fd.append('files', f, f.name))
+                const res = await axios.post('/api/detections/batch?' + q, fd)
                 result.value = res.data
-                showToast(`完成：${res.data.success_count}/${res.data.total_files} 个文件`)
               }
-            } catch (e) {
-              showToast(e.response?.data?.detail || '检测失败', 'error')
-            } finally {
-              isRunning.value = false
-            }
+            } catch (e) { alert(e.response?.data?.detail || '检测失败') }
+            finally { isRunning.value = false }
           }
-
           onMounted(() => { loadModels() })
-
-          return { modes, presets, settings, isRunning, isDragOver, result, modelList, preview, fileName, currentFile, batchFiles, canRun, fileInput, batchInput, toast, getColor, applyPreset, triggerFileInput, triggerBatchInput, onFileChange, onDrop, onBatchChange, runDetect }
+          return { modes, presets, settings, isRunning, isDragOver, result, modelList, preview, fileName, currentFile, batchFiles, canRun, fileInput, batchInput, getColor, applyPreset, triggerFileInput, triggerBatchInput, onFileChange, onDrop, onBatchChange, runDetect, selectedModelPath }
         }
       }
 
-      // ── History View ────────────────────────────────────────────
       const HistoryView = {
         template: `
-          <div class="p-6 max-w-6xl mx-auto">
-            <div class="flex items-center justify-between mb-6">
-              <h2 class="text-2xl font-bold text-white">检测记录</h2>
-              <div class="flex gap-3 items-center">
-                <input v-model="search" @input="debouncedLoad" placeholder="搜索文件名..." type="text"
-                  class="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500" />
+          <div class="history-root">
+            <div class="history-header">
+              <div><div class="page-eyebrow">记录</div><h1 class="page-title">检测历史</h1></div>
+              <div class="header-total">共 <strong>{{ total }}</strong> 条记录 &nbsp;·&nbsp; <button @click="clearHistory" class="clear-history-btn">清除历史</button></div>
+            </div>
+            <div v-if="loading" class="list-state">加载中...</div>
+            <div v-else-if="!records.length" class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <p>暂无记录</p>
+            </div>
+            <div v-else class="records-list">
+              <div v-for="r in records" :key="r.id" class="record-item" @click="showDetail(r)">
+                <div class="record-thumb">
+                  <img v-if="r.num_detections > 0 && r.annotated_image_base64" :src="'data:image/png;base64,' + r.annotated_image_base64" class="thumb-img" />
+                  <div v-else class="thumb-placeholder"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>
+                </div>
+                <div class="record-info"><div class="record-name">{{ r.filename }}</div><div class="record-meta">{{ r.model_name }} · {{ formatDate(r.created_at) }}</div></div>
+                <div class="record-right"><div :class="['record-count', r.num_detections > 0 ? 'count--active' : '']">{{ r.num_detections }} 个</div><div class="record-size">{{ r.image_size?.width }}×{{ r.image_size?.height }}</div></div>
               </div>
             </div>
-
-            <div v-if="loading" class="text-surface-500 text-sm">加载中...</div>
-            <div v-else-if="!records.length" class="bg-surface-800 border border-surface-700 rounded-2xl p-8 text-center text-surface-500">
-              <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-              <p>暂无检测记录</p>
+            <div v-if="totalPages > 1" class="pagination">
+              <button @click="page--; loadHistory()" :disabled="page === 1" class="page-btn">上一页</button>
+              <span class="page-info">{{ page }} / {{ totalPages }}</span>
+              <button @click="page++; loadHistory()" :disabled="page === totalPages" class="page-btn">下一页</button>
             </div>
-            <div v-else class="space-y-3">
-              <div v-for="r in records" :key="r.id" class="bg-surface-800 border border-surface-700 rounded-2xl p-4 hover:border-surface-600 transition-colors">
-                <div class="flex items-start justify-between gap-4">
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-3 mb-1">
-                      <span class="text-white font-medium text-sm truncate">{{ r.filename }}</span>
-                      <span class="px-2 py-0.5 rounded text-xs font-medium shrink-0"
-                        :class="r.num_detections > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-surface-700 text-surface-400'">
-                        {{ r.num_detections }} 个缺陷
-                      </span>
-                    </div>
-                    <div class="flex gap-4 text-xs text-surface-500">
-                      <span>{{ r.model_name }}</span>
-                      <span>{{ r.conf }} / {{ r.iou }}</span>
-                      <span>{{ new Date(r.created_at).toLocaleString('zh-CN') }}</span>
+            <div v-if="showModal" class="modal-overlay" @click.self="showModal = false">
+              <div class="modal-box modal-box--wide">
+                <div class="modal-header">
+                  <div><div class="modal-title">{{ detailItem?.filename }}</div><div class="modal-sub">{{ detailItem?.model_name }} · {{ formatDate(detailItem?.created_at) }}</div></div>
+                  <button @click="showModal = false" class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                <div class="modal-body" v-if="detailItem">
+                  <div class="detail-stats">
+                    <div class="detail-stat"><div class="detail-stat-val">{{ detailItem.image_size?.width }} × {{ detailItem.image_size?.height }}</div><div class="detail-stat-label">图片尺寸</div></div>
+                    <div class="detail-stat"><div class="detail-stat-val text-active">{{ detailItem.num_detections }}</div><div class="detail-stat-label">检测数量</div></div>
+                    <div class="detail-stat"><div class="detail-stat-val">{{ (detailItem.conf * 100).toFixed(0) }}%</div><div class="detail-stat-label">置信度</div></div>
+                  </div>
+                  <div v-if="detailItem.detections?.length > 0" class="detections-list">
+                    <div v-for="(d, i) in detailItem.detections" :key="i" class="detection-item">
+                      <div class="detection-dot" :style="{ background: getColor(d.class_id) }"></div>
+                      <div class="detection-info"><div class="detection-name">{{ d.class_name }}</div><div class="detection-bbox">[{{ d.bbox_xyxy.map(v => v.toFixed(0)).join(', ') }}]</div></div>
+                      <div class="detection-conf">{{ (d.confidence * 100).toFixed(1) }}%</div>
                     </div>
                   </div>
-                  <div class="text-2xl font-bold" :class="r.num_detections > 0 ? 'text-accent-400' : 'text-surface-600'">{{ r.num_detections }}</div>
                 </div>
               </div>
-              <!-- Pagination -->
-              <div class="flex items-center justify-center gap-2 pt-4">
-                <button @click="prevPage" :disabled="page <= 1" class="px-3 py-1 rounded text-sm border border-surface-700 text-surface-400 hover:text-white disabled:opacity-40">上一页</button>
-                <span class="text-sm text-surface-500">{{ page }} / {{ totalPages }}</span>
-                <button @click="nextPage" :disabled="page >= totalPages" class="px-3 py-1 rounded text-sm border border-surface-700 text-surface-400 hover:text-white disabled:opacity-40">下一页</button>
-              </div>
             </div>
           </div>
         `,
         setup() {
-          const records = ref([])
-          const loading = ref(true)
-          const page = ref(1)
-          const limit = 20
-          const total = ref(0)
-          const search = ref('')
-          let debounceTimer = null
-
-          const totalPages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
-
-          const loadRecords = async () => {
-            loading.value = true
-            try {
-              const p = new URLSearchParams({ page: page.value, limit })
-              if (search.value) p.set('search', search.value)
-              const res = await axios.get('/api/detections?' + p.toString())
-              records.value = res.data.records || []
-              total.value = res.data.total || 0
-            } catch {} finally {
-              loading.value = false
-            }
-          }
-
-          const debouncedLoad = () => {
-            page.value = 1
-            clearTimeout(debounceTimer)
-            debounceTimer = setTimeout(loadRecords, 400)
-          }
-
-          const prevPage = () => { if (page.value > 1) { page.value--; loadRecords() } }
-          const nextPage = () => { if (page.value < totalPages.value) { page.value++; loadRecords() } }
-
-          onMounted(() => loadRecords())
-          return { records, loading, page, totalPages, search, debouncedLoad, prevPage, nextPage }
+          const records = ref([]), loading = ref(false), total = ref(0), page = ref(1), limit = 20
+          const showModal = ref(false), detailItem = ref(null)
+          const totalPages = computed(() => Math.ceil(total.value / limit))
+          const classColors = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#f43f5e','#6366f1']
+          const getColor = (id) => classColors[id % classColors.length]
+          const formatDate = (iso) => { if (!iso) return ''; return new Date(iso).toLocaleString('zh-CN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) }
+          const loadHistory = async () => { loading.value = true; try { const p = new URLSearchParams({ page: page.value, limit }); const res = await axios.get('/api/detections?' + p.toString()); records.value = res.data.records || []; total.value = res.data.total || 0 } catch {} finally { loading.value = false } }
+          const clearHistory = async () => { if (!confirm('确定清除所有检测记录？此操作不可恢复。')) return; try { await axios.delete('/api/detections/clear'); await loadHistory() } catch (e) { alert(e.response?.data?.detail || '清除失败') } }
+          const showDetail = async (r) => { try { const res = await axios.get('/api/detections/' + r.id); detailItem.value = res.data; showModal.value = true } catch {} }
+          onMounted(() => { loadHistory() })
+          return { records, loading, total, page, showModal, detailItem, totalPages, getColor, formatDate, loadHistory, clearHistory, showDetail }
         }
       }
 
-      // ── Models View ────────────────────────────────────────────
       const ModelsView = {
         template: `
-          <div class="p-6 max-w-6xl mx-auto">
-            <h2 class="text-2xl font-bold text-white mb-6">模型管理</h2>
-
-            <!-- Upload -->
-            <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5 mb-6">
-              <div class="text-sm font-semibold text-white mb-3">上传模型文件</div>
-              <div class="flex gap-3 items-center">
-                <input type="file" accept=".pt" @change="onUploadFile" class="text-sm text-surface-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-600 file:text-white hover:file:bg-accent-500 file:cursor-pointer" />
-                <button @click="uploadModel" :disabled="!uploadFile || uploading" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent-600 hover:bg-accent-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
-                  {{ uploading ? '上传中...' : '上传' }}
-                </button>
-                <span v-if="uploadMsg" class="text-sm" :class="uploadOk ? 'text-emerald-400' : 'text-red-400'">{{ uploadMsg }}</span>
+          <div class="models-root">
+            <div class="models-header">
+              <div><div class="page-eyebrow">管理</div><h1 class="page-title">模型</h1></div>
+              <button @click="showUploadModal = true" class="add-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>上传模型</button>
+            </div>
+            <div v-if="loading" class="list-state">加载中...</div>
+            <div v-else-if="!models.length" class="empty-state">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <p>暂无自定义模型</p>
+            </div>
+            <div v-else class="models-grid">
+              <div v-for="m in models" :key="m.id" class="model-card">
+                <div class="model-card-left">
+                  <div class="model-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                  <div class="model-info"><div class="model-name">{{ m.name }}</div><div class="model-path">{{ m.path }}</div><div class="model-date" v-if="m.uploaded_at">上传于 {{ formatDate(m.uploaded_at) }}</div></div>
+                </div>
+                <button v-if="m.uploaded_by && isAdmin" @click="deleteModel(m)" class="delete-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
               </div>
             </div>
-
-            <!-- List -->
-            <div v-if="loading" class="text-surface-500 text-sm">加载中...</div>
-            <div v-else-if="!models.length" class="text-surface-500 text-sm">暂无模型</div>
-            <div v-else class="bg-surface-800 border border-surface-700 rounded-2xl overflow-hidden">
-              <table class="w-full text-sm">
-                <thead>
-                  <tr class="border-b border-surface-700 text-left">
-                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">模型路径</th>
-                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">上传者</th>
-                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">时间</th>
-                    <th class="px-4 py-3 text-xs text-surface-500 font-medium text-right">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="m in models" :key="m.id" class="border-b border-surface-700/50 last:border-0 hover:bg-surface-700/30">
-                    <td class="px-4 py-3">
-                      <div class="text-white font-medium text-xs">{{ m.path }}</div>
-                      <div v-if="m.name !== m.path" class="text-xs text-surface-500 mt-0.5">{{ m.name }}</div>
-                    </td>
-                    <td class="px-4 py-3 text-surface-400 text-xs">{{ m.uploaded_by_name || (m.uploaded_by ? '用户' + m.uploaded_by : '项目内置') }}</td>
-                    <td class="px-4 py-3 text-surface-400 text-xs">{{ m.uploaded_at ? new Date(m.uploaded_at).toLocaleString('zh-CN') : '--' }}</td>
-                    <td class="px-4 py-3 text-right">
-                      <button v-if="m.id && !String(m.id).startsWith('proj_')" @click="deleteModel(m)"
-                        class="text-xs px-3 py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">删除</button>
-                      <span v-else class="text-xs text-surface-600">不可删除</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <div v-if="showUploadModal" class="modal-overlay" @click.self="showUploadModal = false">
+              <div class="modal-box">
+                <div class="modal-header">
+                  <h3 class="modal-title">上传模型</h3>
+                  <button @click="showUploadModal = false" class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                </div>
+                <div class="modal-body">
+                  <div class="upload-zone" @click="uploadInput.click()">
+                    <input ref="uploadInput" type="file" accept=".pt" class="hidden" @change="onFileSelected" />
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <p class="upload-text">{{ uploadFile ? uploadFile.name : '点击选择 .pt 模型文件' }}</p>
+                  </div>
+                  <div v-if="uploadError" class="error-msg">{{ uploadError }}</div>
+                  <button @click="uploadModel" :disabled="!uploadFile || uploading" :class="['submit-btn', !uploadFile || uploading ? 'submit-btn--disabled' : '']">
+                    <span v-if="uploading" class="spinner"></span><span v-else>开始上传</span>
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         `,
         setup() {
-          const models = ref([])
-          const loading = ref(true)
-          const uploading = ref(false)
-          const uploadFile = ref(null)
-          const uploadMsg = ref('')
-          const uploadOk = ref(false)
-
-          const loadModels = async () => {
-            try {
-              const res = await axios.get('/api/models')
-              models.value = res.data.models || []
-            } catch {}
-          }
-
-          const onUploadFile = (e) => {
-            uploadFile.value = e.target.files?.[0] || null
-          }
-
-          const uploadModel = async () => {
-            if (!uploadFile.value) return
-            uploading.value = true
-            uploadMsg.value = ''
-            try {
-              const fd = new FormData()
-              fd.append('file', uploadFile.value)
-              await axios.post('/api/models/upload', fd)
-              uploadMsg.value = '上传成功'
-              uploadOk.value = true
-              uploadFile.value = null
-              await loadModels()
-            } catch (e) {
-              uploadMsg.value = e.response?.data?.detail || '上传失败'
-              uploadOk.value = false
-            } finally {
-              uploading.value = false
-            }
-          }
-
-          const deleteModel = async (m) => {
-            if (!confirm('确认删除模型 ' + m.path + '？')) return
-            try {
-              await axios.delete('/api/models/' + m.id)
-              await loadModels()
-            } catch (e) {
-              alert(e.response?.data?.detail || '删除失败')
-            }
-          }
-
-          onMounted(async () => { await loadModels(); loading.value = false })
-          return { models, loading, uploading, uploadFile, uploadMsg, uploadOk, onUploadFile, uploadModel, deleteModel }
+          const models = ref([]), loading = ref(false), showUploadModal = ref(false), uploadFile = ref(null), uploadError = ref(''), uploading = ref(false), uploadInput = ref(null)
+          const isAdmin = ref(false)
+          const user = JSON.parse(localStorage.getItem('user') || 'null')
+          isAdmin.value = user?.role === 'admin'
+          const formatDate = (iso) => { if (!iso) return ''; return new Date(iso).toLocaleString('zh-CN') }
+          const loadModels = async () => { loading.value = true; try { const res = await axios.get('/api/models'); models.value = res.data.models || [] } catch {} finally { loading.value = false } }
+          const onFileSelected = (e) => { uploadFile.value = e.target.files?.[0] || null; uploadError.value = '' }
+          const uploadModel = async () => { if (!uploadFile.value) return; uploading.value = true; uploadError.value = ''; try { const fd = new FormData(); fd.append('file', uploadFile.value); await axios.post('/api/models/upload', fd); showUploadModal.value = false; uploadFile.value = null; await loadModels() } catch (e) { uploadError.value = e.response?.data?.detail || '上传失败' } finally { uploading.value = false } }
+          const deleteModel = async (m) => { if (!confirm('确定删除该模型？')) return; try { await axios.delete('/api/models/' + m.id); await loadModels() } catch (e) { alert(e.response?.data?.detail || '删除失败') } }
+          onMounted(() => { loadModels() })
+          return { models, loading, showUploadModal, uploadFile, uploadError, uploading, uploadInput, isAdmin, formatDate, loadModels, onFileSelected, uploadModel, deleteModel }
         }
       }
 
-      // ── Admin View ─────────────────────────────────────────────
       const AdminView = {
         template: `
-          <div class="p-6 max-w-6xl mx-auto">
-            <h2 class="text-2xl font-bold text-white mb-6">系统管理</h2>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">用户总数</div>
-                <div class="text-3xl font-bold text-white">{{ stats.total_users ?? '--' }}</div>
-              </div>
-              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
-                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">检测总数</div>
-                <div class="text-3xl font-bold text-white">{{ stats.total_detections ?? '--' }}</div>
+          <div class="admin-root">
+            <div class="admin-header"><div class="page-eyebrow">管理</div><h1 class="page-title">用户管理</h1></div>
+            <div class="panel">
+              <div class="panel-title">用户列表 <span class="title-count">{{ users.length }}</span></div>
+              <div v-if="loading" class="list-state">加载中...</div>
+              <div v-else class="user-table">
+                <div class="table-head"><div>用户名</div><div>角色</div><div>注册时间</div><div>操作</div></div>
+                <div v-for="u in users" :key="u.id" class="table-row">
+                  <div class="col-user"><div class="user-avatar">{{ u.username[0].toUpperCase() }}</div><span class="user-name">{{ u.username }}</span></div>
+                  <div class="col-role"><select v-model="u.role" @change="updateRole(u)" class="role-select"><option value="user">user</option><option value="admin">admin</option></select></div>
+                  <div class="col-date text-muted">{{ formatDate(u.created_at) }}</div>
+                  <div class="col-action"><button @click="deleteUser(u)" :disabled="u.id === currentUserId" :class="['action-btn', u.id === currentUserId ? 'action-btn--disabled' : 'action-btn--danger']">删除</button></div>
+                </div>
               </div>
             </div>
           </div>
         `,
         setup() {
-          const stats = ref({})
-          onMounted(async () => {
-            try {
-              const res = await axios.get('/api/dashboard/stats')
-              stats.value = res.data || {}
-            } catch {}
-          })
-          return { stats }
+          const users = ref([]), loading = ref(false)
+          const currentUserId = ref(null)
+          const user = JSON.parse(localStorage.getItem('user') || 'null')
+          currentUserId.value = user?.id
+          const formatDate = (iso) => { if (!iso) return ''; return new Date(iso).toLocaleString('zh-CN') }
+          const loadUsers = async () => { loading.value = true; try { const res = await axios.get('/api/users'); users.value = res.data.users } catch {} finally { loading.value = false } }
+          const updateRole = async (u) => { try { await axios.put('/api/users/' + u.id + '/role', { role: u.role }) } catch (e) { alert(e.response?.data?.detail || '更新失败') } }
+          const deleteUser = async (u) => { if (!confirm('确定删除用户 ' + u.username + '？')) return; try { await axios.delete('/api/users/' + u.id); await loadUsers() } catch (e) { alert(e.response?.data?.detail || '删除失败') } }
+          onMounted(() => { loadUsers() })
+          return { users, loading, currentUserId, formatDate, loadUsers, updateRole, deleteUser }
         }
       }
 
-      // ── Router ─────────────────────────────────────────────────
+      // Router
       const routes = {
         '/dashboard': DashboardView,
         '/detect': DetectView,
@@ -830,7 +1934,6 @@
         '/models': ModelsView,
         '/admin': AdminView,
       }
-
       const App = {
         setup() {
           const path = ref(window.location.hash.slice(1) || '/dashboard')
@@ -846,7 +1949,6 @@
         },
         template: '<component :is="CurrentView" />'
       }
-
       createApp(App).mount('#vueApp')
     }
   </script>

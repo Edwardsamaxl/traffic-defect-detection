@@ -1,50 +1,82 @@
-// Register View
+// Register View — Premium B&W Minimal
 const { createApp, ref } = Vue
 
 export default {
   template: `
-    <div class="min-h-screen bg-surface-900 flex items-center justify-center p-4">
-      <div class="w-full max-w-sm">
-        <div class="text-center mb-8">
-          <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+    <div class="login-root">
+      <div class="login-bg">
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="noise-overlay"></div>
+      </div>
+
+      <div class="login-container">
+        <div class="login-brand">
+          <div class="brand-mark">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <rect x="1" y="1" width="38" height="38" rx="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 20h16M20 12v16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-white">创建账号</h1>
-          <p class="text-surface-400 text-sm mt-1">注册交通缺陷检测系统</p>
+          <h1 class="brand-title">Traffic<br/>Defect<br/>Detection</h1>
+          <p class="brand-sub">智能交通缺陷检测系统</p>
         </div>
 
-        <div class="bg-surface-800 rounded-2xl border border-surface-700 p-6 space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-surface-300 mb-1.5">用户名</label>
-            <input v-model="username" type="text" placeholder="至少3个字符" @keyup.enter="handleRegister"
-              class="w-full bg-surface-700 border border-surface-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-surface-300 mb-1.5">密码</label>
-            <input v-model="password" type="password" placeholder="至少6个字符" @keyup.enter="handleRegister"
-              class="w-full bg-surface-700 border border-surface-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-surface-300 mb-1.5">确认密码</label>
-            <input v-model="confirmPassword" type="password" placeholder="再次输入密码" @keyup.enter="handleRegister"
-              class="w-full bg-surface-700 border border-surface-600 rounded-lg px-3 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500" />
+        <div class="login-form-wrap">
+          <div class="form-header">
+            <h2 class="form-title">注册</h2>
+            <p class="form-desc">创建您的账户</p>
           </div>
 
-          <div v-if="error" class="bg-red-500/15 border border-red-500/30 rounded-lg px-3 py-2 text-red-400 text-sm">
-            {{ error }}
+          <div class="form-body">
+            <div class="field">
+              <label class="field-label">用户名</label>
+              <input
+                v-model="username"
+                type="text"
+                placeholder="username"
+                @keyup.enter="handleRegister"
+                class="field-input"
+                autocomplete="username"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label">密码</label>
+              <input
+                v-model="password"
+                type="password"
+                placeholder="password"
+                @keyup.enter="handleRegister"
+                class="field-input"
+                autocomplete="new-password"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label">确认密码</label>
+              <input
+                v-model="confirmPassword"
+                type="password"
+                placeholder="confirm password"
+                @keyup.enter="handleRegister"
+                class="field-input"
+                autocomplete="new-password"
+              />
+            </div>
+
+            <div v-if="error" class="error-msg">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ error }}
+            </div>
+
+            <button @click="handleRegister" :disabled="loading" class="submit-btn">
+              <span v-if="loading" class="spinner"></span>
+              <span v-else>注册</span>
+            </button>
           </div>
 
-          <button @click="handleRegister" :disabled="loading"
-            class="w-full py-2.5 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2"
-            :class="loading ? 'bg-surface-700 text-surface-400 cursor-not-allowed' : 'bg-accent-600 hover:bg-accent-500 text-white'">
-            <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-            {{ loading ? '注册中...' : '注册' }}
-          </button>
-
-          <div class="text-center text-sm text-surface-400">
-            已有账号？<router-link to="/login" class="text-accent-400 hover:text-accent-300 font-medium">立即登录</router-link>
+          <div class="form-footer">
+            <span class="footer-text">已有账号？</span>
+            <router-link to="/login" class="footer-link">立即登录</router-link>
           </div>
         </div>
       </div>

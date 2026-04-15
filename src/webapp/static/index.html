@@ -1,344 +1,854 @@
 <!doctype html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Traffic Defect Detection Demo</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 0; background: #f5f7fb; color: #222; }
-      .container { max-width: 980px; margin: 24px auto; background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-      h1 { margin-top: 0; font-size: 24px; }
-      .row { display: flex; gap: 16px; flex-wrap: wrap; }
-      .card { flex: 1; min-width: 280px; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
-      label { display: block; margin-bottom: 6px; font-weight: 600; }
-      input[type="number"], input[type="file"], select { width: 100%; margin-bottom: 10px; padding: 8px; box-sizing: border-box; }
-      button { background: #2563eb; color: #fff; border: none; border-radius: 6px; padding: 10px 16px; cursor: pointer; }
-      button:disabled { background: #94a3b8; cursor: not-allowed; }
-      .status { margin-top: 8px; min-height: 22px; }
-      .ok { color: #166534; }
-      .err { color: #b91c1c; }
-      img { max-width: 100%; border-radius: 6px; border: 1px solid #d1d5db; }
-      table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-      th, td { border-bottom: 1px solid #e5e7eb; text-align: left; padding: 6px; font-size: 14px; }
-      th { background: #f8fafc; }
-      .meta { font-size: 13px; color: #64748b; }
-      .inline { display: flex; gap: 8px; align-items: center; }
-      .inline > * { flex: 1; }
-      .tag { display: inline-block; margin-right: 8px; font-size: 12px; color: #334155; background: #e2e8f0; padding: 2px 6px; border-radius: 999px; }
-      .hidden { display: none; }
-      .mono { font-family: Consolas, Monaco, monospace; font-size: 12px; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>交通缺陷检测 Demo</h1>
-      <p class="meta">支持单图展示与批量检测；模型可从项目内 <code>.pt</code> 文件中选择。</p>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>交通缺陷检测系统</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><path d='M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'/></svg>" />
+  <!-- Tailwind CSS CDN with custom colors -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            surface: {
+              700: '#334155', 800: '#1e293b', 900: '#0f172a',
+              400: '#94a3b8', 500: '#64748b',
+            },
+            accent: {
+              400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8',
+            },
+          },
+        },
+      },
+    }
+  </script>
+  <!-- Vue 3 local -->
+  <script src="/static/lib/vue.global.prod.js"></script>
+  <!-- Axios local -->
+  <script src="/static/lib/axios.min.js"></script>
+</head>
+<body>
 
-      <div class="row">
-        <div class="card">
-          <label for="modeSelect">检测模式</label>
-          <select id="modeSelect">
-            <option value="single">单图展示</option>
-            <option value="batch">批量检测</option>
-          </select>
-
-          <label for="modelSelect">选择模型（.pt）</label>
-          <div class="inline">
-            <select id="modelSelect"></select>
-            <button id="refreshModelsBtn" type="button">刷新模型</button>
-          </div>
-          <div class="inline">
-            <input id="modelFileInput" type="file" accept=".pt" />
-            <button id="uploadModelBtn" type="button">上传模型</button>
-          </div>
-
-          <div id="singleUploadBlock">
-            <label for="imageInput">单图上传</label>
-            <input id="imageInput" type="file" accept="image/*" />
-          </div>
-
-          <div id="batchUploadBlock" class="hidden">
-            <label for="batchImageInput">批量上传（选择文件夹）</label>
-            <input id="batchImageInput" type="file" accept="image/*" webkitdirectory directory multiple />
-            <div class="meta">将遍历文件夹内所有图片，自动保存打标结果到项目目录。</div>
-          </div>
-
-          <label for="presetSelect">阈值预设</label>
-          <select id="presetSelect">
-            <option value="balanced">平衡（默认）</option>
-            <option value="high_recall">高召回</option>
-            <option value="high_precision">高精度</option>
-            <option value="custom">自定义</option>
-          </select>
-
-          <label for="confInput">置信度阈值 conf</label>
-          <input id="confInput" type="number" min="0.01" max="0.99" step="0.01" value="0.25" />
-
-          <label for="iouInput">NMS IoU 阈值 iou</label>
-          <input id="iouInput" type="number" min="0.10" max="0.95" step="0.01" value="0.60" />
-
-          <button id="runBtn">开始运行</button>
-          <div id="status" class="status"></div>
+  <!-- ======================== AUTH PAGE ======================== -->
+  <div id="authApp" class="min-h-screen bg-surface-900 flex items-center justify-center p-4">
+    <!-- Login Card -->
+    <div id="loginCard" class="w-full max-w-sm">
+      <div class="bg-surface-800 border border-surface-700 rounded-2xl p-8 shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+          </svg>
         </div>
-
-        <div class="card">
-          <h3>结果面板</h3>
-          <div id="activeMeta" class="meta">尚未运行</div>
-          <img id="resultImage" alt="单图模式会显示可视化结果图" />
-          <div id="batchSummary" class="meta hidden"></div>
+        <h1 class="text-2xl font-bold text-white text-center mb-1">交通缺陷检测</h1>
+        <p class="text-surface-400 text-sm text-center mb-6">登录到您的账号</p>
+        <div id="loginMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm"></div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-surface-400 mb-1.5">用户名</label>
+            <input type="text" id="loginUsername" placeholder="请输入用户名" autocomplete="username"
+              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-surface-400 mb-1.5">密码</label>
+            <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password"
+              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          </div>
+          <button id="loginBtn" onclick="doLogin()"
+            class="w-full py-2.5 rounded-xl font-semibold text-sm bg-accent-600 hover:bg-accent-500 text-white transition-colors flex items-center justify-center gap-2">
+            登录
+          </button>
+          <div class="text-center text-sm text-surface-400">
+            还没有账号？<a href="javascript:void(0)" onclick="showRegister()" class="text-accent-400 hover:text-accent-300 font-medium">立即注册</a>
+          </div>
         </div>
-      </div>
-
-      <div id="detailsCard" class="card" style="margin-top: 16px;">
-        <h3>结果明细</h3>
-        <div id="summary" class="meta">尚未检测</div>
-        <table>
-          <thead>
-            <tr>
-              <th>序号/文件</th>
-              <th>类别或状态</th>
-              <th>置信度/数量</th>
-              <th>边框或信息</th>
-            </tr>
-          </thead>
-          <tbody id="detBody"></tbody>
-        </table>
       </div>
     </div>
 
-    <script>
-      const imageInput = document.getElementById("imageInput");
-      const batchImageInput = document.getElementById("batchImageInput");
-      const modeSelect = document.getElementById("modeSelect");
-      const modelSelect = document.getElementById("modelSelect");
-      const modelFileInput = document.getElementById("modelFileInput");
-      const uploadModelBtn = document.getElementById("uploadModelBtn");
-      const refreshModelsBtn = document.getElementById("refreshModelsBtn");
-      const presetSelect = document.getElementById("presetSelect");
-      const singleUploadBlock = document.getElementById("singleUploadBlock");
-      const batchUploadBlock = document.getElementById("batchUploadBlock");
-      const confInput = document.getElementById("confInput");
-      const iouInput = document.getElementById("iouInput");
-      const runBtn = document.getElementById("runBtn");
-      const statusEl = document.getElementById("status");
-      const resultImage = document.getElementById("resultImage");
-      const detBody = document.getElementById("detBody");
-      const summary = document.getElementById("summary");
-      const activeMeta = document.getElementById("activeMeta");
-      const batchSummary = document.getElementById("batchSummary");
-      const detailsCard = document.getElementById("detailsCard");
-      let lastSingleSummary = "尚未检测";
+    <!-- Register Card (hidden by default) -->
+    <div id="registerCard" class="w-full max-w-sm hidden">
+      <div class="bg-surface-800 border border-surface-700 rounded-2xl p-8 shadow-2xl">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-500 to-accent-700 flex items-center justify-center mx-auto mb-6 shadow-lg">
+          <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/>
+          </svg>
+        </div>
+        <h1 class="text-2xl font-bold text-white text-center mb-1">创建账号</h1>
+        <p class="text-surface-400 text-sm text-center mb-6">注册交通缺陷检测系统</p>
+        <div id="registerMsg" class="hidden mb-4 px-4 py-3 rounded-lg text-sm"></div>
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-surface-400 mb-1.5">用户名</label>
+            <input type="text" id="regUsername" placeholder="至少3个字符" autocomplete="username"
+              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-surface-400 mb-1.5">密码</label>
+            <input type="password" id="regPassword" placeholder="至少6个字符" autocomplete="new-password"
+              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-surface-400 mb-1.5">确认密码</label>
+            <input type="password" id="regConfirm" placeholder="再次输入密码" autocomplete="new-password"
+              class="w-full bg-surface-900 border border-surface-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500 transition-colors" />
+          </div>
+          <button id="registerBtn" onclick="doRegister()"
+            class="w-full py-2.5 rounded-xl font-semibold text-sm bg-accent-600 hover:bg-accent-500 text-white transition-colors flex items-center justify-center gap-2">
+            注册
+          </button>
+          <div class="text-center text-sm text-surface-400">
+            已有账号？<a href="javascript:void(0)" onclick="showLogin()" class="text-accent-400 hover:text-accent-300 font-medium">立即登录</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-      const PRESETS = {
-        balanced: { conf: 0.25, iou: 0.6, text: "平衡：综合精度与召回，适合大多数场景" },
-        high_recall: { conf: 0.1, iou: 0.7, text: "高召回：降低 conf，尽量少漏检" },
-        high_precision: { conf: 0.5, iou: 0.5, text: "高精度：提高 conf，尽量少误检" },
-      };
+  <!-- ======================== APP SHELL ======================== -->
+  <div id="appShell" class="hidden min-h-screen bg-surface-900 flex flex-col">
 
-      function setStatus(msg, ok = true) {
-        statusEl.textContent = msg;
-        statusEl.className = ok ? "status ok" : "status err";
+    <header class="bg-surface-800 border-b border-surface-700 px-6 h-16 flex items-center justify-between shrink-0">
+      <div class="flex items-center gap-3">
+        <svg class="w-7 h-7 text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+        </svg>
+        <span class="font-bold text-white text-lg">交通缺陷检测</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="userBadge" class="text-sm text-surface-400 bg-surface-900 px-3 py-1.5 rounded-lg"></span>
+        <button onclick="doLogout()" class="text-sm text-surface-400 hover:text-red-400 border border-surface-700 hover:border-red-400/50 rounded-lg px-3 py-1.5 transition-colors">退出登录</button>
+      </div>
+    </header>
+
+    <nav class="bg-surface-800 border-b border-surface-700 px-6 flex gap-1 shrink-0">
+      <a href="#/dashboard" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">概览</a>
+      <a href="#/detect" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">缺陷检测</a>
+      <a href="#/history" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">检测记录</a>
+      <a href="#/models" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors">模型管理</a>
+      <a href="#/admin" id="navAdmin" class="nav-link px-4 py-3 text-sm font-medium text-surface-400 border-b-2 border-transparent hover:text-white transition-colors hidden">系统管理</a>
+    </nav>
+
+    <div id="vueApp" class="flex-1"></div>
+  </div>
+
+  <!-- ======================== JAVASCRIPT ======================== -->
+  <script>
+    const API = '/api/auth'
+    const token = localStorage.getItem('token')
+    const user = JSON.parse(localStorage.getItem('user') || 'null')
+
+    function showRegister() {
+      document.getElementById('loginCard').classList.add('hidden')
+      document.getElementById('registerCard').classList.remove('hidden')
+    }
+    function showLogin() {
+      document.getElementById('registerCard').classList.add('hidden')
+      document.getElementById('loginCard').classList.remove('hidden')
+    }
+
+    function setMsg(id, text, type) {
+      const el = document.getElementById(id)
+      el.textContent = text
+      el.className = 'mb-4 px-4 py-3 rounded-lg text-sm ' + (type === 'error'
+        ? 'bg-red-500/15 border border-red-500/30 text-red-400'
+        : 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400')
+    }
+
+    function setLoading(btn, text, on) {
+      btn.disabled = on
+      btn.textContent = text
+    }
+
+    if (token && user) {
+      document.getElementById('authApp').classList.add('hidden')
+      document.getElementById('appShell').classList.remove('hidden')
+      document.getElementById('userBadge').textContent = user.username + ' (' + user.role + ')'
+      if (user.role === 'admin') document.getElementById('navAdmin').classList.remove('hidden')
+      initVueApp()
+    }
+
+    async function doLogin() {
+      const u = document.getElementById('loginUsername').value.trim()
+      const p = document.getElementById('loginPassword').value
+      const btn = document.getElementById('loginBtn')
+      if (!u || !p) { setMsg('loginMsg', '请填写用户名和密码', 'error'); return }
+      setLoading(btn, '登录中...', true)
+      try {
+        const res = await fetch(API + '/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        })
+        const data = await res.json()
+        if (!res.ok) { setMsg('loginMsg', data.detail || '登录失败', 'error'); return }
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        setMsg('loginMsg', '登录成功，正在跳转...', 'success')
+        setTimeout(() => window.location.reload(), 500)
+      } catch {
+        setMsg('loginMsg', '网络错误，请稍后重试', 'error')
+      } finally {
+        setLoading(btn, '登录', false)
       }
+    }
 
-      function applyPreset(name) {
-        const preset = PRESETS[name];
-        if (!preset) return;
-        confInput.value = preset.conf.toFixed(2);
-        iouInput.value = preset.iou.toFixed(2);
-        activeMeta.textContent = `当前预设：${preset.text}`;
+    async function doRegister() {
+      const u = document.getElementById('regUsername').value.trim()
+      const p = document.getElementById('regPassword').value
+      const c = document.getElementById('regConfirm').value
+      const btn = document.getElementById('registerBtn')
+      if (!u || !p || !c) { setMsg('registerMsg', '请填写所有字段', 'error'); return }
+      if (p !== c) { setMsg('registerMsg', '两次密码不一致', 'error'); return }
+      setLoading(btn, '注册中...', true)
+      try {
+        const res = await fetch(API + '/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: u, password: p })
+        })
+        const data = await res.json()
+        if (!res.ok) { setMsg('registerMsg', data.detail || '注册失败', 'error'); return }
+        localStorage.setItem('token', data.token)
+        localStorage.setItem('user', JSON.stringify(data.user))
+        setMsg('registerMsg', '注册成功，正在跳转...', 'success')
+        setTimeout(() => window.location.reload(), 500)
+      } catch {
+        setMsg('registerMsg', '网络错误，请稍后重试', 'error')
+      } finally {
+        setLoading(btn, '注册', false)
       }
+    }
 
-      function updateModeUI() {
-        const isSingle = modeSelect.value === "single";
-        singleUploadBlock.classList.toggle("hidden", !isSingle);
-        batchUploadBlock.classList.toggle("hidden", isSingle);
-        resultImage.classList.toggle("hidden", !isSingle);
-        batchSummary.classList.toggle("hidden", isSingle);
-        detailsCard.classList.toggle("hidden", !isSingle);
-        if (isSingle) {
-          summary.textContent = lastSingleSummary;
+    function doLogout() {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.reload()
+    }
+
+    document.getElementById('loginPassword').addEventListener('keyup', e => { if (e.key === 'Enter') doLogin() })
+    document.getElementById('loginUsername').addEventListener('keyup', e => { if (e.key === 'Enter') doLogin() })
+    document.getElementById('regConfirm').addEventListener('keyup', e => { if (e.key === 'Enter') doRegister() })
+
+    function updateNav(path) {
+      document.querySelectorAll('.nav-link').forEach(a => {
+        const active = a.getAttribute('href') === '#' + path
+        a.classList.toggle('text-accent-400', active)
+        a.classList.toggle('border-accent-400', active)
+        a.classList.toggle('text-white', active)
+        a.classList.toggle('text-surface-400', !active)
+        a.classList.toggle('border-transparent', !active)
+      })
+    }
+
+    function initVueApp() {
+      const { createApp, ref, computed, reactive, onMounted } = Vue
+
+      // ── Dashboard View ────────────────────────────────────────
+      const DashboardView = {
+        template: `
+          <div class="p-6 max-w-6xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-6">概览</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">今日检测</div>
+                <div class="text-3xl font-bold text-white">{{ stats.detections_today ?? '--' }}</div>
+                <div class="text-xs text-surface-500 mt-1">次</div>
+              </div>
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">总检测量</div>
+                <div class="text-3xl font-bold text-accent-400">{{ stats.total_detections ?? 0 }}</div>
+                <div class="text-xs text-surface-500 mt-1">所有时间</div>
+              </div>
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">本周趋势</div>
+                <div class="text-3xl font-bold text-white">{{ weekCount }}</div>
+                <div class="text-xs text-surface-500 mt-1">近7天</div>
+              </div>
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">系统状态</div>
+                <div class="text-3xl font-bold text-emerald-400">正常</div>
+                <div class="text-xs text-surface-500 mt-1">运行中</div>
+              </div>
+            </div>
+            <div v-if="stats.by_class?.length" class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+              <div class="text-sm font-semibold text-white mb-4">缺陷类型分布</div>
+              <div class="space-y-3">
+                <div v-for="c in stats.by_class.slice(0,8)" :key="c.class_name" class="flex items-center gap-3">
+                  <div class="text-sm text-surface-400 w-40 truncate">{{ c.class_name }}</div>
+                  <div class="flex-1 bg-surface-700 rounded-full h-2">
+                    <div class="bg-accent-500 h-2 rounded-full transition-all" :style="{width: Math.max(2, c.count / stats.by_class[0].count * 100) + '%'}"></div>
+                  </div>
+                  <div class="text-sm text-accent-400 font-mono w-12 text-right">{{ c.count }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const stats = ref({})
+          const weekCount = computed(() => {
+            if (!stats.value.by_day) return '--'
+            const now = new Date()
+            const weekAgo = new Date(now); weekAgo.setDate(now.getDate() - 7)
+            return stats.value.by_day.filter(d => new Date(d.date) >= weekAgo).reduce((s, d) => s + d.count, 0)
+          })
+          onMounted(async () => {
+            try {
+              const res = await axios.get('/api/dashboard/stats')
+              stats.value = res.data || {}
+            } catch {}
+          })
+          return { stats, weekCount }
         }
       }
 
-      async function loadModels() {
-        try {
-          const resp = await fetch("/models");
-          const data = await resp.json();
-          if (!resp.ok) throw new Error(data.detail || "加载模型失败");
+      // ── Detect View ────────────────────────────────────────────
+      const DetectView = {
+        template: `
+          <div class="p-6 max-w-6xl mx-auto space-y-6">
+            <!-- Mode Tabs -->
+            <div class="flex gap-1 bg-surface-800 p-1 rounded-xl w-fit">
+              <button v-for="m in modes" :key="m.id" @click="settings.mode = m.id"
+                :class="['flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all', settings.mode === m.id ? 'bg-accent-600 text-white shadow' : 'text-surface-400 hover:text-white']">
+                {{ m.icon }} {{ m.label }}
+              </button>
+            </div>
 
-          modelSelect.innerHTML = "";
-          const defaultOption = document.createElement("option");
-          defaultOption.value = "";
-          defaultOption.textContent = `默认模型（${data.default_model}）`;
-          defaultOption.selected = true;
-          modelSelect.appendChild(defaultOption);
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <!-- LEFT: Config -->
+              <div class="bg-surface-800 rounded-2xl border border-surface-700 p-5 space-y-5">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-accent-600 flex items-center justify-center text-xs text-white">1</span>
+                  上传与设置
+                </h2>
 
-          data.models.forEach((modelPath) => {
-            const option = document.createElement("option");
-            option.value = modelPath;
-            option.textContent = modelPath;
-            modelSelect.appendChild(option);
-          });
-        } catch (err) {
-          setStatus(`模型列表加载失败: ${err.message}`, false);
-        }
-      }
+                <!-- Model -->
+                <div>
+                  <label class="block text-sm font-medium text-surface-400 mb-2">模型选择</label>
+                  <select v-model="settings.modelId" class="w-full bg-surface-900 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500">
+                    <option value="">默认模型</option>
+                    <option v-for="m in modelList" :key="m.id" :value="m.id">{{ m.path }}</option>
+                  </select>
+                </div>
 
-      function renderDetections(detections) {
-        detBody.innerHTML = "";
-        if (!detections.length) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = "<td colspan='4'>无检测框</td>";
-          detBody.appendChild(tr);
-          return;
-        }
+                <!-- Upload -->
+                <div>
+                  <label class="block text-sm font-medium text-surface-400 mb-2">
+                    {{ settings.mode === 'single' ? '上传图片' : '上传文件夹' }}
+                  </label>
+                  <div v-if="settings.mode === 'single'"
+                    @dragover.prevent="isDragOver = true" @dragleave="isDragOver = false" @drop.prevent="onDrop"
+                    @click="triggerFileInput"
+                    :class="['border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all', isDragOver ? 'border-accent-500 bg-accent-500/10' : 'border-surface-700 hover:border-surface-500']">
+                    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+                    <div v-if="preview" class="space-y-2">
+                      <img :src="preview" class="max-h-36 mx-auto rounded-lg object-contain" />
+                      <p class="text-sm text-surface-400">{{ fileName }}</p>
+                    </div>
+                    <div v-else class="space-y-2">
+                      <svg class="w-10 h-10 mx-auto text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                      <p class="text-sm text-surface-500">拖拽图片或点击选择</p>
+                    </div>
+                  </div>
+                  <div v-else @click="triggerBatchInput"
+                    :class="['border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all', isDragOver ? 'border-accent-500 bg-accent-500/10' : 'border-surface-700 hover:border-surface-500']">
+                    <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" />
+                    <div v-if="batchFiles.length" class="text-emerald-400 font-medium">{{ batchFiles.length }} 个文件已选择</div>
+                    <div v-else class="space-y-2">
+                      <svg class="w-10 h-10 mx-auto text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                      <p class="text-sm text-surface-500">拖拽文件夹或点击选择</p>
+                    </div>
+                  </div>
+                </div>
 
-        detections.forEach((det, idx) => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${idx + 1}</td>
-            <td>${det.class_name} (${det.class_id})</td>
-            <td>${det.confidence.toFixed(4)}</td>
-            <td>[${det.bbox_xyxy.join(", ")}]</td>
-          `;
-          detBody.appendChild(tr);
-        });
-      }
+                <!-- Presets -->
+                <div>
+                  <label class="block text-sm font-medium text-surface-400 mb-2">阈值预设</label>
+                  <div class="flex gap-2">
+                    <button v-for="p in presets" :key="p.id" @click="applyPreset(p.id)"
+                      :class="['flex-1 py-1.5 rounded-lg text-sm font-medium transition-all', settings.preset === p.id ? 'bg-accent-600 text-white' : 'bg-surface-900 text-surface-400 hover:bg-surface-700']">
+                      {{ p.label }}
+                    </button>
+                  </div>
+                </div>
 
-      function renderBatchResults(items) {
-        detBody.innerHTML = "";
-        items.forEach((item, idx) => {
-          const tr = document.createElement("tr");
-          if (item.error) {
-            tr.innerHTML = `
-              <td>${item.filename || idx + 1}</td>
-              <td>失败</td>
-              <td>-</td>
-              <td>${item.error}</td>
-            `;
-          } else {
-            tr.innerHTML = `
-              <td>${item.filename || idx + 1}</td>
-              <td>成功</td>
-              <td>${item.num_detections}</td>
-              <td>${item.detections.slice(0, 3).map(d => `${d.class_name}:${d.confidence.toFixed(2)}`).join(" | ") || "无检测框"}</td>
-            `;
+                <!-- Sliders -->
+                <div class="space-y-3">
+                  <div>
+                    <div class="flex justify-between mb-1">
+                      <label class="text-sm text-surface-400">置信度 conf</label>
+                      <span class="text-sm text-accent-400 font-mono">{{ settings.conf.toFixed(2) }}</span>
+                    </div>
+                    <input type="range" v-model.number="settings.conf" min="0.01" max="0.99" step="0.01" class="w-full" />
+                  </div>
+                  <div>
+                    <div class="flex justify-between mb-1">
+                      <label class="text-sm text-surface-400">IoU iou</label>
+                      <span class="text-sm text-accent-400 font-mono">{{ settings.iou.toFixed(2) }}</span>
+                    </div>
+                    <input type="range" v-model.number="settings.iou" min="0.1" max="0.95" step="0.01" class="w-full" />
+                  </div>
+                </div>
+
+                <!-- Run -->
+                <button @click="runDetect" :disabled="isRunning || !canRun"
+                  class="w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+                  :class="isRunning || !canRun ? 'bg-surface-700 text-surface-400 cursor-not-allowed' : 'bg-accent-600 hover:bg-accent-500 text-white'">
+                  <svg v-if="isRunning" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                  {{ isRunning ? (settings.mode === 'single' ? '检测中...' : '处理中...') : '开始检测' }}
+                </button>
+
+                <div v-if="toast.show" :class="['px-4 py-3 rounded-lg text-sm', toast.type === 'error' ? 'bg-red-500/15 text-red-400' : 'bg-emerald-500/15 text-emerald-400']">
+                  {{ toast.message }}
+                </div>
+              </div>
+
+              <!-- RIGHT: Result -->
+              <div class="bg-surface-800 rounded-2xl border border-surface-700 p-5 space-y-5">
+                <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+                  <span class="w-6 h-6 rounded bg-emerald-600 flex items-center justify-center text-xs text-white">2</span>
+                  检测结果
+                </h2>
+
+                <div v-if="!result && !isRunning" class="flex flex-col items-center justify-center py-16 text-surface-500">
+                  <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <p>上传图片开始检测</p>
+                </div>
+
+                <div v-else-if="isRunning && settings.mode === 'single'" class="space-y-4 animate-pulse">
+                  <div class="h-48 bg-surface-700 rounded-xl"></div>
+                  <div class="h-4 bg-surface-700 rounded w-3/4"></div>
+                </div>
+
+                <div v-else-if="result" class="space-y-4">
+                  <!-- Single -->
+                  <div v-if="settings.mode === 'single'" class="space-y-4">
+                    <div class="relative rounded-xl overflow-hidden bg-surface-900">
+                      <img :src="'data:image/png;base64,' + result.annotated_image_base64" class="w-full max-h-[360px] object-contain" />
+                      <div class="absolute top-3 right-3 px-3 py-1.5 rounded-full text-xs font-bold shadow-lg"
+                        :class="result.num_detections > 0 ? 'bg-emerald-500 text-white' : 'bg-surface-700 text-surface-400'">
+                        {{ result.num_detections > 0 ? result.num_detections + ' 个缺陷' : '无缺陷' }}
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div class="bg-surface-900 rounded-xl p-3">
+                        <div class="text-xs text-surface-500">图片尺寸</div>
+                        <div class="text-sm font-semibold text-white">{{ result.image_size?.width }} × {{ result.image_size?.height }}</div>
+                      </div>
+                      <div class="bg-surface-900 rounded-xl p-3">
+                        <div class="text-xs text-surface-500">检测数量</div>
+                        <div class="text-sm font-semibold" :class="result.num_detections > 0 ? 'text-accent-400' : 'text-surface-400'">{{ result.num_detections }}</div>
+                      </div>
+                    </div>
+                    <div v-if="result.model_name" class="bg-surface-900 rounded-xl p-3">
+                      <div class="text-xs text-surface-500">使用模型</div>
+                      <div class="text-sm font-medium text-white">{{ result.model_name }}</div>
+                    </div>
+                    <div v-if="result.detections?.length > 0" class="space-y-2 max-h-64 overflow-y-auto">
+                      <div v-for="(d, i) in result.detections" :key="i" class="flex items-center gap-3 bg-surface-900 rounded-lg p-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0"
+                          :style="{ backgroundColor: getColor(d.class_id) + '30', color: getColor(d.class_id) }">{{ d.class_id }}</div>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm font-medium text-white truncate">{{ d.class_name }}</div>
+                          <div class="text-xs text-surface-500 font-mono">[{{ d.bbox_xyxy.map(v => v.toFixed(0)).join(', ') }}]</div>
+                        </div>
+                        <div class="text-sm font-bold text-accent-400">{{ (d.confidence * 100).toFixed(1) }}%</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Batch -->
+                  <div v-else class="space-y-4">
+                    <div class="grid grid-cols-3 gap-3">
+                      <div class="bg-surface-900 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-accent-400">{{ result.total_files }}</div>
+                        <div class="text-xs text-surface-500">总文件</div>
+                      </div>
+                      <div class="bg-surface-900 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold text-emerald-400">{{ result.success_count }}</div>
+                        <div class="text-xs text-surface-500">成功</div>
+                      </div>
+                      <div class="bg-surface-900 rounded-xl p-3 text-center">
+                        <div class="text-xl font-bold" :class="result.failure_count > 0 ? 'text-red-400' : 'text-surface-400'">{{ result.failure_count }}</div>
+                        <div class="text-xs text-surface-500">失败</div>
+                      </div>
+                    </div>
+                    <div v-if="result.results?.length" class="space-y-2 max-h-64 overflow-y-auto">
+                      <div v-for="(r, i) in result.results.slice(0,20)" :key="i" class="flex items-center gap-3 bg-surface-900 rounded-lg px-3 py-2">
+                        <div class="text-sm text-white truncate flex-1">{{ r.filename }}</div>
+                        <div v-if="r.num_detections !== undefined" class="text-sm font-medium" :class="r.num_detections > 0 ? 'text-accent-400' : 'text-surface-500'">{{ r.num_detections }} 个</div>
+                        <div v-else-if="r.error" class="text-xs text-red-400">{{ r.error }}</div>
+                      </div>
+                    </div>
+                    <div class="text-xs text-surface-500">输出目录: <code class="text-surface-400">{{ result.output_dir }}</code></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const modes = [
+            { id: 'single', label: '单图检测', icon: '🖼' },
+            { id: 'batch', label: '批量检测', icon: '📁' },
+          ]
+          const presets = [
+            { id: 'balanced', label: '平衡', conf: 0.25, iou: 0.6 },
+            { id: 'high_recall', label: '高召回', conf: 0.1, iou: 0.7 },
+            { id: 'high_precision', label: '高精度', conf: 0.5, iou: 0.5 },
+          ]
+          const presetValues = { balanced: { conf: 0.25, iou: 0.6 }, high_recall: { conf: 0.1, iou: 0.7 }, high_precision: { conf: 0.5, iou: 0.5 } }
+
+          const settings = reactive({ mode: 'single', modelId: '', conf: 0.25, iou: 0.6, preset: 'balanced' })
+          const isRunning = ref(false)
+          const isDragOver = ref(false)
+          const result = ref(null)
+          const modelList = ref([])
+          const preview = ref('')
+          const fileName = ref('')
+          const currentFile = ref(null)
+          const batchFiles = ref([])
+          const fileInput = ref(null)
+          const batchInput = ref(null)
+          const toast = reactive({ show: false, message: '', type: 'success' })
+
+          const classColors = ['#ef4444','#f97316','#eab308','#22c55e','#14b8a6','#3b82f6','#8b5cf6','#ec4899','#f43f5e','#6366f1']
+          const getColor = (id) => classColors[(id || 0) % classColors.length]
+
+          const canRun = computed(() => settings.mode === 'single' ? !!currentFile.value : batchFiles.value.length > 0)
+
+          const applyPreset = (id) => {
+            settings.preset = id
+            const v = presetValues[id]
+            if (v) { settings.conf = v.conf; settings.iou = v.iou }
           }
-          detBody.appendChild(tr);
-        });
-      }
 
-      runBtn.addEventListener("click", async () => {
-        const isSingle = modeSelect.value === "single";
+          const triggerFileInput = () => fileInput.value?.click()
+          const triggerBatchInput = () => batchInput.value?.click()
 
-        runBtn.disabled = true;
-        setStatus("运行中，请稍候...");
+          const onFileChange = (e) => {
+            const file = e.target.files?.[0]
+            if (file) handleFile(file)
+          }
+          const onDrop = (e) => {
+            isDragOver.value = false
+            const file = e.dataTransfer.files?.[0]
+            if (file?.type.startsWith('image/')) handleFile(file)
+          }
+          const handleFile = (file) => {
+            fileName.value = file.name
+            currentFile.value = file
+            const reader = new FileReader()
+            reader.onload = e => { preview.value = e.target.result }
+            reader.readAsDataURL(file)
+          }
 
-        try {
-          const query = new URLSearchParams({
-            conf: confInput.value,
-            iou: iouInput.value,
-            imgsz: "640",
-            max_det: "300",
-            model: modelSelect.value,
-          });
+          const onBatchChange = (e) => {
+            batchFiles.value = Array.from(e.target.files || [])
+          }
 
-          if (isSingle) {
-            const file = imageInput.files?.[0];
-            if (!file) throw new Error("请先选择一张图片");
+          const showToast = (message, type = 'success') => {
+            toast.message = message; toast.type = type; toast.show = true
+            setTimeout(() => { toast.show = false }, 4000)
+          }
 
-            const formData = new FormData();
-            formData.append("file", file);
+          const loadModels = async () => {
+            try {
+              const res = await axios.get('/api/models')
+              modelList.value = res.data.models || []
+            } catch {}
+          }
 
-            const resp = await fetch(`/predict?${query.toString()}`, {
-              method: "POST",
-              body: formData,
-            });
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.detail || "请求失败");
-
-            resultImage.src = `data:image/png;base64,${data.annotated_image_base64}`;
-            summary.textContent = `图片尺寸 ${data.image_size.width}x${data.image_size.height}，检测框数量 ${data.num_detections}`;
-            lastSingleSummary = summary.textContent;
-            activeMeta.innerHTML = `<span class="tag">模式：单图</span><span class="tag">模型：${data.model_path}</span>`;
-            renderDetections(data.detections);
-            batchSummary.classList.add("hidden");
-          } else {
-            const files = batchImageInput.files;
-            if (!files || files.length === 0) throw new Error("请至少选择一张图片");
-
-            const formData = new FormData();
-            for (const file of files) {
-              formData.append("files", file, file.webkitRelativePath || file.name);
+          // Build query — only pass model_id when it's a positive integer (not "" or "proj_...")
+          const buildQuery = () => {
+            const p = new URLSearchParams({
+              conf: settings.conf.toString(), iou: settings.iou.toString(),
+              imgsz: '640', max_det: '300'
+            })
+            const mid = settings.modelId
+            // Only include model_id if it's a numeric string (DB-uploaded model)
+            if (mid && Number.isInteger(Number(mid)) && Number(mid) > 0) {
+              p.set('model_id', mid)
             }
-
-            const resp = await fetch(`/predict_batch?${query.toString()}`, {
-              method: "POST",
-              body: formData,
-            });
-            const data = await resp.json();
-            if (!resp.ok) throw new Error(data.detail || "请求失败");
-
-            const lines = [
-              `共 ${data.total_files} 张，成功 ${data.success_count} 张，失败 ${data.failure_count} 张`,
-              `输出目录：${data.output_dir}`,
-              `汇总文件：${data.output_dir}/summary.json`,
-            ];
-            batchSummary.innerHTML = `${lines[0]}<br/><span class="mono">${lines[1]}</span><br/><span class="mono">${lines[2]}</span>`;
-            batchSummary.classList.remove("hidden");
-            activeMeta.innerHTML = `<span class="tag">模式：批量</span><span class="tag">模型：${data.model_path}</span>`;
-            setStatus(`批量完成，结果已保存到 ${data.output_dir}`, true);
+            return p
           }
-          if (isSingle) setStatus("运行完成", true);
-        } catch (err) {
-          setStatus(`运行失败: ${err.message}`, false);
-        } finally {
-          runBtn.disabled = false;
-        }
-      });
 
-      modeSelect.addEventListener("change", updateModeUI);
-      presetSelect.addEventListener("change", () => {
-        if (presetSelect.value === "custom") {
-          activeMeta.textContent = "当前预设：自定义（你可手动调整 conf 与 iou）";
-          return;
-        }
-        applyPreset(presetSelect.value);
-      });
-      refreshModelsBtn.addEventListener("click", loadModels);
-      uploadModelBtn.addEventListener("click", async () => {
-        const file = modelFileInput.files?.[0];
-        if (!file) {
-          setStatus("请先选择一个 .pt 模型文件", false);
-          return;
-        }
-        if (!file.name.toLowerCase().endsWith(".pt")) {
-          setStatus("只支持 .pt 模型文件", false);
-          return;
-        }
+          const runDetect = async () => {
+            if (!canRun.value) { showToast(settings.mode === 'single' ? '请先选择图片' : '请先选择文件', 'error'); return }
+            isRunning.value = true
+            const q = buildQuery().toString()
+            try {
+              if (settings.mode === 'single') {
+                const fd = new FormData()
+                fd.append('file', currentFile.value)
+                const res = await axios.post(`/api/detections/predict?${q}`, fd)
+                result.value = res.data
+                showToast('检测完成')
+              } else {
+                const fd = new FormData()
+                batchFiles.value.forEach(f => fd.append('files', f, f.name))
+                const res = await axios.post(`/api/detections/batch?${q}`, fd)
+                result.value = res.data
+                showToast(`完成：${res.data.success_count}/${res.data.total_files} 个文件`)
+              }
+            } catch (e) {
+              showToast(e.response?.data?.detail || '检测失败', 'error')
+            } finally {
+              isRunning.value = false
+            }
+          }
 
-        uploadModelBtn.disabled = true;
-        try {
-          const formData = new FormData();
-          formData.append("file", file);
-          const resp = await fetch("/models/upload", { method: "POST", body: formData });
-          const data = await resp.json();
-          if (!resp.ok) throw new Error(data.detail || "上传失败");
+          onMounted(() => { loadModels() })
 
-          await loadModels();
-          modelSelect.value = data.model_path;
-          setStatus(`模型上传成功：${data.model_path}`, true);
-        } catch (err) {
-          setStatus(`模型上传失败: ${err.message}`, false);
-        } finally {
-          uploadModelBtn.disabled = false;
-          modelFileInput.value = "";
+          return { modes, presets, settings, isRunning, isDragOver, result, modelList, preview, fileName, currentFile, batchFiles, canRun, fileInput, batchInput, toast, getColor, applyPreset, triggerFileInput, triggerBatchInput, onFileChange, onDrop, onBatchChange, runDetect }
         }
-      });
+      }
 
-      updateModeUI();
-      applyPreset("balanced");
-      loadModels();
-    </script>
-  </body>
+      // ── History View ────────────────────────────────────────────
+      const HistoryView = {
+        template: `
+          <div class="p-6 max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-6">
+              <h2 class="text-2xl font-bold text-white">检测记录</h2>
+              <div class="flex gap-3 items-center">
+                <input v-model="search" @input="debouncedLoad" placeholder="搜索文件名..." type="text"
+                  class="bg-surface-800 border border-surface-700 rounded-lg px-3 py-2 text-sm text-white placeholder-surface-500 focus:outline-none focus:border-accent-500" />
+              </div>
+            </div>
+
+            <div v-if="loading" class="text-surface-500 text-sm">加载中...</div>
+            <div v-else-if="!records.length" class="bg-surface-800 border border-surface-700 rounded-2xl p-8 text-center text-surface-500">
+              <svg class="w-12 h-12 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              <p>暂无检测记录</p>
+            </div>
+            <div v-else class="space-y-3">
+              <div v-for="r in records" :key="r.id" class="bg-surface-800 border border-surface-700 rounded-2xl p-4 hover:border-surface-600 transition-colors">
+                <div class="flex items-start justify-between gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 mb-1">
+                      <span class="text-white font-medium text-sm truncate">{{ r.filename }}</span>
+                      <span class="px-2 py-0.5 rounded text-xs font-medium shrink-0"
+                        :class="r.num_detections > 0 ? 'bg-emerald-500/15 text-emerald-400' : 'bg-surface-700 text-surface-400'">
+                        {{ r.num_detections }} 个缺陷
+                      </span>
+                    </div>
+                    <div class="flex gap-4 text-xs text-surface-500">
+                      <span>{{ r.model_name }}</span>
+                      <span>{{ r.conf }} / {{ r.iou }}</span>
+                      <span>{{ new Date(r.created_at).toLocaleString('zh-CN') }}</span>
+                    </div>
+                  </div>
+                  <div class="text-2xl font-bold" :class="r.num_detections > 0 ? 'text-accent-400' : 'text-surface-600'">{{ r.num_detections }}</div>
+                </div>
+              </div>
+              <!-- Pagination -->
+              <div class="flex items-center justify-center gap-2 pt-4">
+                <button @click="prevPage" :disabled="page <= 1" class="px-3 py-1 rounded text-sm border border-surface-700 text-surface-400 hover:text-white disabled:opacity-40">上一页</button>
+                <span class="text-sm text-surface-500">{{ page }} / {{ totalPages }}</span>
+                <button @click="nextPage" :disabled="page >= totalPages" class="px-3 py-1 rounded text-sm border border-surface-700 text-surface-400 hover:text-white disabled:opacity-40">下一页</button>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const records = ref([])
+          const loading = ref(true)
+          const page = ref(1)
+          const limit = 20
+          const total = ref(0)
+          const search = ref('')
+          let debounceTimer = null
+
+          const totalPages = computed(() => Math.max(1, Math.ceil(total.value / limit)))
+
+          const loadRecords = async () => {
+            loading.value = true
+            try {
+              const p = new URLSearchParams({ page: page.value, limit })
+              if (search.value) p.set('search', search.value)
+              const res = await axios.get('/api/detections?' + p.toString())
+              records.value = res.data.records || []
+              total.value = res.data.total || 0
+            } catch {} finally {
+              loading.value = false
+            }
+          }
+
+          const debouncedLoad = () => {
+            page.value = 1
+            clearTimeout(debounceTimer)
+            debounceTimer = setTimeout(loadRecords, 400)
+          }
+
+          const prevPage = () => { if (page.value > 1) { page.value--; loadRecords() } }
+          const nextPage = () => { if (page.value < totalPages.value) { page.value++; loadRecords() } }
+
+          onMounted(() => loadRecords())
+          return { records, loading, page, totalPages, search, debouncedLoad, prevPage, nextPage }
+        }
+      }
+
+      // ── Models View ────────────────────────────────────────────
+      const ModelsView = {
+        template: `
+          <div class="p-6 max-w-6xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-6">模型管理</h2>
+
+            <!-- Upload -->
+            <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5 mb-6">
+              <div class="text-sm font-semibold text-white mb-3">上传模型文件</div>
+              <div class="flex gap-3 items-center">
+                <input type="file" accept=".pt" @change="onUploadFile" class="text-sm text-surface-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent-600 file:text-white hover:file:bg-accent-500 file:cursor-pointer" />
+                <button @click="uploadModel" :disabled="!uploadFile || uploading" class="px-5 py-2 rounded-lg text-sm font-semibold bg-accent-600 hover:bg-accent-500 text-white disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+                  {{ uploading ? '上传中...' : '上传' }}
+                </button>
+                <span v-if="uploadMsg" class="text-sm" :class="uploadOk ? 'text-emerald-400' : 'text-red-400'">{{ uploadMsg }}</span>
+              </div>
+            </div>
+
+            <!-- List -->
+            <div v-if="loading" class="text-surface-500 text-sm">加载中...</div>
+            <div v-else-if="!models.length" class="text-surface-500 text-sm">暂无模型</div>
+            <div v-else class="bg-surface-800 border border-surface-700 rounded-2xl overflow-hidden">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-surface-700 text-left">
+                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">模型路径</th>
+                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">上传者</th>
+                    <th class="px-4 py-3 text-xs text-surface-500 font-medium">时间</th>
+                    <th class="px-4 py-3 text-xs text-surface-500 font-medium text-right">操作</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="m in models" :key="m.id" class="border-b border-surface-700/50 last:border-0 hover:bg-surface-700/30">
+                    <td class="px-4 py-3">
+                      <div class="text-white font-medium text-xs">{{ m.path }}</div>
+                      <div v-if="m.name !== m.path" class="text-xs text-surface-500 mt-0.5">{{ m.name }}</div>
+                    </td>
+                    <td class="px-4 py-3 text-surface-400 text-xs">{{ m.uploaded_by_name || (m.uploaded_by ? '用户' + m.uploaded_by : '项目内置') }}</td>
+                    <td class="px-4 py-3 text-surface-400 text-xs">{{ m.uploaded_at ? new Date(m.uploaded_at).toLocaleString('zh-CN') : '--' }}</td>
+                    <td class="px-4 py-3 text-right">
+                      <button v-if="m.id && !String(m.id).startsWith('proj_')" @click="deleteModel(m)"
+                        class="text-xs px-3 py-1 rounded border border-red-500/30 text-red-400 hover:bg-red-500/10 transition-colors">删除</button>
+                      <span v-else class="text-xs text-surface-600">不可删除</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        `,
+        setup() {
+          const models = ref([])
+          const loading = ref(true)
+          const uploading = ref(false)
+          const uploadFile = ref(null)
+          const uploadMsg = ref('')
+          const uploadOk = ref(false)
+
+          const loadModels = async () => {
+            try {
+              const res = await axios.get('/api/models')
+              models.value = res.data.models || []
+            } catch {}
+          }
+
+          const onUploadFile = (e) => {
+            uploadFile.value = e.target.files?.[0] || null
+          }
+
+          const uploadModel = async () => {
+            if (!uploadFile.value) return
+            uploading.value = true
+            uploadMsg.value = ''
+            try {
+              const fd = new FormData()
+              fd.append('file', uploadFile.value)
+              await axios.post('/api/models/upload', fd)
+              uploadMsg.value = '上传成功'
+              uploadOk.value = true
+              uploadFile.value = null
+              await loadModels()
+            } catch (e) {
+              uploadMsg.value = e.response?.data?.detail || '上传失败'
+              uploadOk.value = false
+            } finally {
+              uploading.value = false
+            }
+          }
+
+          const deleteModel = async (m) => {
+            if (!confirm('确认删除模型 ' + m.path + '？')) return
+            try {
+              await axios.delete('/api/models/' + m.id)
+              await loadModels()
+            } catch (e) {
+              alert(e.response?.data?.detail || '删除失败')
+            }
+          }
+
+          onMounted(async () => { await loadModels(); loading.value = false })
+          return { models, loading, uploading, uploadFile, uploadMsg, uploadOk, onUploadFile, uploadModel, deleteModel }
+        }
+      }
+
+      // ── Admin View ─────────────────────────────────────────────
+      const AdminView = {
+        template: `
+          <div class="p-6 max-w-6xl mx-auto">
+            <h2 class="text-2xl font-bold text-white mb-6">系统管理</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">用户总数</div>
+                <div class="text-3xl font-bold text-white">{{ stats.total_users ?? '--' }}</div>
+              </div>
+              <div class="bg-surface-800 border border-surface-700 rounded-2xl p-5">
+                <div class="text-xs text-surface-400 uppercase tracking-wide mb-2">检测总数</div>
+                <div class="text-3xl font-bold text-white">{{ stats.total_detections ?? '--' }}</div>
+              </div>
+            </div>
+          </div>
+        `,
+        setup() {
+          const stats = ref({})
+          onMounted(async () => {
+            try {
+              const res = await axios.get('/api/dashboard/stats')
+              stats.value = res.data || {}
+            } catch {}
+          })
+          return { stats }
+        }
+      }
+
+      // ── Router ─────────────────────────────────────────────────
+      const routes = {
+        '/dashboard': DashboardView,
+        '/detect': DetectView,
+        '/history': HistoryView,
+        '/models': ModelsView,
+        '/admin': AdminView,
+      }
+
+      const App = {
+        setup() {
+          const path = ref(window.location.hash.slice(1) || '/dashboard')
+          const CurrentView = computed(() => routes[path.value] || DashboardView)
+          onMounted(() => {
+            window.addEventListener('hashchange', () => {
+              path.value = window.location.hash.slice(1) || '/dashboard'
+              updateNav(path.value)
+            })
+            updateNav(path.value)
+          })
+          return { CurrentView }
+        },
+        template: '<component :is="CurrentView" />'
+      }
+
+      createApp(App).mount('#vueApp')
+    }
+  </script>
+</body>
 </html>

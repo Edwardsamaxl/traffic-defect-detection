@@ -66,6 +66,7 @@ from ultralytics.nn.modules import (
     ResNetLayer,
     RTDETRDecoder,
     SCDown,
+    SE,
     Segment,
     Segment26,
     SpatialAttention,
@@ -1682,6 +1683,9 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is CBAM:
             c1, c2 = ch[f], ch[f]  # CBAM输出通道数=输入通道数
+            args = [c1]
+        elif m is SE:
+            c1, c2 = ch[f], ch[f]  # SE输出通道数=输入通道数
             args = [c1]
         elif m is BiFPNNeck:
             # BiFPNNeck: takes list of [P3, P4, P5] features

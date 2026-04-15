@@ -75,6 +75,7 @@ from .conv import (
     Index,
     LightConv,
     RepConv,
+    SE,
     SpatialAttention,
 )
 from .head import (

@@ -36,7 +36,12 @@
       "Bash(dir E:\\\\PycharmProjects\\\\traffic-defect-detection\\\\data\\\\NEU-DET:*)",
       "Bash(do cat:*)",
       "Bash(start:*)",
-      "Bash(.venv/Scripts/python.exe:*)"
+      "Bash(.venv/Scripts/python.exe:*)",
+      "Bash(curl:*)",
+      "Bash(netstat:*)",
+      "Bash(.venv/Scripts/pip.exe install:*)",
+      "Bash(source:*)",
+      "Bash(python3:*)"
     ]
   }
 }

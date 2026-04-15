@@ -1,0 +1,50 @@
+# Ultralytics YOLOv8s + SE (Squeeze-Excitation) 注意力机制
+# 集成位置：与 CBAM 相同，Backbone 的 C2f 层后
+
+# Parameters
+nc: 6
+scales:
+  n: [0.33, 0.25, 1024]
+  s: [0.33, 0.50, 1024]
+  m: [0.67, 0.75, 768]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.25, 512]
+
+# Backbone with SE
+backbone:
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2  640->320
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4  320->160
+  - [-1, 3, C2f, [128, True]] # 2
+  - [-1, 1, SE, []] # 3
+
+  - [-1, 1, Conv, [256, 3, 2]] # 4-P3/8  160->80
+  - [-1, 6, C2f, [256, True]] # 5
+  - [-1, 1, SE, []] # 6
+
+  - [-1, 1, Conv, [512, 3, 2]] # 7-P4/16  80->40
+  - [-1, 6, C2f, [512, True]] # 8
+  - [-1, 1, SE, []] # 9
+
+  - [-1, 1, Conv, [1024, 3, 2]] # 10-P5/32  40->20
+  - [-1, 3, C2f, [1024, True]] # 11
+  - [-1, 1, SPPF, [1024, 5]] # 12
+
+# Head (same as YOLOv8s)
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 6], 1, Concat, [1]] # cat backbone P4
+  - [-1, 3, C2f, [512]] # 15
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 4], 1, Concat, [1]] # cat backbone P3
+  - [-1, 3, C2f, [256]] # 18 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 12], 1, Concat, [1]] # cat head P4
+  - [-1, 3, C2f, [512]] # 21 (P4/16-medium)
+
+  - [-1, 1, Conv, [512, 3, 2]]
+  - [[-1, 9], 1, Concat, [1]] # cat head P5
+  - [-1, 3, C2f, [1024]] # 24 (P5/32-large)
+
+  - [[18, 21, 24], 1, Detect, [nc]] # Detect(P3, P4, P5)

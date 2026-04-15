@@ -1,0 +1,7 @@
+{
+  "tool_name": "Read",
+  "tool_input_preview": "{\"file_path\":\"C:/Users/Ed/AppData/Local/Temp/claude/E--PycharmProjects-traffic-defect-detection/tasks/bmlffu92t.output\"}",
+  "error": "File content (40588 tokens) exceeds maximum allowed tokens (25000). Please use offset and limit parameters to read specific portions of the file, or use the GrepTool to search for specific content.",
+  "timestamp": "2026-04-14T05:19:52.121Z",
+  "retry_count": 2
+}

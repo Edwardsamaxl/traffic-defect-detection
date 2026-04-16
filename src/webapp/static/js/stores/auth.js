@@ -1,26 +1,6 @@
-// Auth store - browser compatible version
+// Auth store - no interceptor setup here (handled by api/client.js)
 const TOKEN_KEY = 'token'
 const USER_KEY = 'user'
-
-// Setup axios interceptor for 401
-axios.interceptors.response.use(
-  res => res,
-  err => {
-    if (err.response?.status === 401) {
-      localStorage.removeItem(TOKEN_KEY)
-      localStorage.removeItem(USER_KEY)
-      window.location.href = '/static/index.html#/login'
-    }
-    return Promise.reject(err)
-  }
-)
-
-// Attach token to requests
-axios.interceptors.request.use(config => {
-  const token = localStorage.getItem(TOKEN_KEY)
-  if (token) config.headers.Authorization = `Bearer ${token}`
-  return config
-})
 
 // Simple reactive state
 const state = Vue.reactive({

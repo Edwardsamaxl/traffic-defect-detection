@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import json
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String, Text
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, JSON, String, Text
 from sqlalchemy.orm import relationship
 
 from src.webapp.database import Base
@@ -19,7 +18,7 @@ class DetectionRecord(Base):
     conf = Column(Float, nullable=False)
     iou = Column(Float, nullable=False)
     num_detections = Column(Integer, nullable=False)
-    detections = Column(Text, nullable=False)  # JSON string
+    detections = Column(JSON, nullable=False)
     image_width = Column(Integer, nullable=False)
     image_height = Column(Integer, nullable=False)
     annotated_image_base64 = Column(Text, nullable=True)  # only for single-image view
@@ -36,7 +35,7 @@ class DetectionRecord(Base):
             "conf": self.conf,
             "iou": self.iou,
             "num_detections": self.num_detections,
-            "detections": json.loads(self.detections) if self.detections else [],
+            "detections": self.detections if self.detections else [],
             "image_size": {"width": self.image_width, "height": self.image_height},
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

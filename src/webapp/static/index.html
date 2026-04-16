@@ -5,27 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>交通缺陷检测系统</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect x='1' y='1' width='38' height='38' rx='8' stroke='%23e2e8f0' stroke-width='2' fill='none'/><path d='M12 20h16M20 12v16' stroke='%23e2e8f0' stroke-width='2' stroke-linecap='round'/></svg>" />
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            surface: {
-              700: '#e5e5e3', 800: '#f5f5f3', 900: '#fafaf9',
-              400: '#9ca3af', 500: '#6b7280',
-            },
-            accent: {
-              400: '#374151', 500: '#111111', 600: '#000000',
-            },
-          },
-        },
-      },
-    }
-  </script>
   <script src="/static/lib/vue.global.prod.js"></script>
   <script src="/static/lib/vue-router.global.prod.js"></script>
   <script src="/static/lib/axios.min.js"></script>
+  <script src="/static/lib/chart.umd.min.js"></script>
   <style>
     /* ============================================================
        DESIGN SYSTEM — B&W Light Brutalist Minimal
@@ -379,6 +362,9 @@
     .modal-close:hover { color: #111111; }
     .modal-body { padding: 20px 22px; }
 
+    /* ── Utilities ── */
+    .hidden { display: none !important; }
+
     /* ── Upload Zone ── */
     .upload-zone {
       border: 1px dashed #d4d4d4;
@@ -388,9 +374,10 @@
       cursor: pointer;
       transition: all 0.15s;
       margin-bottom: 14px;
+      position: relative;
     }
     .upload-zone:hover { border-color: #111111; }
-    .upload-zone svg { color: #9ca3af; margin: 0 auto 10px; }
+    .upload-zone svg { color: #9ca3af; margin: 0 auto 10px; display: block; }
     .upload-text {
       font-size: 12px;
       color: #9ca3af;
@@ -1141,6 +1128,8 @@
     }
     .detail-stat-val { font-size: 18px; font-weight: 800; color: #111111; letter-spacing: -0.02em; }
     .detail-stat-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
+    .detail-image-wrap { margin-bottom: 16px; border-radius: 8px; overflow: hidden; border: 1px solid #e5e5e3; }
+    .detail-annotated-img { width: 100%; height: auto; display: block; }
 
     /* ============================================================
        ADMIN PAGE
@@ -1354,6 +1343,25 @@
     const token = localStorage.getItem('token')
     const user = JSON.parse(localStorage.getItem('user') || 'null')
 
+    // ── Global axios auth interceptor (for inline views) ──
+    axios.interceptors.request.use(config => {
+      const t = localStorage.getItem('token')
+      if (t) config.headers.Authorization = 'Bearer ' + t
+      return config
+    })
+    axios.interceptors.response.use(
+      res => res,
+      err => {
+        if (err.response?.status === 401) {
+          localStorage.removeItem('token')
+          localStorage.removeItem('user')
+          window.location.hash = '#/login'
+          window.location.reload()
+        }
+        return Promise.reject(err)
+      }
+    )
+
     function showRegister() {
       document.getElementById('authApp').style.display = 'none'
       document.getElementById('registerCard').style.display = 'flex'
@@ -1371,8 +1379,8 @@
     if (token && user) {
       document.getElementById('authApp').style.display = 'none'
       document.getElementById('appShell').classList.remove('hidden')
-      document.getElementById('userBadge').textContent = user.username + ' · ' + user.role
-      if (user.role === 'admin') document.getElementById('navAdmin').style.display = 'flex'
+      document.getElementById('userBadge').textContent = user.username
+      document.getElementById('navAdmin').style.display = 'none'
       initVueApp()
     }
 
@@ -1465,7 +1473,7 @@
                 <div class="page-eyebrow">概览</div>
                 <h1 class="page-title">数据统计</h1>
               </div>
-              <span class="header-note">最近30天</span>
+              <span class="header-note">最近7天</span>
             </div>
             <div class="stats-row">
               <div class="stat-card">
@@ -1604,12 +1612,12 @@
                   <div v-if="settings.mode === 'single'"
                     @click="triggerFileInput"
                     :class="['drop-zone', currentFile ? 'drop-zone--has-file' : '']">
-                    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+                    <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" @click.stop />
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <span class="drop-text">{{ currentFile ? fileName : '点击选择图片' }}</span>
                   </div>
                   <div v-else @click="triggerBatchInput" :class="['drop-zone', 'drop-zone--batch', batchFiles.length ? 'drop-zone--has-file' : '']">
-                    <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" />
+                    <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" @click.stop />
                     <div v-if="batchFiles.length" class="batch-info">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
                       <span class="drop-text">{{ batchFiles.length }} 个文件已选择</span>
@@ -1854,7 +1862,7 @@
                   <div class="model-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                   <div class="model-info"><div class="model-name">{{ m.name }}</div><div class="model-path">{{ m.path }}</div><div class="model-date" v-if="m.uploaded_at">上传于 {{ formatDate(m.uploaded_at) }}</div></div>
                 </div>
-                <button v-if="m.uploaded_by && isAdmin" @click="deleteModel(m)" class="delete-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
+                <button v-if="m.uploaded_by === currentUserId" @click="deleteModel(m)" class="delete-btn"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>
               </div>
             </div>
             <div v-if="showUploadModal" class="modal-overlay" @click.self="showUploadModal = false">
@@ -1864,11 +1872,11 @@
                   <button @click="showUploadModal = false" class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
                 <div class="modal-body">
-                  <div class="upload-zone" @click="uploadInput.click()">
-                    <input ref="uploadInput" type="file" accept=".pt" class="hidden" @change="onFileSelected" />
+                  <label for="modelFileInput" class="upload-zone" style="cursor:pointer;display:block">
+                    <input ref="uploadInput" id="modelFileInput" type="file" accept=".pt" class="hidden" @change="onFileSelected" />
                     <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <p class="upload-text">{{ uploadFile ? uploadFile.name : '点击选择 .pt 模型文件' }}</p>
-                  </div>
+                  </label>
                   <div v-if="uploadError" class="error-msg">{{ uploadError }}</div>
                   <button @click="uploadModel" :disabled="!uploadFile || uploading" :class="['submit-btn', !uploadFile || uploading ? 'submit-btn--disabled' : '']">
                     <span v-if="uploading" class="spinner"></span><span v-else>开始上传</span>
@@ -1880,16 +1888,16 @@
         `,
         setup() {
           const models = ref([]), loading = ref(false), showUploadModal = ref(false), uploadFile = ref(null), uploadError = ref(''), uploading = ref(false), uploadInput = ref(null)
-          const isAdmin = ref(false)
+          const currentUserId = ref(null)
           const user = JSON.parse(localStorage.getItem('user') || 'null')
-          isAdmin.value = user?.role === 'admin'
+          currentUserId.value = user?.id
           const formatDate = (iso) => { if (!iso) return ''; return new Date(iso).toLocaleString('zh-CN') }
           const loadModels = async () => { loading.value = true; try { const res = await axios.get('/api/models'); models.value = res.data.models || [] } catch {} finally { loading.value = false } }
           const onFileSelected = (e) => { uploadFile.value = e.target.files?.[0] || null; uploadError.value = '' }
           const uploadModel = async () => { if (!uploadFile.value) return; uploading.value = true; uploadError.value = ''; try { const fd = new FormData(); fd.append('file', uploadFile.value); await axios.post('/api/models/upload', fd); showUploadModal.value = false; uploadFile.value = null; await loadModels() } catch (e) { uploadError.value = e.response?.data?.detail || '上传失败' } finally { uploading.value = false } }
           const deleteModel = async (m) => { if (!confirm('确定删除该模型？')) return; try { await axios.delete('/api/models/' + m.id); await loadModels() } catch (e) { alert(e.response?.data?.detail || '删除失败') } }
           onMounted(() => { loadModels() })
-          return { models, loading, showUploadModal, uploadFile, uploadError, uploading, uploadInput, isAdmin, formatDate, loadModels, onFileSelected, uploadModel, deleteModel }
+          return { models, loading, showUploadModal, uploadFile, uploadError, uploading, uploadInput, currentUserId, formatDate, loadModels, onFileSelected, uploadModel, deleteModel }
         }
       }
 

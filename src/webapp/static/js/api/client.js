@@ -18,7 +18,8 @@ api.interceptors.response.use(
     if (err.response?.status === 401) {
       localStorage.removeItem('token')
       localStorage.removeItem('user')
-      window.location.href = '/static/index.html#/login'
+      // Use hash-based redirect to work with Vue Router hash history
+      window.location.hash = '#/login'
     }
     return Promise.reject(err)
   }

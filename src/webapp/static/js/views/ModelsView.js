@@ -32,7 +32,7 @@ export default {
               <div class="model-date" v-if="m.uploaded_at">上传于 {{ formatDate(m.uploaded_at) }}</div>
             </div>
           </div>
-          <button v-if="m.uploaded_by && isAdmin" @click="deleteModel(m)" class="delete-btn">
+          <button v-if="m.uploaded_by === currentUserId" @click="deleteModel(m)" class="delete-btn">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
           </button>
         </div>
@@ -48,11 +48,11 @@ export default {
             </button>
           </div>
           <div class="modal-body">
-            <div class="upload-zone" @click="uploadInput?.click()">
-              <input ref="uploadInput" type="file" accept=".pt" class="hidden" @change="onFileSelected" />
+            <label for="modelFileInput" class="upload-zone" style="cursor:pointer;display:block">
+              <input ref="uploadInput" id="modelFileInput" type="file" accept=".pt" class="hidden" @change="onFileSelected" />
               <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <p class="upload-text">{{ uploadFile ? uploadFile.name : '点击选择 .pt 模型文件' }}</p>
-            </div>
+            </label>
             <div v-if="uploadError" class="error-msg">{{ uploadError }}</div>
             <button @click="uploadModel" :disabled="!uploadFile || uploading" :class="['submit-btn', !uploadFile || uploading ? 'submit-btn--disabled' : '']">
               <span v-if="uploading" class="spinner"></span>
@@ -72,8 +72,10 @@ export default {
     const uploading = ref(false)
     const uploadInput = ref(null)
     const isAdmin = ref(false)
+    const currentUserId = ref(null)
     const user = JSON.parse(localStorage.getItem('user') || 'null')
     isAdmin.value = user?.role === 'admin'
+    currentUserId.value = user?.id || null
 
     const formatDate = (iso) => {
       if (!iso) return ''
@@ -125,6 +127,6 @@ export default {
 
     onMounted(() => { loadModels() })
 
-    return { models, loading, showUploadModal, uploadFile, uploadError, uploading, uploadInput, isAdmin, formatDate, loadModels, onFileSelected, uploadModel, deleteModel }
+    return { models, loading, showUploadModal, uploadFile, uploadError, uploading, uploadInput, isAdmin, currentUserId, formatDate, loadModels, onFileSelected, uploadModel, deleteModel }
   }
 }

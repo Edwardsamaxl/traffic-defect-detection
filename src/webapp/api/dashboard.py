@@ -22,14 +22,10 @@ def get_stats(
     db: Session = Depends(get_db),
 ) -> dict:
     today = datetime.utcnow().date()
-    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+    seven_days_ago = datetime.utcnow() - timedelta(days=6)
 
-    # Base query (always filter by user unless admin sees all)
-    base_filter = (
-        DetectionRecord.user_id == current_user.id
-        if current_user.role != "admin"
-        else True
-    )
+    # Base query (always filter by user - no admin role exists)
+    base_filter = DetectionRecord.user_id == current_user.id
 
     # Total detections
     total = db.query(func.count(DetectionRecord.id)).filter(base_filter).scalar() or 0
@@ -42,23 +38,27 @@ def get_stats(
         or 0
     )
 
-    # Last 30 days: detections per day (for line chart)
+    # Last 30 days: detections per day (fill missing days with 0)
     daily_data = (
         db.query(
             func.date(DetectionRecord.created_at).label("day"),
             func.count(DetectionRecord.id).label("count"),
         )
-        .filter(base_filter, DetectionRecord.created_at >= thirty_days_ago)
+        .filter(base_filter, DetectionRecord.created_at >= seven_days_ago)
         .group_by(text("day"))
         .order_by(text("day"))
         .all()
     )
-    by_day = [{"date": str(row.day), "count": row.count} for row in daily_data]
+    daily_map = {str(row.day): row.count for row in daily_data}
+    by_day = [
+        {"date": str(seven_days_ago + timedelta(days=i)), "count": daily_map.get(str(seven_days_ago + timedelta(days=i)), 0)}
+        for i in range(7)
+    ]
 
     # Last 30 days: class distribution (for bar chart)
     records = (
         db.query(DetectionRecord.detections)
-        .filter(base_filter, DetectionRecord.created_at >= thirty_days_ago)
+        .filter(base_filter, DetectionRecord.created_at >= seven_days_ago)
         .all()
     )
 
@@ -79,16 +79,9 @@ def get_stats(
         reverse=True,
     )[:10]
 
-    # Total users (admin only)
-    total_users = 0
-    if current_user.role == "admin":
-        from src.webapp.models.user import User as U
-        total_users = db.query(func.count(U.id)).scalar() or 0
-
     return {
         "total_detections": total,
         "detections_today": today_count,
         "by_day": by_day,
         "by_class": by_class,
-        "total_users": total_users,
     }

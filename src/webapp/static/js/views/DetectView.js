@@ -56,7 +56,7 @@ export default {
               @click="triggerFileInput"
               :class="['drop-zone', isDragOver ? 'drop-zone--over' : '', preview ? 'drop-zone--has-file' : '']"
             >
-              <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" />
+              <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="onFileChange" @click.stop />
               <div v-if="preview" class="preview-wrap">
                 <img :src="preview" class="preview-img" />
                 <div class="preview-meta">
@@ -77,7 +77,7 @@ export default {
               @click="triggerBatchInput"
               :class="['drop-zone', 'drop-zone--batch', batchFiles.length ? 'drop-zone--has-file' : '']"
             >
-              <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" />
+              <input ref="batchInput" type="file" accept="image/*" webkitdirectory directory multiple class="hidden" @change="onBatchChange" @click.stop />
               <div v-if="batchFiles.length" class="batch-info">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span>{{ batchFiles.length }} 个文件已选择</span>
@@ -292,7 +292,7 @@ export default {
       isRunning.value = true
       const query = new URLSearchParams({
         conf: settings.value.conf.toString(), iou: settings.value.iou.toString(),
-        imgsz: '640', max_det: '300', model_id: settings.value.modelId || ''
+        imgsz: '640', max_det: '300', model_id: settings.value.modelId ?? ''
       })
       try {
         const api = (await import('../api/client.js')).default

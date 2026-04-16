@@ -17,7 +17,6 @@ class User(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
-    role = Column(String(20), nullable=False, default="user")
     created_at = Column(DateTime, default=datetime.utcnow)
 
     detection_records = relationship("DetectionRecord", back_populates="user")
@@ -33,6 +32,5 @@ class User(Base):
         return {
             "id": self.id,
             "username": self.username,
-            "role": self.role,
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+import numpy as np
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from PIL import Image
 from pydantic import BaseModel
@@ -44,7 +45,7 @@ def _load_model(model_path: str | None = None) -> YOLO:
         _MODEL_CACHE[cache_key] = model
         return model
 
-    default_path = ROOT / "experiments/stage4_overall/weights/best-cosine.pt"
+    default_path = ROOT / "experiments/02_cbam/weights/best.pt"
     cache_key = str(default_path)
     if cache_key in _MODEL_CACHE:
         return _MODEL_CACHE[cache_key]
@@ -68,8 +69,9 @@ def _safe_output_relative_path(raw_name: str) -> Path:
 def _run_prediction(image_bytes: bytes, conf: float, iou: float, imgsz: int, max_det: int, model_path: str | None = None) -> dict[str, Any]:
     model = _load_model(model_path)
     image = Image.open(BytesIO(image_bytes)).convert("RGB")
+    image_array = np.array(image)
 
-    result = model.predict(source=image, conf=conf, iou=iou, imgsz=imgsz, max_det=max_det, verbose=False)[0]
+    result = model.predict(source=image_array, conf=conf, iou=iou, imgsz=imgsz, max_det=max_det, verbose=False)[0]
     boxes = result.boxes
     names = model.names
     detections = []
@@ -90,13 +92,14 @@ def _run_prediction(image_bytes: bytes, conf: float, iou: float, imgsz: int, max
     plotted_rgb = Image.fromarray(plotted[..., ::-1])
     buffer = BytesIO()
     plotted_rgb.save(buffer, format="PNG")
-    annotated_b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    annotated_png_bytes = buffer.getvalue()
 
     return {
         "image_size": {"width": image.width, "height": image.height},
         "num_detections": len(detections),
         "detections": detections,
-        "annotated_image_base64": annotated_b64,
+        "annotated_image_base64": base64.b64encode(annotated_png_bytes).decode("utf-8"),
+        "_annotated_png_bytes": annotated_png_bytes,  # internal use, not serialized to JSON
     }
 
 
@@ -206,19 +209,21 @@ async def predict_batch(
             continue
 
         image_bytes = await uploaded.read()
+        # Defensive: ensure bytes (guard against string/Image leakage from malformed multipart)
+        if not isinstance(image_bytes, bytes):
+            image_bytes = str(image_bytes).encode("latin-1")
         if not image_bytes:
             results.append({"filename": filename, "error": "Empty file"})
             continue
 
         try:
             payload = _run_prediction(image_bytes, conf, iou, imgsz, max_det, resolved_model_path)
-            annotated_image = Image.fromarray(
-                Image.open(BytesIO(base64.b64decode(payload["annotated_image_base64"]))).convert("RGB")
-            )
+            # Use raw PNG bytes directly (avoids broken base64→Image→fromarray chain)
+            annotated_png_bytes = payload.get("_annotated_png_bytes") or base64.b64decode(payload["annotated_image_base64"])
             rel_output_path = _safe_output_relative_path(filename)
             save_path = run_dir / rel_output_path
             save_path.parent.mkdir(parents=True, exist_ok=True)
-            annotated_image.save(save_path)
+            save_path.write_bytes(annotated_png_bytes)
 
             record = DetectionRecord(
                 user_id=current_user.id,
@@ -230,6 +235,7 @@ async def predict_batch(
                 detections=json.dumps(payload["detections"], ensure_ascii=False),
                 image_width=payload["image_size"]["width"],
                 image_height=payload["image_size"]["height"],
+                annotated_image_base64=base64.b64encode(annotated_png_bytes).decode("utf-8"),
             )
             db.add(record)
             db.commit()

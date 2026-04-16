@@ -9,7 +9,7 @@ export default {
           <div class="page-eyebrow">概览</div>
           <h1 class="page-title">数据统计</h1>
         </div>
-        <span class="header-note">最近30天</span>
+        <span class="header-note">最近7天</span>
       </div>
 
       <!-- Stats Row -->
@@ -64,8 +64,7 @@ export default {
     const recentRecords = ref([])
     const recentLoading = ref(false)
     const avgPerDay = computed(() => {
-      const days = stats.value.by_day?.length || 1
-      return Math.round(stats.value.total_detections / days)
+      return Math.round(stats.value.total_detections / 7)
     })
 
     const formatDate = (iso) => {
@@ -116,10 +115,18 @@ export default {
         },
         options: {
           responsive: true,
-          plugins: { legend: { display: false } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                title: (items) => data[items[0].dataIndex].date,
+                label: (item) => `${item.raw} 次检测`,
+              }
+            }
+          },
           scales: {
-            x: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' } },
-            y: { ticks: { color: '#64748b' }, grid: { color: '#1e293b' }, beginAtZero: true }
+            x: { ticks: { color: '#64748b' }, grid: { display: false }, border: { display: false } },
+            y: { ticks: { color: '#64748b' }, grid: { display: false }, border: { display: false }, beginAtZero: true }
           }
         }
       })

@@ -7,7 +7,6 @@ const routes = [
   { path: '/history', name: 'history', component: () => import('./views/HistoryView.js'), meta: { requiresAuth: true } },
   { path: '/dashboard', name: 'dashboard', component: () => import('./views/DashboardView.js'), meta: { requiresAuth: true } },
   { path: '/models', name: 'models', component: () => import('./views/ModelsView.js'), meta: { requiresAuth: true } },
-  { path: '/admin', name: 'admin', component: () => import('./views/AdminView.js'), meta: { requiresAuth: true, requiresAdmin: true } },
 ]
 
 const router = VueRouter.createRouter({
@@ -20,13 +19,6 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
   if (to.meta.requiresAuth && !token) {
     next({ name: 'login' })
-  } else if (to.meta.requiresAdmin) {
-    const user = JSON.parse(localStorage.getItem('user') || 'null')
-    if (!user || user.role !== 'admin') {
-      next({ name: 'dashboard' })
-    } else {
-      next()
-    }
   } else if ((to.name === 'login' || to.name === 'register') && token) {
     next({ name: 'dashboard' })
   } else {

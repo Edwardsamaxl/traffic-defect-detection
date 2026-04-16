@@ -7,13 +7,14 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+import numpy as np
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from PIL import Image
 from ultralytics import YOLO
 
-from src.webapp.api import auth, dashboard, detections, models, users
+from src.webapp.api import auth, dashboard, detections, models  # users
 from src.webapp.database import Base, SessionLocal, engine
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -36,10 +37,10 @@ def root():
 
 # Include routers
 app.include_router(auth.router)
-app.include_router(users.router)
 app.include_router(detections.router)
 app.include_router(models.router)
 app.include_router(dashboard.router)
+# app.include_router(users.router)  # disabled - no admin/user roles
 
 # In-memory model cache
 _MODEL_CACHE: dict[str, YOLO] = {}
@@ -93,7 +94,8 @@ def _safe_output_relative_path(raw_name: str) -> Path:
 def _run_prediction(image_bytes: bytes, conf: float, iou: float, imgsz: int, max_det: int, model_path: Path | None = None) -> dict[str, Any]:
     model = _load_model(model_path)
     image = Image.open(__import__("io").BytesIO(image_bytes)).convert("RGB")
-    result = model.predict(source=image, conf=conf, iou=iou, imgsz=imgsz, max_det=max_det, verbose=False)[0]
+    image_array = np.array(image)
+    result = model.predict(source=image_array, conf=conf, iou=iou, imgsz=imgsz, max_det=max_det, verbose=False)[0]
     boxes = result.boxes
     names = model.names
     detections_list = []
@@ -131,6 +133,23 @@ def startup() -> None:
 
     # Create DB tables
     Base.metadata.create_all(bind=engine)
+
+    # Auto-register builtin model if not in DB
+    from src.webapp.models.uploaded_model import UploadedModel
+    with SessionLocal() as db:
+        exists = db.query(UploadedModel).filter(
+            UploadedModel.is_builtin == True,
+            UploadedModel.path.like("%02_cbam%")
+        ).first()
+        if not exists:
+            builtin = UploadedModel(
+                name="02_cbam (内置)",
+                path="experiments/02_cbam/weights/best.pt",
+                is_builtin=True,
+                uploaded_by=None,
+            )
+            db.add(builtin)
+            db.commit()
 
     # Warm up default model
     try:

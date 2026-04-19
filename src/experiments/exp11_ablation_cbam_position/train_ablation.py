@@ -83,6 +83,7 @@ TRAIN_CONFIG = {
     "pretrained": str(PRETRAINED),
     "optimizer": "auto",
     "verbose": True,
+    "amp": False,
     "mosaic": 1.0,
     "mixup": 0.1,
     "hsv_h": 0.015,

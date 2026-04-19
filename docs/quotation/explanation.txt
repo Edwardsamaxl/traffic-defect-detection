@@ -1,0 +1,41 @@
+1.A Steel Surface Defect Detection Method Based on Lightweight Convolution Optimization：引言有钢材表面的重要性
+
+2.Research on steel surface defect classification method based on deep learning：钢材质量有效性
+
+3.DFIR-DETR: Frequency Domain Enhancement and Dynamic Feature Aggregation for Cross-Scene Small Object Detection：解释跨场景通用性
+
+4.YOLO-Based Defect Detection for Metal Sheets：YOLO被用于多个场景
+
+5.YOLO-MS: Rethinking Multi-Scale Representation Learning for Real-time Object Detection：YOLO的应用
+
+6.SOD-YOLOv8: Enhancing YOLOv8 for Small Object Detection in Traffic Scenes：YOLO的应用
+
+7.HyperDefect-YOLO: Enhance YOLO with HyperGraph Computation for Industrial Defect Detection：YOLO的应用
+
+8.Research on Steel Surface Defect Detection Algorithm Based on YOLOv12：YOLO的应用
+
+9.What is YOLOv8: An In-Depth Exploration of the Internal Features of the Next-Generation Object Detector：YOLOv8的介绍
+
+10.Comparative Analysis of Object Detection Algorithms for Surface Defect Detection：yolov8是无锚模型中在该数据集表现最好的，而yolov11是新出的且有锚，尽管效果更好，但是提升空间不大，而且基于其的改进方法不多，尚未在工业界成熟运用
+
+11.YOLOv8 to YOLO11: A Comprehensive Architecture In-depth Comparative Review：讲述YOLOv8的优势
+
+12.Small Object Detection with YOLO: A Performance Analysis Across Model Versions and Hardware：分析各个YOLO系列
+
+Learning Data Augmentation Strategies for Object Detection：说明数据增强的有效性
+
+Understanding Test-Time Augmentation：TTA有效的数学证明
+
+Learning Loss for Test-Time Augmentation：TTA的使用
+
+Simple Copy-Paste is a Strong Data Augmentation Method for Instance Segmentation：复制粘贴的数据增强
+
+InstaBoost: Boosting Instance Segmentation via Probability Map Guided Copy-Pasting：简单有效的在线copy-paste方法
+
+A Comprehensive Survey for Real-World Industrial Defect Detection: Challenges, Approaches, and Prospects：解释工业检测的必要性，解释copy-paste解决的痛点，用来证明该方法适合工业检测
+
+ALPHAEDIT: NULL-SPACE CONSTRAINED KNOWLEDGE EDITING FOR LANGUAGE MODELS：定向类别增强，即复制粘贴稀有类别在训练时高频调用
+
+CBAM Convolutional Block Attention Module：CBAM介绍
+
+Steel Surface Defect Detection Based on Improved YOLOv8 with Multi-Scale Feature Fusion and Attention Mechanism：CBAM融合P2

@@ -29,7 +29,7 @@ export default {
         <p>暂无记录</p>
       </div>
       <div v-else class="records-list">
-        <div v-for="r in records" :key="r.id" class="record-item">
+        <div v-for="r in records" :key="r.id" class="record-item" @click="showDetail(r)">
           <div class="record-thumb">
             <img v-if="r.num_detections > 0 && r.annotated_image_base64" :src="'data:image/png;base64,' + r.annotated_image_base64" class="thumb-img" />
             <div v-else class="thumb-placeholder">
@@ -89,7 +89,7 @@ export default {
                 <div class="detection-dot" :style="{ background: getColor(d.class_id) }"></div>
                 <div class="detection-info">
                   <div class="detection-name">{{ d.class_name }}</div>
-                  <div class="detection-bbox">[{{ d.bbox_xyxy.map(v => v.toFixed(0)).join(', ') }}]</div>
+                  <div class="detection-bbox">[{{ (d.bbox_xyxy || []).map(v => v.toFixed(0)).join(', ') }}]</div>
                 </div>
                 <div class="detection-conf">{{ (d.confidence * 100).toFixed(1) }}%</div>
               </div>

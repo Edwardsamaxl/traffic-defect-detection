@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime
 
 from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, JSON, String, Text
@@ -35,7 +36,7 @@ class DetectionRecord(Base):
             "conf": self.conf,
             "iou": self.iou,
             "num_detections": self.num_detections,
-            "detections": self.detections if self.detections else [],
+            "detections": json.loads(self.detections) if self.detections else [],
             "image_size": {"width": self.image_width, "height": self.image_height},
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }

@@ -41,7 +41,12 @@
       "Bash(netstat:*)",
       "Bash(.venv/Scripts/pip.exe install:*)",
       "Bash(source:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(.venv/Scripts/python:*)",
+      "Bash(.venv/Scripts/pip show:*)",
+      "Bash(conda info:*)",
+      "Bash(mysql:*)",
+      "mcp__plugin_everything-claude-code_exa__web_fetch_exa"
     ]
   }
 }

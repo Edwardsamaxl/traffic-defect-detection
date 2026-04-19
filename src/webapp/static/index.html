@@ -1534,11 +1534,12 @@
             try {
               const res = await axios.get('/api/dashboard/stats')
               stats.value = res.data
+              console.log('by_day data:', JSON.stringify(stats.value.by_day))
               setTimeout(() => {
                 drawDailyChart(stats.value.by_day || [])
                 drawClassChart(stats.value.by_class || [])
               }, 80)
-            } catch {}
+            } catch (e) { console.error('loadStats error:', e) }
           }
           const loadRecent = async () => {
             recentLoading.value = true
@@ -1555,10 +1556,57 @@
             new Chart(ctx, {
               type: 'line',
               data: {
-                labels: data.map(d => d.date.slice(5)),
-                datasets: [{ label: '检测数', data: data.map(d => d.count), borderColor: '#e2e8f0', backgroundColor: 'rgba(226,232,240,0.05)', fill: true, tension: 0.4, pointRadius: 3, pointBackgroundColor: '#e2e8f0' }]
+                labels: data.map(d => {
+                  const datePart = d.date.split(' ')[0]
+                  const [year, month, day] = datePart.split('-')
+                  return `${parseInt(month)}/${parseInt(day)}`
+                }),
+                datasets: [{
+                  label: '检测数',
+                  data: data.map(d => d.count),
+                  borderColor: '#111111',
+                  borderWidth: 2,
+                  backgroundColor: 'transparent',
+                  fill: false,
+                  tension: 0.35,
+                  pointRadius: 5,
+                  pointHoverRadius: 7,
+                  pointBackgroundColor: '#ffffff',
+                  pointBorderColor: '#111111',
+                  pointBorderWidth: 2,
+                }]
               },
-              options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#4b5563' }, grid: { color: '#161616' } }, y: { ticks: { color: '#4b5563' }, grid: { color: '#161616' }, beginAtZero: true } } }
+              options: {
+                responsive: true,
+                plugins: {
+                  legend: { display: false },
+                  tooltip: {
+                    backgroundColor: '#111111',
+                    titleColor: '#f5f5f3',
+                    bodyColor: '#f5f5f3',
+                    padding: 10,
+                    cornerRadius: 6,
+                    callbacks: {
+                      title: (items) => data[items[0].dataIndex].date,
+                      label: (item) => `${item.raw} 次检测`,
+                    }
+                  }
+                },
+                scales: {
+                  x: {
+                    ticks: { color: '#6b7280', font: { size: 11 } },
+                    grid: { display: false },
+                    border: { display: false }
+                  },
+                  y: {
+                    ticks: { color: '#6b7280', font: { size: 11 } },
+                    grid: { color: '#e5e5e3', lineWidth: 1 },
+                    border: { display: false },
+                    beginAtZero: true,
+                    grace: '10%'
+                  }
+                }
+              }
             })
           }
           const drawClassChart = (data) => {

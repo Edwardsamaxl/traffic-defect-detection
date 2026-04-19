@@ -101,16 +101,24 @@ export default {
       new Chart(ctx, {
         type: 'line',
         data: {
-          labels: data.map(d => d.date.slice(5)),
+          labels: data.map(d => {
+            const datePart = d.date.split(' ')[0]
+            const [year, month, day] = datePart.split('-')
+            return `${parseInt(month)}/${parseInt(day)}`
+          }),
           datasets: [{
             label: '检测数',
             data: data.map(d => d.count),
-            borderColor: '#e2e8f0',
-            backgroundColor: 'rgba(226,232,240,0.06)',
-            fill: true,
-            tension: 0.4,
-            pointRadius: 3,
-            pointBackgroundColor: '#e2e8f0',
+            borderColor: '#111111',
+            borderWidth: 2,
+            backgroundColor: 'transparent',
+            fill: false,
+            tension: 0.35,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+            pointBackgroundColor: '#ffffff',
+            pointBorderColor: '#111111',
+            pointBorderWidth: 2,
           }]
         },
         options: {
@@ -118,6 +126,11 @@ export default {
           plugins: {
             legend: { display: false },
             tooltip: {
+              backgroundColor: '#111111',
+              titleColor: '#f5f5f3',
+              bodyColor: '#f5f5f3',
+              padding: 10,
+              cornerRadius: 6,
               callbacks: {
                 title: (items) => data[items[0].dataIndex].date,
                 label: (item) => `${item.raw} 次检测`,
@@ -125,8 +138,18 @@ export default {
             }
           },
           scales: {
-            x: { ticks: { color: '#64748b' }, grid: { display: false }, border: { display: false } },
-            y: { ticks: { color: '#64748b' }, grid: { display: false }, border: { display: false }, beginAtZero: true }
+            x: {
+              ticks: { color: '#6b7280', font: { size: 11 } },
+              grid: { display: false },
+              border: { display: false }
+            },
+            y: {
+              ticks: { color: '#6b7280', font: { size: 11 } },
+              grid: { color: '#e5e5e3', lineWidth: 1 },
+              border: { display: false },
+              beginAtZero: true,
+              grace: '10%'
+            }
           }
         }
       })

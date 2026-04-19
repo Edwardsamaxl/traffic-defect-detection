@@ -51,7 +51,7 @@ def get_stats(
     )
     daily_map = {str(row.day): row.count for row in daily_data}
     by_day = [
-        {"date": str(seven_days_ago + timedelta(days=i)), "count": daily_map.get(str(seven_days_ago + timedelta(days=i)), 0)}
+        {"date": str((seven_days_ago + timedelta(days=i)).date()), "count": daily_map.get(str((seven_days_ago + timedelta(days=i)).date()), 0)}
         for i in range(7)
     ]
 

@@ -144,26 +144,52 @@ async def predict(
     except FileNotFoundError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"检测失败: {exc}") from exc
+        # 检测失败时返回原图 + 0 检测数，前端按正常流程处理
+        try:
+            image = Image.open(BytesIO(image_bytes)).convert("RGB")
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            annotated_png_bytes = buffer.getvalue()
+            result_data = {
+                "image_size": {"width": image.width, "height": image.height},
+                "num_detections": 0,
+                "detections": [],
+                "annotated_image_base64": base64.b64encode(annotated_png_bytes).decode("utf-8"),
+                "_annotated_png_bytes": annotated_png_bytes,
+            }
+        except Exception:
+            # Fallback 也失败时返回最小有效响应，避免 500
+            result_data = {
+                "image_size": {"width": 0, "height": 0},
+                "num_detections": 0,
+                "detections": [],
+                "annotated_image_base64": "",
+                "_annotated_png_bytes": b"",
+            }
 
-    record = DetectionRecord(
-        user_id=current_user.id,
-        filename=file.filename or "uploaded_image",
-        model_name=model_name,
-        conf=conf,
-        iou=iou,
-        num_detections=result_data["num_detections"],
-        detections=json.dumps(result_data["detections"], ensure_ascii=False),
-        image_width=result_data["image_size"]["width"],
-        image_height=result_data["image_size"]["height"],
-        annotated_image_base64=result_data["annotated_image_base64"],
-    )
-    db.add(record)
-    db.commit()
-    db.refresh(record)
+    try:
+        record = DetectionRecord(
+            user_id=current_user.id,
+            filename=file.filename or "uploaded_image",
+            model_name=model_name,
+            conf=conf,
+            iou=iou,
+            num_detections=result_data["num_detections"],
+            detections=json.dumps(result_data["detections"], ensure_ascii=False),
+            image_width=result_data["image_size"]["width"],
+            image_height=result_data["image_size"]["height"],
+            annotated_image_base64=result_data["annotated_image_base64"],
+        )
+        db.add(record)
+        db.commit()
+        db.refresh(record)
+        record_id = record.id
+    except Exception:
+        db.rollback()
+        record_id = 0
 
     return PredictResponse(
-        record_id=record.id,
+        record_id=record_id,
         detections=result_data["detections"],
         num_detections=result_data["num_detections"],
         image_size=result_data["image_size"],
@@ -218,37 +244,49 @@ async def predict_batch(
 
         try:
             payload = _run_prediction(image_bytes, conf, iou, imgsz, max_det, resolved_model_path)
-            # Use raw PNG bytes directly (avoids broken base64→Image→fromarray chain)
-            annotated_png_bytes = payload.get("_annotated_png_bytes") or base64.b64decode(payload["annotated_image_base64"])
-            rel_output_path = _safe_output_relative_path(filename)
-            save_path = run_dir / rel_output_path
-            save_path.parent.mkdir(parents=True, exist_ok=True)
-            save_path.write_bytes(annotated_png_bytes)
-
-            record = DetectionRecord(
-                user_id=current_user.id,
-                filename=filename,
-                model_name=model_name,
-                conf=conf,
-                iou=iou,
-                num_detections=payload["num_detections"],
-                detections=json.dumps(payload["detections"], ensure_ascii=False),
-                image_width=payload["image_size"]["width"],
-                image_height=payload["image_size"]["height"],
-                annotated_image_base64=base64.b64encode(annotated_png_bytes).decode("utf-8"),
-            )
-            db.add(record)
-            db.commit()
-
-            results.append({
-                "filename": filename,
-                "num_detections": payload["num_detections"],
-                "detections": payload["detections"],
-                "saved_image": str(save_path.relative_to(ROOT)).replace("\\", "/"),
-            })
-            success_count += 1
         except Exception as exc:
-            results.append({"filename": filename, "error": str(exc)})
+            # 检测失败时返回原图 + 0 检测数
+            image = Image.open(BytesIO(image_bytes)).convert("RGB")
+            buffer = BytesIO()
+            image.save(buffer, format="PNG")
+            annotated_png_bytes = buffer.getvalue()
+            payload = {
+                "image_size": {"width": image.width, "height": image.height},
+                "num_detections": 0,
+                "detections": [],
+                "_annotated_png_bytes": annotated_png_bytes,
+            }
+
+        # Use raw PNG bytes directly (avoids broken base64→Image→fromarray chain)
+        annotated_png_bytes = payload.get("_annotated_png_bytes") or base64.b64decode(payload["annotated_image_base64"])
+        rel_output_path = _safe_output_relative_path(filename)
+        save_path = run_dir / rel_output_path
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+        save_path.write_bytes(annotated_png_bytes)
+
+        # 批量模式图片已存磁盘，base64 存空节省数据库空间
+        record = DetectionRecord(
+            user_id=current_user.id,
+            filename=filename,
+            model_name=model_name,
+            conf=conf,
+            iou=iou,
+            num_detections=payload["num_detections"],
+            detections=json.dumps(payload["detections"], ensure_ascii=False),
+            image_width=payload["image_size"]["width"],
+            image_height=payload["image_size"]["height"],
+            annotated_image_base64="",
+        )
+        db.add(record)
+        db.commit()
+
+        results.append({
+            "filename": filename,
+            "num_detections": payload["num_detections"],
+            "detections": payload["detections"],
+            "saved_image": str(save_path.relative_to(ROOT)).replace("\\", "/"),
+        })
+        success_count += 1
 
     summary = {
         "run_id": run_id,

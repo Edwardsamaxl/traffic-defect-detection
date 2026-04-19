@@ -52,22 +52,45 @@ async def upload_model(
     if not content:
         raise HTTPException(status_code=400, detail="文件为空")
 
-    safe_name = "".join(c for c in file.filename if c.isalnum() or c in ("-", "_", ".")) or "model"
-    saved_name = f"{safe_name[:-3]}_{Path(file.filename).stem[:20]}.pt"
+    # name 列只有 String(100)，超过会 500，需要截断
+    safe_stem = Path(file.filename).stem[:80]
+    safe_ext = ".pt"
+    safe_name = "".join(c for c in safe_stem if c.isalnum() or c in ("-", "_")) or "model"
+    saved_name = f"{safe_name}{safe_ext}"
+
+    # 处理文件名冲突：多次上传同名文件时在文件名后加序号
     save_path = UPLOADED_MODEL_DIR / saved_name
-    save_path.write_bytes(content)
+    counter = 1
+    while save_path.exists():
+        save_path = UPLOADED_MODEL_DIR / f"{safe_name}_{counter}{safe_ext}"
+        counter += 1
+
+    try:
+        save_path.write_bytes(content)
+    except OSError as exc:
+        raise HTTPException(status_code=500, detail=f"文件保存失败: {exc}") from exc
 
     rel_path = str(save_path.relative_to(ROOT)).replace("\\", "/")
 
-    db_model = UploadedModel(
-        name=file.filename,
-        path=rel_path,
-        is_builtin=False,
-        uploaded_by=current_user.id,
-    )
-    db.add(db_model)
-    db.commit()
-    db.refresh(db_model)
+    # 检查路径是否已存在（唯一约束）
+    if db.query(UploadedModel).filter(UploadedModel.path == rel_path).first():
+        save_path.unlink(missing_ok=True)
+        raise HTTPException(status_code=409, detail="该模型路径已存在")
+
+    try:
+        db_model = UploadedModel(
+            name=file.filename[:100],  # 截断到 100 字符以内
+            path=rel_path,
+            is_builtin=False,
+            uploaded_by=current_user.id,
+        )
+        db.add(db_model)
+        db.commit()
+        db.refresh(db_model)
+    except Exception as exc:
+        save_path.unlink(missing_ok=True)
+        raise HTTPException(status_code=500, detail=f"数据库保存失败: {exc}") from exc
+
     return {"model": db_model.to_dict()}
 
 

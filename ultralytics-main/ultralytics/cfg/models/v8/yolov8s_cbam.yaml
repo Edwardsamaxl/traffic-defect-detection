@@ -1,0 +1,50 @@
+# Ultralytics YOLOv8 object detection model with CBAM attention
+# Based on YOLOv8s with CBAM modules added to backbone
+# Model docs: https://docs.ultralytics.com/models/yolov8
+
+# Parameters
+nc: 6 # number of classes (NEU-DET: 6 defect types)
+scales:
+  # [depth, width, max_channels]
+  n: [0.33, 0.25, 1024]
+  s: [0.33, 0.50, 1024]
+  m: [0.67, 0.75, 768]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.25, 512]
+
+# YOLOv8.0s backbone with CBAM attention
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
+  - [-1, 3, C2f, [128, True]] # 2
+  - [-1, 1, CBAM, []] # 3 - CBAM attention after P2/4
+  - [-1, 1, Conv, [256, 3, 2]] # 4-P3/8
+  - [-1, 6, C2f, [256, True]] # 5
+  - [-1, 1, CBAM, []] # 6 - CBAM attention after P3/8
+  - [-1, 1, Conv, [512, 3, 2]] # 7-P4/16
+  - [-1, 6, C2f, [512, True]] # 8
+  - [-1, 1, CBAM, []] # 9 - CBAM attention after P4/16
+  - [-1, 1, Conv, [1024, 3, 2]] # 10-P5/32
+  - [-1, 3, C2f, [1024, True]] # 11
+  - [-1, 1, SPPF, [1024, 5]] # 12
+
+# YOLOv8.0s head (indices adjusted for CBAM layers)
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 13
+  - [[-1, 8], 1, Concat, [1]] # cat backbone P4 (C2f after CBAM at idx 8)
+  - [-1, 3, C2f, [512]] # 15
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 16
+  - [[-1, 5], 1, Concat, [1]] # cat backbone P3 (C2f after CBAM at idx 5)
+  - [-1, 3, C2f, [256]] # 18 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]] # 19
+  - [[-1, 15], 1, Concat, [1]] # cat head P4
+  - [-1, 3, C2f, [512]] # 21 (P4/16-medium)
+
+  - [-1, 1, Conv, [512, 3, 2]] # 22
+  - [[-1, 12], 1, Concat, [1]] # cat head P5
+  - [-1, 3, C2f, [1024]] # 24 (P5/32-large)
+
+  - [[18, 21, 24], 1, Detect, [nc]] # Detect(P3, P4, P5)

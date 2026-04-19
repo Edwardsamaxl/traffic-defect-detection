@@ -41,6 +41,14 @@ ROOT = _root
 NEU_DATA = ROOT / "data/NEU-DET"
 PRETRAINED = ROOT / "yolov8s.pt"
 
+# 自动下载预训练权重（如果不存在）
+if not PRETRAINED.exists():
+    import urllib.request
+    print(f"下载预训练权重到 {PRETRAINED} ...")
+    url = "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8s.pt"
+    urllib.request.urlretrieve(url, str(PRETRAINED))
+    print("下载完成")
+
 
 def create_yaml():
     yaml_path = ROOT / "datasets/neu_ablation.yaml"

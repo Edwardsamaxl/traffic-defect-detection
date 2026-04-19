@@ -29,7 +29,15 @@ import json
 import time
 import argparse
 
-ROOT = Path(__file__).parent.parent.parent.parent
+# 动态计算 ROOT：自动向上找到包含 ultralytics-main 的目录
+_script = Path(__file__).resolve()
+for _depth in range(2, 6):
+    _root = _script
+    for _ in range(_depth):
+        _root = _root.parent
+    if (_root / "ultralytics-main").exists():
+        break
+ROOT = _root
 NEU_DATA = ROOT / "data/NEU-DET"
 PRETRAINED = ROOT / "yolov8s.pt"
 
@@ -82,6 +90,7 @@ def train_and_eval(exp_name: str, model_yaml: str) -> dict:
     print(f"\n{'='*60}")
     print(f"开始实验: {exp_name}")
     print(f"模型配置: {model_yaml}")
+    print(f"ROOT: {ROOT}")
     print(f"{'='*60}")
 
     yaml_path = create_yaml()
@@ -117,10 +126,10 @@ def main_single(exp_name: str, model_yaml: str):
 def main_batch():
     experiments = {
         "exp11_baseline":     "ultralytics-main/ultralytics/cfg/models/v8/yolov8s.yaml",
-        "exp11_cbam_p3only":  "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",
-        "exp11_cbam_p4only":  "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",
-        "exp11_cbam_p5only":  "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",
-        "exp11_cbam_p3p4":    "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",
+        "exp11_cbam_p3only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",
+        "exp11_cbam_p4only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",
+        "exp11_cbam_p5only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",
+        "exp11_cbam_p3p4":   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",
     }
 
     results = []

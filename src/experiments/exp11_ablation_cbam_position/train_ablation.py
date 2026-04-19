@@ -28,6 +28,7 @@ from ultralytics import YOLO
 import json
 import time
 import argparse
+import urllib.request
 
 # 动态计算 ROOT：自动向上找到包含 ultralytics-main 的目录
 _script = Path(__file__).resolve()
@@ -41,9 +42,12 @@ ROOT = _root
 NEU_DATA = ROOT / "data/NEU-DET"
 PRETRAINED = ROOT / "yolov8s.pt"
 
+# 调试：确认路径
+print(f"[DEBUG] ROOT = {ROOT}")
+print(f"[DEBUG] PRETRAINED = {PRETRAINED}  exists={PRETRAINED.exists()}")
+
 # 自动下载预训练权重（如果不存在）
 if not PRETRAINED.exists():
-    import urllib.request
     print(f"下载预训练权重到 {PRETRAINED} ...")
     url = "https://github.com/ultralytics/assets/releases/download/v0.0.0/yolov8s.pt"
     urllib.request.urlretrieve(url, str(PRETRAINED))

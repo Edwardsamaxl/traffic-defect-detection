@@ -3,22 +3,32 @@ Exp-11: CBAM 集成位置消融实验
 =====================================
 实验目标：验证 CBAM 插入在不同 Backbone 层级对检测性能的影响
 
+⚠️ 命名说明：
+  - Backbone 里的 P2/4、P3/8、P4/16、P5/32 是降采样阶段标记
+  - 例如 "P3/8" 意思是 stride=8 的特征输出
+  - 检测层 P3/P4/P5 是 head 的输出尺度，与 backbone 阶段不是同一套命名
+
+CBAM 插入位置 = backbone 降采样阶段之后插入 CBAM 模块
+
 用法：
   # 单实验模式（Kaggle 并行训练）
-  python train_ablation.py --exp exp11_baseline --yaml yolov8s.yaml
-  python train_ablation.py --exp exp11_cbam_p3only --yaml yolov8s_cbam_p3only.yaml
+  python train_ablation.py --exp exp11_cbam_p2only --yaml yolov8s_cbam_p2only.yaml
+  python train_ablation.py --exp exp11_cbam_p2p3 --yaml yolov8s_cbam_p2p3.yaml
 
   # 批量模式（本地顺序训练）
   python train_ablation.py
 
-实验设计：
-  - Baseline:     纯 YOLOv8s（无 CBAM）
-  - CBAM-P3:      仅在 P3/8 层后插入 CBAM
-  - CBAM-P4:      仅在 P4/16 层后插入 CBAM
-  - CBAM-P5:      仅在 P5/32 层后插入 CBAM
-  - CBAM-P3+P4:   在 P3/8 和 P4/16 层后插入 CBAM（共2个）
+实验设计（按 backbone 降采样阶段分类）：
+  - exp11_baseline:     纯 YOLOv8s（无 CBAM）-------------------- 公平对照
+  - exp11_cbam_p2only: 仅在 P2/4 阶段后插入 CBAM（160×160）----- 细粒度
+  - exp11_cbam_p3only: 仅在 P3/8 阶段后插入 CBAM（80×80）
+  - exp11_cbam_p4only: 仅在 P4/16 阶段后插入 CBAM（40×40）
+  - exp11_cbam_p5only: 仅在 P5/32 阶段后插入 CBAM（20×20）
+  - exp11_cbam_p2p3:   在 P2/4 + P3/8 阶段后插入 CBAM（细粒度组合）
+  - exp11_cbam_p3p4:   在 P3/8 + P4/16 阶段后插入 CBAM（浅中组合）
+  - exp11_cbam_full:    在 P2/4 + P3/8 + P4/16 阶段后插入 CBAM（=exp02_cbam，已训好）
 
-注意：CBAM-Full(3) = 02_cbam (P3+P4+P5, mAP50=0.7870) 已训好，作为参考不重训
+注意：exp11_cbam_full (P2+P3+P4) 即 exp02_cbam (mAP50=0.7870)，已训好不重训
 
 数据集：NEU-DET (640x640)
 评价指标：Precision, Recall, mAP@0.5, mAP@0.5:0.95
@@ -137,18 +147,36 @@ def main_single(exp_name: str, model_yaml: str):
 
 
 def main_batch():
-    experiments = {
-        "exp11_baseline":     "ultralytics-main/ultralytics/cfg/models/v8/yolov8s.yaml",
-        "exp11_cbam_p3only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",
-        "exp11_cbam_p4only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",
-        "exp11_cbam_p5only": "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",
-        "exp11_cbam_p3p4":   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",
-    }
+    # 实验配置：(实验名, yaml路径, 是否跳过[已有结果或已知已训练])
+    # skip=True 表示该实验已训好（如exp02_cbam），跳过不重训
+    experiments = [
+        ("exp11_baseline",    "ultralytics-main/ultralytics/cfg/models/v8/yolov8s.yaml",             False),
+        ("exp11_cbam_p2only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2only.yaml",  False),  # 新增
+        ("exp11_cbam_p3only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",  False),
+        ("exp11_cbam_p4only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",  False),
+        ("exp11_cbam_p5only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",  False),
+        ("exp11_cbam_p2p3",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2p3.yaml",    False),   # 新增
+        ("exp11_cbam_p3p4",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",    False),
+        # exp11_cbam_full = exp02_cbam (P2+P3+P4, mAP50=0.7870)，已训好，跳过
+        ("exp11_cbam_full",    "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam.yaml",         True),
+    ]
 
     results = []
     start_time = time.time()
 
-    for exp_name, model_yaml in experiments.items():
+    for exp_name, model_yaml, skip in experiments:
+        # 检查是否已有结果文件（跳过已完成的实验，避免重复训练）
+        result_file = ROOT / f"experiments/{exp_name}_result.json"
+        if result_file.exists():
+            print(f"\n[跳过] {exp_name} 已存在结果文件: {result_file}，跳过训练")
+            with open(result_file, "r") as f:
+                results.append(json.load(f))
+            continue
+
+        if skip:
+            print(f"\n[跳过] {exp_name} 已知已训好（如exp02_cbam），跳过训练")
+            continue
+
         try:
             result = train_and_eval(exp_name, str(ROOT / model_yaml))
             results.append(result)

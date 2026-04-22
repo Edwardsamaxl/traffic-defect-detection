@@ -23,6 +23,7 @@ class DetectionRecord(Base):
     image_width = Column(Integer, nullable=False)
     image_height = Column(Integer, nullable=False)
     annotated_image_base64 = Column(Text, nullable=True)  # only for single-image view
+    batch_output_path = Column(String(512), nullable=True)  # disk path for batch images
     created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
     user = relationship("User", back_populates="detection_records")
@@ -42,4 +43,6 @@ class DetectionRecord(Base):
         }
         if include_image and self.annotated_image_base64:
             data["annotated_image_base64"] = self.annotated_image_base64
+        if self.batch_output_path:
+            data["batch_output_path"] = self.batch_output_path
         return data

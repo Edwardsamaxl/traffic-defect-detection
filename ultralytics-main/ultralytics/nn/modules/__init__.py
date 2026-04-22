@@ -63,6 +63,7 @@ from .block import (
 )
 from .conv import (
     CBAM,
+    CBAMFull,
     ChannelAttention,
     Concat,
     Conv,

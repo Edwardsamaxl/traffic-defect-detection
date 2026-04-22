@@ -276,6 +276,7 @@ async def predict_batch(
             image_width=payload["image_size"]["width"],
             image_height=payload["image_size"]["height"],
             annotated_image_base64="",
+            batch_output_path=str(save_path.relative_to(ROOT)).replace("\\", "/"),
         )
         db.add(record)
         db.commit()
@@ -367,4 +368,13 @@ def get_detection(
     ).first()
     if not record:
         raise HTTPException(status_code=404, detail="记录不存在")
-    return record.to_dict(include_image=True)
+
+    data = record.to_dict(include_image=True)
+
+    # Batch images stored on disk — read and encode on demand
+    if not data.get("annotated_image_base64") and record.batch_output_path:
+        disk_path = ROOT / record.batch_output_path
+        if disk_path.exists():
+            data["annotated_image_base64"] = base64.b64encode(disk_path.read_bytes()).decode("utf-8")
+
+    return data

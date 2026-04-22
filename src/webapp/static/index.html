@@ -1129,7 +1129,7 @@
     .detail-stat-val { font-size: 18px; font-weight: 800; color: #111111; letter-spacing: -0.02em; }
     .detail-stat-label { font-size: 10px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 4px; }
     .detail-image-wrap { margin-bottom: 16px; border-radius: 8px; overflow: hidden; border: 1px solid #e5e5e3; }
-    .detail-annotated-img { width: 100%; height: auto; display: block; }
+    .detail-annotated-img { width: 200px; height: 200px; object-fit: cover; display: block; }
 
     /* ============================================================
        ADMIN PAGE
@@ -1860,6 +1860,9 @@
                   <button @click="showModal = false" class="modal-close"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
                 </div>
                 <div class="modal-body" v-if="detailItem">
+                  <div v-if="detailItem.annotated_image_base64" class="detail-image-wrap">
+                    <img :src="'data:image/png;base64,' + detailItem.annotated_image_base64" class="detail-annotated-img" />
+                  </div>
                   <div class="detail-stats">
                     <div class="detail-stat"><div class="detail-stat-val">{{ detailItem.image_size?.width }} × {{ detailItem.image_size?.height }}</div><div class="detail-stat-label">图片尺寸</div></div>
                     <div class="detail-stat"><div class="detail-stat-val text-active">{{ detailItem.num_detections }}</div><div class="detail-stat-label">检测数量</div></div>

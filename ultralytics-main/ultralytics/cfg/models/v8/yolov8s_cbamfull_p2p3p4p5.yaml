@@ -1,0 +1,52 @@
+# Ultralytics YOLOv8s object detection model with Full CBAM (CBAMFull)
+# Based on YOLOv8s with CBAMFull modules added to backbone (P2+P3+P4+P5)
+# CBAMFull: 完整论文版通道注意力（AvgPool+MaxPool + 共享MLP降维比r=16）
+# 对照实验：与简化版CBAM（只有AvgPool，无降维）比较
+
+# Parameters
+nc: 6 # number of classes (NEU-DET: 6 defect types)
+scales:
+  # [depth, width, max_channels]
+  n: [0.33, 0.25, 1024]
+  s: [0.33, 0.50, 1024]
+  m: [0.67, 0.75, 768]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.25, 512]
+
+# YOLOv8.0s backbone with CBAMFull (full paper version)
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
+  - [-1, 3, C2f, [128, True]] # 2
+  - [-1, 1, CBAMFull, []] # 3 - CBAMFull after P2/4 (160×160)
+  - [-1, 1, Conv, [256, 3, 2]] # 4-P3/8
+  - [-1, 6, C2f, [256, True]] # 5
+  - [-1, 1, CBAMFull, []] # 6 - CBAMFull after P3/8 (80×80)
+  - [-1, 1, Conv, [512, 3, 2]] # 7-P4/16
+  - [-1, 6, C2f, [512, True]] # 8
+  - [-1, 1, CBAMFull, []] # 9 - CBAMFull after P4/16 (40×40)
+  - [-1, 1, Conv, [1024, 3, 2]] # 10-P5/32
+  - [-1, 3, C2f, [1024, True]] # 11
+  - [-1, 1, CBAMFull, []] # 12 - CBAMFull after P5/32 (20×20)
+  - [-1, 1, SPPF, [1024, 5]] # 13
+
+# YOLOv8.0s head (identical to CBAM version, indices unchanged)
+head:
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 14
+  - [[-1, 8], 1, Concat, [1]] # cat backbone P4 (C2f after CBAMFull at idx 8)
+  - [-1, 3, C2f, [512]] # 16
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]] # 17
+  - [[-1, 5], 1, Concat, [1]] # cat backbone P3 (C2f after CBAMFull at idx 5)
+  - [-1, 3, C2f, [256]] # 19 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]] # 20
+  - [[-1, 16], 1, Concat, [1]] # cat head P4
+  - [-1, 3, C2f, [512]] # 22 (P4/16-medium)
+
+  - [-1, 1, Conv, [512, 3, 2]] # 23
+  - [[-1, 13], 1, Concat, [1]] # cat head P5 (SPPF at idx 13)
+  - [-1, 3, C2f, [1024]] # 25 (P5/32-large)
+
+  - [[19, 22, 25], 1, Detect, [nc]] # Detect(P3, P4, P5)

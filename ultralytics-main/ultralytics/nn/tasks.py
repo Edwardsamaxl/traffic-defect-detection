@@ -40,6 +40,7 @@ from ultralytics.nn.modules import (
     CBFuse,
     CBLinear,
     CBAM,
+    CBAMFull,
     Classify,
     Concat,
     Conv,
@@ -1683,6 +1684,9 @@ def parse_model(d, ch, verbose=True):
             args = [ch[f]]
         elif m is CBAM:
             c1, c2 = ch[f], ch[f]  # CBAM输出通道数=输入通道数
+            args = [c1]
+        elif m is CBAMFull:
+            c1, c2 = ch[f], ch[f]  # CBAMFull输出通道数=输入通道数
             args = [c1]
         elif m is SE:
             c1, c2 = ch[f], ch[f]  # SE输出通道数=输入通道数

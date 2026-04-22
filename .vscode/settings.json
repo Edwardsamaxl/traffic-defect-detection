@@ -4,5 +4,6 @@
   "python.analysis.extraPaths": [
     "${workspaceFolder}\\src",
     "${workspaceFolder}\\ultralytics-main"
-  ]
+  ],
+  "cmake.sourceDirectory": "E:/PycharmProjects/traffic-defect-detection/ultralytics-main/examples/YOLO11-Triton-CPP"
 }

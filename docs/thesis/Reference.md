@@ -1,7 +1,7 @@
 # 参考文献表（Reference）
 
-> 专为"基于YOLOv8与CBAM的交通零部件缺陷检测系统"论文整理
-> 更新日期：2026-04-19
+> 专为"基于YOLOv8与CBAM的钢材表面缺陷检测系统"论文整理
+> 更新日期：2026-04-21
 > 整理说明：所有文献均已验证可访问来源，按论文章节分类，标注PDF来源与可能的用途
 
 ---
@@ -182,6 +182,20 @@
 
 ---
 
+## 七、P2检测层设计原理（对应论文3.5节）
+
+**[R26]** Fang, M., Rui, X., Cheng, H., Liu, X., She, J., Du, Y., & Tan, H. (2025). Small Object Detection Algorithm Based on Improved Attention Mechanism and Feature Fusion of YOLOv8. *Journal of Advanced Computational Intelligence and Intelligent Informatics*, 29(4), 941-951.
+- **来源**：✅ quotation/Small Object Detection Algorithm Based on Improved Attention Mechanism and Feature Fusion of YOLOv8.pdf
+- **DOI**：10.20965/jaciii.2025.p0941
+- **用途**：第3章P2检测层设计原理、第3.5节P2层理论依据
+
+**[R27]** Xu, H. (2024). CPAM-P2-YOLOv8：基于YOLOv8改进的用于安全帽检测的算法. *Applied Mathematics*, 13(1).
+- **来源**：✅ quotation/（CPAM-P2-YOLOv8：基于YOLOv8改进的用于安全帽检测的算法.pdf）
+- **DOI**：10.12677/aam.2024.1310424
+- **用途**：第3.5节P2检测层设计参考
+
+---
+
 ## 参考文献来源汇总
 
 ### quotation文件夹PDF → 参考文献映射
@@ -212,6 +226,8 @@
 | An_End-to-End_Steel_Surface_Defect_Detection_Approach.pdf | [R22] | ✅ |
 | Deep Residual Learning for Image Recognition.pdf | [R24] | ✅ |
 | Distance-IoU Loss.pdf | [R25] | ✅ |
+| Small Object Detection Algorithm Based on Improved Attention Mechanism and Feature Fusion of YOLOv8.pdf | [R26] | ✅ |
+| （中文文献PDF） | [R27] | ✅ 待确认 |
 
 ### 补充来源（不在quotation文件夹中）
 
@@ -219,7 +235,7 @@
 |---------|------|------|
 | [R3] YOLOv8 | GitHub ultralytics | 无正式论文，引用仓库 |
 | [R4] Small Object Detection with YOLO | arXiv:2504.09900 | ✅ 已验证 |
-| [R5] YOLOv8 to YOLO11 | arXiv:2501.13400 | ✅ 已验证（原ResearchGate链接已更正）|
+| [R5] YOLOv8 to YOLO11 | arXiv:2501.13400 | ✅ 已验证 |
 | [R7] HyperDefect-YOLO | arXiv:2412.03969 | ✅ 已验证 |
 | [R8] SLF-YOLO | Nature Scientific Reports | ✅ 已验证 |
 | [R10] Comparative Analysis | arXiv:2510.21811 | ✅ 已验证 |
@@ -241,11 +257,11 @@
 | ★★★ | [R3] YOLOv8 | 基线模型框架 |
 | ★★★ | [R21] Comprehensive Survey | 工业缺陷检测综述 |
 | ★★★ | [R22] NEU-DET来源 | 数据集引用 |
-| ★★★ | [R26] DIoU Loss | 损失函数 |
+| ★★★ | [R25] DIoU Loss | 损失函数 |
 | ★★☆ | [R2] SE Networks | 注意力机制对比 |
 | ★★☆ | [R16] AutoAugment | 数据增强策略 |
 | ★★☆ | [R17] Copy-Paste | 数据增强方法 |
-| ★★☆ | [R25] ResNet | Backbone基础 |
+| ★★☆ | [R24] ResNet | Backbone基础 |
 | ★☆☆ | [R19] TTA理论 | 测试时增强 |
 
 ### 补充组合（根据论文内容，6-10篇）
@@ -258,10 +274,12 @@
 | ★★☆ | [R8] SLF-YOLO | YOLOv8改进对比 |
 | ★★☆ | [R10] Comparative Analysis | NEU-DET上算法对比 |
 | ★★☆ | [R4] YOLO Versions对比 | YOLO版本性能分析 |
+| ★★☆ | [R26] YOLOv8-FE P2层 | P2检测层设计原理 |
+| ★★☆ | [R27] （中文P2文献） | P2检测层补充参考 |
 | ★☆☆ | [R14] SOD-YOLOv8 | 交通场景小目标参考 |
 | ★☆☆ | [R23] Transfer Learning | 桥梁论文（钢铁→交通）|
 
-### 失败策略说明段落引用（论文4.4节）
+### 失败策略说明段落引用（论文4.5节）
 
 > "为验证CBAM改进的有效性，我们还尝试了WIoU损失函数、P2小目标检测层、Focal Loss等优化策略。实验结果表明，这些策略在NEU-DET数据集上均未带来mAP提升..."
 > （无需额外引用，YOLOv8官方文档和标准损失函数知识足够说明）
@@ -285,4 +303,4 @@
 ---
 
 *本表所有✅标记的文献均已验证可访问来源，可直接用于论文写作*
-*整理日期：2026-04-19*
+*整理日期：2026-04-21*

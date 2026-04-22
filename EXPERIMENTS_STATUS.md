@@ -28,7 +28,7 @@ python src/utils/evaluation.py --model <weight_path> --split test
 | **exp07_spd_cbam** | 11.5M | 0.669 | 0.711 | 0.750 | 0.407 | #7 |
 | 06b_focal | 11.1M | 0.6180 | 0.6970 | 0.7290 | 0.3630 | #8 |
 | baseline_seed | 11.1M | 0.6665 | 0.6840 | 0.6949 | 0.3740 | #9 |
-| **exp09_cbam_gfpn** | 11.15M | 0.631 | 0.684 | 0.729 | 0.381 | #10 |
+| **exp09_cbam_bifpn** | 11.15M | 0.631 | 0.684 | 0.729 | 0.381 | #10 |
 
 ---
 
@@ -51,7 +51,7 @@ python src/utils/evaluation.py --model <weight_path> --split test
 
 ### 待优化类别
 - **crazing**: recall极低 (~0.23)，漏检严重
-- **rolled-in_scale**: 效果中等 (~0.69)
+- **rolled-in-scale**: 效果中等 (~0.69)
 
 ---
 
@@ -79,7 +79,7 @@ python src/utils/evaluation.py --model <weight_path> --split test
 
 ### 5. 03_p2_layer (P2高分辨率层)
 - mAP50-95: 0.3965
-- 对rolled-in_scale有提升但整体下降
+- 对rolled-in-scale有提升但整体下降
 
 ### 6. 04_combined_cbam_p2 (CBAM+P2组合)
 - mAP50-95: 0.3880
@@ -106,7 +106,7 @@ python src/utils/evaluation.py --model <weight_path> --split test
 - SPD-Conv: 纯SPD和组合均无效
 
 **可能有效的方向:**
-1. **类别权重**: 手动提高crazing和rolled-in_scale的损失权重
+1. **类别权重**: 手动提高crazing和rolled-in-scale的损失权重
 2. **数据增强**: Mosaic+MixUp已验证有效，可尝试更激进的配置
 3. **多尺度测试**: 训练时使用多尺度，推理时使用TTA
 
@@ -138,7 +138,7 @@ WIoU已撤销，改动记录见 `ultralytics-main/ultralytics/utils/loss_wiou_MO
 
 ## CBAM+BiFPN-style Neck实验 (2026-04-12)
 
-**实验脚本位置:** `src/experiments/exp09_cbam_gfpn_neck/`
+**实验脚本位置:** `src/experiments/exp09_cbam_Bifpn_neck/`
 
 **结果:**
 - mAP50: 0.729

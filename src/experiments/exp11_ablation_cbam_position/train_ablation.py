@@ -27,6 +27,7 @@ CBAM 插入位置 = backbone 降采样阶段之后插入 CBAM 模块
   - exp11_cbam_p2p3:   在 P2/4 + P3/8 阶段后插入 CBAM（细粒度组合）
   - exp11_cbam_p3p4:   在 P3/8 + P4/16 阶段后插入 CBAM（浅中组合）
   - exp11_cbam_full:    在 P2/4 + P3/8 + P4/16 阶段后插入 CBAM（=exp02_cbam，已训好）
+  - exp11_cbamfull_p2p3p4: 同等位置，但使用完整论文版 CBAMFull（双池化+降维比r=16）
 
 注意：exp11_cbam_full (P2+P3+P4) 即 exp02_cbam (mAP50=0.7870)，已训好不重训
 
@@ -150,15 +151,17 @@ def main_batch():
     # 实验配置：(实验名, yaml路径, 是否跳过[已有结果或已知已训练])
     # skip=True 表示该实验已训好（如exp02_cbam），跳过不重训
     experiments = [
-        ("exp11_baseline",    "ultralytics-main/ultralytics/cfg/models/v8/yolov8s.yaml",             False),
-        ("exp11_cbam_p2only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2only.yaml",  False),  # 新增
-        ("exp11_cbam_p3only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",  False),
-        ("exp11_cbam_p4only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",  False),
-        ("exp11_cbam_p5only", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",  False),
-        ("exp11_cbam_p2p3",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2p3.yaml",    False),   # 新增
-        ("exp11_cbam_p3p4",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",    False),
-        # exp11_cbam_full = exp02_cbam (P2+P3+P4, mAP50=0.7870)，已训好，跳过
-        ("exp11_cbam_full",    "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam.yaml",         True),
+        ("exp11_baseline",      "ultralytics-main/ultralytics/cfg/models/v8/yolov8s.yaml",                   False),
+        ("exp11_cbam_p2only",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2only.yaml",       False),
+        ("exp11_cbam_p3only",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3only.yaml",       False),
+        ("exp11_cbam_p4only",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p4only.yaml",       False),
+        ("exp11_cbam_p5only",   "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p5only.yaml",       False),
+        ("exp11_cbam_p2p3",     "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p2p3.yaml",         False),
+        ("exp11_cbam_p3p4",     "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam_p3p4.yaml",         False),
+        # exp11_cbam_full = exp02_cbam (P2+P3+P4简化版, mAP50=0.7870)，已训好，跳过
+        ("exp11_cbam_full",     "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbam.yaml",              True),
+        # CBAMFull: 完整论文版通道注意力（P2+P3+P4，对照实验）
+        ("exp11_cbamfull_p2p3p4", "ultralytics-main/ultralytics/cfg/models/v8/yolov8s_cbamfull_p2p3p4.yaml", False),
     ]
 
     results = []

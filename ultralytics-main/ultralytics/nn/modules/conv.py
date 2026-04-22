@@ -11,6 +11,7 @@ import torch.nn as nn
 
 __all__ = (
     "CBAM",
+    "CBAMFull",
     "ChannelAttention",
     "Concat",
     "Conv",
@@ -612,6 +613,56 @@ class CBAM(nn.Module):
             (torch.Tensor): Attended output tensor.
         """
         return self.spatial_attention(self.channel_attention(x))
+
+
+class CBAMFull(nn.Module):
+    """Full CBAM implementation matching the original ECCV 2018 paper.
+
+    Channel attention uses both avg-pool and max-pool with a shared MLP
+    (reduction ratio r=16), matching the original paper design.
+
+    Attributes:
+        pool (nn.AdaptiveAvgPool2d): Global average pooling.
+        pool_max (nn.AdaptiveMaxPool2d): Global max pooling.
+        mlp (nn.Sequential): Shared MLP with reduction ratio 16.
+        spatial (SpatialAttention): Spatial attention module (7x7 conv).
+    """
+
+    def __init__(self, c1, kernel_size=7):
+        """Initialize CBAMFull.
+
+        Args:
+            c1 (int): Number of input channels.
+            kernel_size (int): Kernel size for spatial attention conv (3 or 7).
+        """
+        super().__init__()
+        self.pool = nn.AdaptiveAvgPool2d(1)
+        self.pool_max = nn.AdaptiveMaxPool2d(1)
+        c_mlp = c1 // 16  # reduction ratio r=16
+        self.mlp = nn.Sequential(
+            nn.Conv2d(c1, c_mlp, 1, bias=False),
+            nn.ReLU(inplace=True),
+            nn.Conv2d(c_mlp, c1, 1, bias=False),
+        )
+        self.spatial = SpatialAttention(kernel_size)
+
+    def forward(self, x):
+        """Apply full CBAM (channel then spatial) to input tensor.
+
+        Args:
+            x (torch.Tensor): Input tensor (B, C, H, W).
+
+        Returns:
+            (torch.Tensor): Attended output tensor.
+        """
+        # Channel attention: avg pool + max pool → shared MLP → add → sigmoid
+        avg_out = self.mlp(self.pool(x))
+        max_out = self.mlp(self.pool_max(x))
+        mc = torch.sigmoid(avg_out + max_out)  # (B, C, 1, 1)
+        x = x * mc
+        # Spatial attention: avg pool + max pool along channel → concat → 7x7 conv → sigmoid
+        ms = self.spatial(x)  # (B, 1, H, W)
+        return x * ms
 
 
 class SE(nn.Module):

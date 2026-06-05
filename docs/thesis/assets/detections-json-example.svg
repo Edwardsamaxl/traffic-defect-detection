@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980">
+  <defs>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#111827" flood-opacity="0.12"/>
+    </filter>
+    <style>
+      .bg { fill: #f7f8fb; }
+      .title { font: 700 42px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #111827; }
+      .subtitle { font: 400 24px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #4b5563; }
+      .label { font: 700 25px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #111827; }
+      .small { font: 400 21px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #4b5563; }
+      .mono { font: 600 23px "Consolas", "Cascadia Mono", "Microsoft YaHei", monospace; fill: #1f2937; }
+      .mono-small { font: 500 20px "Consolas", "Cascadia Mono", "Microsoft YaHei", monospace; fill: #374151; }
+      .note { font: 400 19px "Microsoft YaHei", "Noto Sans CJK SC", Arial, sans-serif; fill: #6b7280; }
+      .card { fill: #ffffff; stroke: #d8dee9; stroke-width: 2; rx: 18; filter: url(#shadow); }
+      .head { fill: #eef4ff; stroke: #b9ccf3; stroke-width: 2; rx: 14; }
+      .field { fill: #ffffff; stroke: #e5e7eb; stroke-width: 2; rx: 14; }
+      .array { fill: #fff7ed; stroke: #fdba74; stroke-width: 2; rx: 14; }
+      .chip-blue { fill: #dbeafe; stroke: #93c5fd; stroke-width: 1.5; rx: 18; }
+      .chip-green { fill: #dcfce7; stroke: #86efac; stroke-width: 1.5; rx: 18; }
+      .chip-orange { fill: #ffedd5; stroke: #fdba74; stroke-width: 1.5; rx: 18; }
+      .line { stroke: #9ca3af; stroke-width: 3; fill: none; }
+      .arrow { fill: #6b7280; }
+      .accent { fill: #2563eb; }
+      .muted { fill: #9ca3af; }
+      .brace { font: 700 42px "Consolas", "Cascadia Mono", monospace; fill: #6b7280; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1600" height="980"/>
+
+  <text class="title" x="80" y="92">detections 字段 JSON 数据示例图</text>
+  <text class="subtitle" x="80" y="132">每条检测记录中，detections 以 JSON 数组保存 0..N 个缺陷目标，每个目标采用统一字段结构。</text>
+
+  <rect class="head" x="80" y="180" width="1440" height="96"/>
+  <text class="mono" x="122" y="239">detections: JSON Array</text>
+  <rect class="chip-blue" x="430" y="207" width="156" height="42"/>
+  <text class="small" x="462" y="235">数组类型</text>
+  <rect class="chip-green" x="616" y="207" width="182" height="42"/>
+  <text class="small" x="646" y="235">元素数 0..N</text>
+  <text class="note" x="1000" y="238">字段来源：模型推理后处理结果</text>
+
+  <path class="line" d="M800 276 L800 324"/>
+  <polygon class="arrow" points="800,342 789,322 811,322"/>
+
+  <rect class="card" x="110" y="344" width="660" height="540"/>
+  <text class="label" x="150" y="398">目标对象 1：Detection Object</text>
+  <text class="note" x="150" y="432">表示图像中检测到的一个缺陷目标</text>
+
+  <rect class="field" x="150" y="470" width="580" height="72"/>
+  <text class="mono-small" x="180" y="515">class_id: 0</text>
+  <text class="small" x="426" y="515">类别编号</text>
+
+  <rect class="field" x="150" y="560" width="580" height="72"/>
+  <text class="mono-small" x="180" y="605">class_name: "crazing"</text>
+  <text class="small" x="488" y="605">缺陷类别名称</text>
+
+  <rect class="field" x="150" y="650" width="580" height="72"/>
+  <text class="mono-small" x="180" y="695">confidence: 0.9241</text>
+  <text class="small" x="488" y="695">预测置信度</text>
+
+  <rect class="array" x="150" y="740" width="580" height="96"/>
+  <text class="mono-small" x="180" y="786">bbox_xyxy: [120.25, 85.50, 340.00, 210.75]</text>
+  <text class="small" x="180" y="818">边界框坐标，依次为左上角与右下角坐标</text>
+
+  <text class="brace" x="805" y="612">,</text>
+  <text class="note" x="835" y="612">数组中可继续存放同结构的检测目标</text>
+
+  <rect class="card" x="910" y="344" width="580" height="540"/>
+  <text class="label" x="950" y="398">目标对象 2：Detection Object</text>
+  <text class="note" x="950" y="432">同一数组中的下一项，字段结构保持一致</text>
+
+  <rect class="field" x="950" y="470" width="500" height="72"/>
+  <text class="mono-small" x="980" y="515">class_id: 2</text>
+  <text class="small" x="1210" y="515">类别编号</text>
+
+  <rect class="field" x="950" y="560" width="500" height="72"/>
+  <text class="mono-small" x="980" y="605">class_name: "inclusion"</text>
+  <text class="small" x="1280" y="605">缺陷类别名称</text>
+
+  <rect class="field" x="950" y="650" width="500" height="72"/>
+  <text class="mono-small" x="980" y="695">confidence: 0.8715</text>
+  <text class="small" x="1280" y="695">预测置信度</text>
+
+  <rect class="array" x="950" y="740" width="500" height="96"/>
+  <text class="mono-small" x="980" y="786">bbox_xyxy: [450.00, 320.50, 580.25, 410.00]</text>
+  <text class="small" x="980" y="818">坐标格式：[x1, y1, x2, y2]</text>
+
+  <rect class="chip-orange" x="112" y="912" width="1376" height="44"/>
+  <text class="note" x="142" y="941">说明：bbox_xyxy 采用 YOLO 后处理常用的 xyxy 格式，x1、y1 为左上角坐标，x2、y2 为右下角坐标；实际记录中目标数量由 num_detections 字段统计。</text>
+</svg>

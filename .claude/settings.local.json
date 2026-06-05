@@ -47,7 +47,10 @@
       "Bash(conda info:*)",
       "Bash(mysql:*)",
       "mcp__plugin_everything-claude-code_exa__web_fetch_exa",
-      "Bash(E:/python_envs/ai_env/Scripts/python.exe:*)"
+      "Bash(E:/python_envs/ai_env/Scripts/python.exe:*)",
+      "WebFetch(domain:arxiv.org)",
+      "Bash(pip list *)",
+      "Bash(C:/Users/Ed/scoop/apps/python/current/python.exe *)"
     ]
   }
 }

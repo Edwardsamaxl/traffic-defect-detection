@@ -665,6 +665,42 @@ class CBAMFull(nn.Module):
         return x * ms
 
 
+class BiFPN_Add2(nn.Module):
+    """BiFPN weighted feature fusion for 2 inputs.
+
+    References:
+        https://arxiv.org/abs/1911.09070 (EfficientDet)
+    """
+
+    def __init__(self, c1=None):
+        super().__init__()
+        self.w = nn.Parameter(torch.ones(2, dtype=torch.float32), requires_grad=True)
+        self.eps = 0.0001
+
+    def forward(self, x):
+        w = torch.relu(self.w)
+        w = w / (w.sum() + self.eps)
+        return w[0] * x[0] + w[1] * x[1]
+
+
+class BiFPN_Add3(nn.Module):
+    """BiFPN weighted feature fusion for 3 inputs.
+
+    References:
+        https://arxiv.org/abs/1911.09070 (EfficientDet)
+    """
+
+    def __init__(self, c1=None):
+        super().__init__()
+        self.w = nn.Parameter(torch.ones(3, dtype=torch.float32), requires_grad=True)
+        self.eps = 0.0001
+
+    def forward(self, x):
+        w = torch.relu(self.w)
+        w = w / (w.sum() + self.eps)
+        return w[0] * x[0] + w[1] * x[1] + w[2] * x[2]
+
+
 class SE(nn.Module):
     """Squeeze-and-Excitation channel attention module.
 

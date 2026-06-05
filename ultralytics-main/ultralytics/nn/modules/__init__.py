@@ -62,6 +62,8 @@ from .block import (
     BiFPNNeck,
 )
 from .conv import (
+    BiFPN_Add2,
+    BiFPN_Add3,
     CBAM,
     CBAMFull,
     ChannelAttention,
@@ -116,6 +118,8 @@ __all__ = (
     "C2PSA",
     "C3",
     "C3TR",
+    "BiFPN_Add2",
+    "BiFPN_Add3",
     "CBAM",
     "CIB",
     "DFL",

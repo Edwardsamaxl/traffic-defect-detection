@@ -37,6 +37,8 @@ from ultralytics.nn.modules import (
     C3Ghost,
     C3k2,
     C3x,
+    BiFPN_Add2,
+    BiFPN_Add3,
     CBFuse,
     CBLinear,
     CBAM,
@@ -1698,6 +1700,9 @@ def parse_model(d, ch, verbose=True):
             args = [c1_list, c2, *args[1:]]
         elif m is Concat:
             c2 = sum(ch[x] for x in f)
+        elif m in {BiFPN_Add2, BiFPN_Add3}:
+            c2 = ch[f[0]]  # 输出通道数=任一输入通道（要求已对齐）
+            args = []
         elif m in frozenset(
             {
                 Detect,

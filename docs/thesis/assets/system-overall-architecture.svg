@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1800" height="1120" viewBox="0 0 1800 1120">
+<defs>
+<style>text{font-family:'Microsoft YaHei','SimHei',Arial,sans-serif;dominant-baseline:middle}.small{font-size:15px}</style>
+<marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#637083"/></marker>
+<marker id="arrow-red" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#d74b3f"/></marker>
+<marker id="arrow-green" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#2d7d46"/></marker>
+</defs>
+<rect width="1800" height="1120" fill="#f7f8fb"/>
+<text x="900" y="60" font-size="42" font-weight="700" text-anchor="middle" fill="#1e293b">钢材表面缺陷检测系统整体架构图</text>
+<text x="900" y="105" font-size="18" font-weight="400" text-anchor="middle" fill="#5b6472">以三层职责划分为主线，突出界面交互、业务编排、模型检测与数据持久化之间的协作关系</text>
+<rect x="70" y="145" width="1660" height="200" rx="28" fill="#e8f6f3" stroke="#127c72" stroke-width="3"/>
+<rect x="70" y="145" width="205" height="200" rx="28" fill="#127c72" stroke="#127c72" stroke-width="0"/>
+<rect x="248" y="145" width="27" height="200" fill="#127c72"/>
+<text x="173" y="202" font-size="29" font-weight="700" text-anchor="middle" fill="#ffffff">前端交互层</text>
+<text x="172" y="282" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">提供操作入口与结</text>
+<text x="172" y="302" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">果呈现</text>
+<rect x="70" y="390" width="1660" height="415" rx="28" fill="#eef3ff" stroke="#3158a8" stroke-width="3"/>
+<rect x="70" y="390" width="205" height="415" rx="28" fill="#3158a8" stroke="#3158a8" stroke-width="0"/>
+<rect x="248" y="390" width="27" height="415" fill="#3158a8"/>
+<text x="173" y="447" font-size="29" font-weight="700" text-anchor="middle" fill="#ffffff">后端服务层</text>
+<text x="172" y="634" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">承载核心业务逻辑</text>
+<text x="172" y="654" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">与检测流程</text>
+<rect x="70" y="850" width="1660" height="190" rx="28" fill="#fff3e6" stroke="#b85a12" stroke-width="3"/>
+<rect x="70" y="850" width="205" height="190" rx="28" fill="#b85a12" stroke="#b85a12" stroke-width="0"/>
+<rect x="248" y="850" width="27" height="190" fill="#b85a12"/>
+<text x="173" y="907" font-size="29" font-weight="700" text-anchor="middle" fill="#ffffff">数据持久层</text>
+<text x="172" y="982" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">统一保存结构化数</text>
+<text x="172" y="1002" font-size="15" font-weight="400" text-anchor="middle" fill="#ffffff">据与文件资源</text>
+<rect x="305" y="185" width="240" height="60" rx="15" fill="#ffffff" stroke="#127c72" stroke-width="2"/>
+<text x="425" y="215" font-size="22" font-weight="700" text-anchor="middle" fill="#1e293b">检测任务界面</text>
+<rect x="590" y="185" width="240" height="60" rx="15" fill="#ffffff" stroke="#127c72" stroke-width="2"/>
+<text x="710" y="215" font-size="22" font-weight="700" text-anchor="middle" fill="#1e293b">历史记录检索</text>
+<rect x="875" y="185" width="240" height="60" rx="15" fill="#ffffff" stroke="#127c72" stroke-width="2"/>
+<text x="995" y="215" font-size="22" font-weight="700" text-anchor="middle" fill="#1e293b">统计信息可视化</text>
+<rect x="1160" y="185" width="240" height="60" rx="15" fill="#ffffff" stroke="#127c72" stroke-width="2"/>
+<text x="1280" y="215" font-size="22" font-weight="700" text-anchor="middle" fill="#1e293b">模型管理入口</text>
+<rect x="1445" y="185" width="180" height="60" rx="15" fill="#ffffff" stroke="#127c72" stroke-width="2"/>
+<text x="1535" y="215" font-size="22" font-weight="700" text-anchor="middle" fill="#1e293b">登录 / 注册</text>
+<rect x="360" y="275" width="1220" height="50" rx="14" fill="#dff0ec" stroke="#71aaa2" stroke-width="2"/>
+<text x="970" y="300" font-size="18" font-weight="400" text-anchor="middle" fill="#1e293b">统一前端应用：封装页面状态、表单输入、文件上传、结果展示与图表渲染</text>
+<rect x="300" y="425" width="1320" height="70" rx="18" fill="#ffffff" stroke="#8ea3d6" stroke-width="2"/>
+<text x="960" y="460" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">请求接入与权限校验：统一接收前端请求，完成身份校验、参数校验与响应封装</text>
+<rect x="310" y="535" width="250" height="110" rx="18" fill="#ffffff" stroke="#566fb2" stroke-width="2"/>
+<text x="435" y="563" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">认证管理</text>
+<text x="435" y="599" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">注册、登录、令牌签发</text>
+<text x="435" y="619" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">用户身份校验</text>
+<rect x="600" y="535" width="250" height="110" rx="18" fill="#ffffff" stroke="#566fb2" stroke-width="2"/>
+<text x="725" y="563" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">智能分析</text>
+<text x="725" y="599" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">单样本检测、批量检测</text>
+<text x="725" y="619" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">结果后处理</text>
+<rect x="890" y="535" width="250" height="110" rx="18" fill="#ffffff" stroke="#566fb2" stroke-width="2"/>
+<text x="1015" y="563" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">数据处理</text>
+<text x="1015" y="599" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">历史记录查询</text>
+<text x="1015" y="619" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">统计聚合与指标计算</text>
+<rect x="1180" y="535" width="250" height="110" rx="18" fill="#ffffff" stroke="#566fb2" stroke-width="2"/>
+<text x="1305" y="563" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">模型生命周期管理</text>
+<text x="1305" y="599" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">权重上传、版本维护</text>
+<text x="1305" y="619" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">模型实例复用</text>
+<rect x="1480" y="535" width="140" height="110" rx="18" fill="#f8fbff" stroke="#566fb2" stroke-width="2"/>
+<text x="1550" y="569" font-size="15" font-weight="700" text-anchor="middle" fill="#3158a8">接口规范</text>
+<text x="1550" y="589" font-size="15" font-weight="700" text-anchor="middle" fill="#3158a8">JSON 响应</text>
+<text x="1550" y="609" font-size="15" font-weight="700" text-anchor="middle" fill="#3158a8">错误处理</text>
+<rect x="420" y="690" width="1080" height="85" rx="18" fill="#f9fbff" stroke="#8ea3d6" stroke-width="2"/>
+<text x="960" y="712" font-size="22" font-weight="700" text-anchor="middle" fill="#3158a8">检测任务编排</text>
+<rect x="470" y="732" width="190" height="30" rx="15" fill="#ffffff" stroke="#9fb0d8" stroke-width="2"/>
+<text x="565" y="747" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">图像与阈值输入</text>
+<line x1="666" y1="747" x2="854" y2="747" stroke="#8a97b0" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="668" y="732" width="190" height="30" rx="15" fill="#ffffff" stroke="#9fb0d8" stroke-width="2"/>
+<text x="763" y="747" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">模型实例缓存</text>
+<line x1="864" y1="747" x2="1052" y2="747" stroke="#8a97b0" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="866" y="732" width="190" height="30" rx="15" fill="#ffffff" stroke="#9fb0d8" stroke-width="2"/>
+<text x="961" y="747" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">单图 / 批量推理</text>
+<line x1="1062" y1="747" x2="1250" y2="747" stroke="#8a97b0" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1064" y="732" width="190" height="30" rx="15" fill="#ffffff" stroke="#9fb0d8" stroke-width="2"/>
+<text x="1159" y="747" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">结果后处理</text>
+<line x1="1260" y1="747" x2="1448" y2="747" stroke="#8a97b0" stroke-width="2" marker-end="url(#arrow)"/>
+<rect x="1262" y="732" width="190" height="30" rx="15" fill="#ffffff" stroke="#9fb0d8" stroke-width="2"/>
+<text x="1357" y="747" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">结果持久化</text>
+<rect x="315" y="885" width="480" height="130" rx="22" fill="#ffffff" stroke="#c87525" stroke-width="2"/>
+<text x="555" y="914" font-size="22" font-weight="700" text-anchor="middle" fill="#b85a12">关系型数据区</text>
+<rect x="350" y="948" width="125" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="412" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">用户信息</text>
+<rect x="495" y="948" width="140" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="565" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">检测记录</text>
+<rect x="655" y="948" width="105" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="707" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">模型元数据</text>
+<rect x="875" y="885" width="480" height="130" rx="22" fill="#ffffff" stroke="#c87525" stroke-width="2"/>
+<text x="1115" y="914" font-size="22" font-weight="700" text-anchor="middle" fill="#b85a12">文件资源区</text>
+<rect x="905" y="948" width="133" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="971" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">上传图像</text>
+<rect x="1060" y="948" width="140" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="1130" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">标注结果</text>
+<rect x="1220" y="948" width="105" height="44" rx="15" fill="#fff8f0" stroke="#d99557" stroke-width="2"/>
+<text x="1272" y="970" font-size="15" font-weight="400" text-anchor="middle" fill="#1e293b">模型权重</text>
+<rect x="1415" y="885" width="205" height="130" rx="22" fill="#fffaf4" stroke="#c87525" stroke-width="2"/>
+<text x="1517" y="924" font-size="18" font-weight="400" text-anchor="middle" fill="#b85a12">会话级连接池</text>
+<text x="1517" y="949" font-size="18" font-weight="400" text-anchor="middle" fill="#b85a12">事务管理</text>
+<text x="1517" y="973" font-size="18" font-weight="400" text-anchor="middle" fill="#b85a12">路径索引</text>
+<line x1="960" y1="345" x2="960" y2="425" stroke="#d74b3f" stroke-width="4" marker-end="url(#arrow-red)"/>
+<text x="960" y="382" font-size="15" font-weight="400" text-anchor="middle" fill="#d74b3f">HTTP 请求 / JSON 响应</text>
+<polyline points="960,495 960,515 870,515 870,690" fill="none" stroke="#d74b3f" stroke-width="4" marker-end="url(#arrow-red)"/>
+<rect x="779" y="568" width="70" height="28" rx="10" fill="#ffffff" stroke="#d9e0ea" stroke-width="1"/>
+<text x="814" y="582" font-size="15" font-weight="400" text-anchor="middle" fill="#d74b3f">业务调度</text>
+<line x1="715" y1="775" x2="555" y2="885" stroke="#2d7d46" stroke-width="4" marker-end="url(#arrow-green)"/>
+<text x="595" y="830" font-size="15" font-weight="400" text-anchor="middle" fill="#2d7d46">结构化记录</text>
+<line x1="1115" y1="775" x2="1115" y2="885" stroke="#2d7d46" stroke-width="4" marker-end="url(#arrow-green)"/>
+<text x="1195" y="830" font-size="15" font-weight="400" text-anchor="middle" fill="#2d7d46">文件与检测产物</text>
+<line x1="1310" y1="775" x2="1515" y2="885" stroke="#2d7d46" stroke-width="4" marker-end="url(#arrow-green)"/>
+<text x="1510" y="830" font-size="15" font-weight="400" text-anchor="middle" fill="#2d7d46">模型与事务状态</text>
+<rect x="115" y="1060" width="1570" height="33" rx="14" fill="#ffffff" stroke="#d5dde8" stroke-width="1"/>
+<text x="900" y="1077" font-size="15" font-weight="400" text-anchor="middle" fill="#5b6472">设计重点：前端不直接访问模型或数据库；后端统一协调认证、检测、统计与模型管理；持久层同时承载业务数据和检测文件资源。</text>
+</svg>

@@ -14,11 +14,11 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_DATA = ROOT / "datasets/neu.yaml"
 
 # ==================== 评测配置（修改这里即可） ====================
-DEFAULT_MODEL = ROOT / "experiments/thesis_model/weights/cbam_p2p3p4p5.pt"  # 模型路径
+DEFAULT_MODEL = ROOT / "experiments/thesis_model/weights/baseline.pt"  # 模型路径
 DEFAULT_SPLIT = "test"   # 数据划分: "train" / "val" / "test"
 DEFAULT_CONF = 0.001     # 置信度阈值
 DEFAULT_IOU = 0.6        # IoU阈值
-DEFAULT_AUGMENT = True  # 是否开启TTA（True/False）
+DEFAULT_AUGMENT = False  # 是否开启TTA（True/False）
 # =============================================================
 
 

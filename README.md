@@ -2,6 +2,8 @@
 
 钢材表面缺陷检测项目，基于 YOLOv8 的目标检测，支持多种训练策略和半监督学习方法。
 
+启动全项目: .venv\Scripts\python.exe -m uvicorn src.webapp.app:app --reload
+
 ## 项目结构
 
 ```

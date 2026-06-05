@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="850" viewBox="0 0 1180 850" role="img" aria-labelledby="title desc">
+  <title id="title">钢材表面缺陷检测系统用例图</title>
+  <desc id="desc">UML use case diagram in a clean thesis style with two actors and included sub use cases.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L10,4 L0,8 Z" fill="#222222"/>
+    </marker>
+    <style>
+      .bg { fill: #ffffff; }
+      .system { fill: #ffffff; stroke: #222222; stroke-width: 1.45; }
+      .actor { stroke: #222222; stroke-width: 1.4; fill: none; }
+      .assoc { stroke: #222222; stroke-width: 1.15; fill: none; }
+      .include { stroke: #222222; stroke-width: 1.0; fill: none; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+      .usecase { fill: #ffffff; stroke: #222222; stroke-width: 1.2; }
+      .title { font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif; font-size: 21px; font-weight: 600; fill: #111111; }
+      .label { font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif; font-size: 17px; fill: #111111; text-anchor: middle; dominant-baseline: middle; }
+      .actor-text { font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif; font-size: 17px; fill: #111111; text-anchor: middle; }
+      .include-text { font-family: Arial, "Microsoft YaHei", sans-serif; font-size: 13px; fill: #111111; text-anchor: middle; dominant-baseline: middle; }
+      .note { font-family: "Microsoft YaHei", "SimSun", Arial, sans-serif; font-size: 14px; fill: #111111; text-anchor: middle; dominant-baseline: middle; }
+    </style>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1180" height="850"/>
+  <rect class="system" x="145" y="38" width="965" height="775"/>
+  <text class="title" x="168" y="72">钢材表面缺陷检测系统</text>
+
+  <!-- Actors -->
+  <circle class="actor" cx="55" cy="148" r="16"/>
+  <line class="actor" x1="55" y1="164" x2="55" y2="220"/>
+  <line class="actor" x1="24" y1="184" x2="86" y2="184"/>
+  <line class="actor" x1="55" y1="220" x2="28" y2="268"/>
+  <line class="actor" x1="55" y1="220" x2="82" y2="268"/>
+  <text class="actor-text" x="55" y="300">未登录用户</text>
+
+  <circle class="actor" cx="55" cy="468" r="16"/>
+  <line class="actor" x1="55" y1="484" x2="55" y2="540"/>
+  <line class="actor" x1="24" y1="504" x2="86" y2="504"/>
+  <line class="actor" x1="55" y1="540" x2="28" y2="588"/>
+  <line class="actor" x1="55" y1="540" x2="82" y2="588"/>
+  <text class="actor-text" x="55" y="620">注册用户</text>
+
+  <!-- Main use cases -->
+  <ellipse class="usecase" cx="335" cy="155" rx="96" ry="34"/>
+  <text class="label" x="335" y="155">用户认证</text>
+
+  <ellipse class="usecase" cx="335" cy="305" rx="106" ry="34"/>
+  <text class="label" x="335" y="305">缺陷检测</text>
+
+  <ellipse class="usecase" cx="335" cy="455" rx="116" ry="34"/>
+  <text class="label" x="335" y="455">历史记录管理</text>
+
+  <ellipse class="usecase" cx="335" cy="605" rx="106" ry="34"/>
+  <text class="label" x="335" y="605">模型管理</text>
+
+  <ellipse class="usecase" cx="335" cy="735" rx="106" ry="34"/>
+  <text class="label" x="335" y="735">统计分析查看</text>
+
+  <!-- Sub use cases -->
+  <ellipse class="usecase" cx="720" cy="110" rx="96" ry="31"/>
+  <text class="label" x="720" y="110">用户注册</text>
+  <ellipse class="usecase" cx="720" cy="185" rx="96" ry="31"/>
+  <text class="label" x="720" y="185">用户登录</text>
+
+  <ellipse class="usecase" cx="720" cy="260" rx="112" ry="31"/>
+  <text class="label" x="720" y="260">单图缺陷检测</text>
+  <ellipse class="usecase" cx="720" cy="335" rx="112" ry="31"/>
+  <text class="label" x="720" y="335">批量缺陷检测</text>
+
+  <ellipse class="usecase" cx="720" cy="410" rx="112" ry="31"/>
+  <text class="label" x="720" y="410">历史记录查询</text>
+  <ellipse class="usecase" cx="720" cy="485" rx="132" ry="31"/>
+  <text class="label" x="720" y="485">检测记录详情查看</text>
+  <ellipse class="usecase" cx="720" cy="560" rx="112" ry="31"/>
+  <text class="label" x="720" y="560">清空历史记录</text>
+
+  <ellipse class="usecase" cx="720" cy="635" rx="112" ry="31"/>
+  <text class="label" x="720" y="635">模型列表查询</text>
+  <ellipse class="usecase" cx="720" cy="710" rx="122" ry="31"/>
+  <text class="label" x="720" y="710">上传自定义模型</text>
+  <ellipse class="usecase" cx="720" cy="785" rx="122" ry="31"/>
+  <text class="label" x="720" y="785">删除自定义模型</text>
+
+  <!-- Actor associations -->
+  <line class="assoc" x1="86" y1="184" x2="244" y2="160"/>
+  <line class="assoc" x1="86" y1="504" x2="244" y2="314"/>
+  <line class="assoc" x1="86" y1="504" x2="224" y2="453"/>
+  <line class="assoc" x1="86" y1="504" x2="237" y2="596"/>
+  <line class="assoc" x1="86" y1="504" x2="237" y2="724"/>
+
+  <!-- Include relations -->
+  <path class="include" d="M425,143 C500,125 555,116 624,112"/>
+  <text class="include-text" x="535" y="113">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M425,166 C500,178 555,183 624,185"/>
+  <text class="include-text" x="535" y="177">&lt;&lt;include&gt;&gt;</text>
+
+  <path class="include" d="M436,294 C505,276 555,267 608,262"/>
+  <text class="include-text" x="535" y="265">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M436,316 C505,326 555,333 608,335"/>
+  <text class="include-text" x="535" y="326">&lt;&lt;include&gt;&gt;</text>
+
+  <path class="include" d="M445,440 C506,424 558,415 608,412"/>
+  <text class="include-text" x="535" y="415">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M451,457 C505,468 553,477 589,481"/>
+  <text class="include-text" x="535" y="468">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M445,473 C506,515 556,543 608,555"/>
+  <text class="include-text" x="535" y="529">&lt;&lt;include&gt;&gt;</text>
+
+  <path class="include" d="M437,612 C504,625 558,632 608,634"/>
+  <text class="include-text" x="535" y="624">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M422,624 C494,670 550,695 599,705"/>
+  <text class="include-text" x="535" y="682">&lt;&lt;include&gt;&gt;</text>
+  <path class="include" d="M412,630 C490,715 550,760 599,778"/>
+  <text class="include-text" x="535" y="745">&lt;&lt;include&gt;&gt;</text>
+
+  <!-- Permission note -->
+  <text class="note" x="915" y="185">注：用户登录成功后获得注册用户权限</text>
+</svg>

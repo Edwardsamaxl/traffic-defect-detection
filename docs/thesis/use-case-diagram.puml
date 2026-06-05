@@ -1,0 +1,67 @@
+@startuml
+left to right direction
+
+skinparam monochrome true
+skinparam shadowing false
+skinparam backgroundColor #FFFFFF
+skinparam packageStyle rectangle
+skinparam actorStyle stickman
+skinparam defaultFontName "Microsoft YaHei"
+skinparam usecase {
+  BorderColor #222222
+  BackgroundColor #FFFFFF
+  ArrowColor #222222
+}
+skinparam rectangle {
+  BorderColor #222222
+  BackgroundColor #FFFFFF
+}
+
+actor "未登录用户" as Guest
+actor "注册用户" as User
+
+rectangle "钢材表面缺陷检测系统" {
+  usecase "用户认证" as UC_Auth
+  usecase "缺陷检测" as UC_Detect
+  usecase "历史记录管理" as UC_HistoryManage
+  usecase "模型管理" as UC_ModelManage
+  usecase "统计分析查看" as UC_Stats
+
+  usecase "用户注册" as UC_Register
+  usecase "用户登录" as UC_Login
+
+  usecase "单图缺陷检测" as UC_SingleDetect
+  usecase "批量缺陷检测" as UC_BatchDetect
+
+  usecase "历史记录查询" as UC_History
+  usecase "检测记录详情查看" as UC_RecordDetail
+  usecase "清空历史记录" as UC_ClearHistory
+
+  usecase "模型列表查询" as UC_ModelList
+  usecase "上传自定义模型" as UC_UploadModel
+  usecase "删除自定义模型" as UC_DeleteModel
+}
+
+Guest -- UC_Auth
+User -- UC_Detect
+User -- UC_HistoryManage
+User -- UC_ModelManage
+User -- UC_Stats
+
+UC_Auth ..> UC_Register : <<include>>
+UC_Auth ..> UC_Login : <<include>>
+
+UC_Detect ..> UC_SingleDetect : <<include>>
+UC_Detect ..> UC_BatchDetect : <<include>>
+
+UC_HistoryManage ..> UC_History : <<include>>
+UC_HistoryManage ..> UC_RecordDetail : <<include>>
+UC_HistoryManage ..> UC_ClearHistory : <<include>>
+
+UC_ModelManage ..> UC_ModelList : <<include>>
+UC_ModelManage ..> UC_UploadModel : <<include>>
+UC_ModelManage ..> UC_DeleteModel : <<include>>
+
+UC_Login ..> User : 登录成功后获得权限
+
+@enduml
